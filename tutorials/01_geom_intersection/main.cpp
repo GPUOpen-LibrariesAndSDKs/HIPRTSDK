@@ -68,7 +68,7 @@ class Test : public TestBase
 int main( int argc, char** argv )
 {
 	Test test;
-	test.init( 1 );
+	test.init( 0 );
 	test.run();
 
 	return 0;
