@@ -33,8 +33,8 @@ int main( int argc, char** argv )
 			m_ctxtInput.deviceType = hiprtDeviceAMD;
 		else
 			m_ctxtInput.deviceType = hiprtDeviceNVIDIA;
-		m_ctxtInput.ctxt   = getRawCtx( m_oroCtx );
-		m_ctxtInput.device = getRawDevice( m_oroDevice );
+		m_ctxtInput.ctxt   = oroGetRawCtx( m_oroCtx );
+		m_ctxtInput.device = oroGetRawDevice( m_oroDevice );
 	}
 
 	hiprtContext ctxt;

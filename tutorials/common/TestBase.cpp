@@ -26,8 +26,8 @@ void TestBase::init( int deviceIndex )
 		m_ctxtInput.deviceType = hiprtDeviceAMD;
 	else
 		m_ctxtInput.deviceType = hiprtDeviceNVIDIA;
-	m_ctxtInput.ctxt   = getRawCtx( m_oroCtx );
-	m_ctxtInput.device = getRawDevice( m_oroDevice );
+	m_ctxtInput.ctxt   = oroGetRawCtx( m_oroCtx );
+	m_ctxtInput.device = oroGetRawDevice( m_oroDevice );
 }
 
 void TestBase::readSourceCode( const std::string& path, std::string& sourceCode, std::vector<std::string>* includes )
