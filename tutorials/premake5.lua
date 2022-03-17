@@ -60,5 +60,6 @@ workspace "hiprtSdkTutorial"
 
     include "00_context_creation"
     include "01_geom_intersection"
+    include "10_motion_blur"
 
     copydir( "../hiprt/win/", "./build/" )

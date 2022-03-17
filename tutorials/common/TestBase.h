@@ -11,6 +11,7 @@
 	}
 
 typedef unsigned char u8;
+#define M_PI 3.1415f
 
 class TestBase
 {
