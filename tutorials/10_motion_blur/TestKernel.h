@@ -13,13 +13,10 @@ __global__ void MotionBlurKernel( hiprtScene scene, unsigned char* gDst, int2 cR
 	const int gIdy = blockIdx.y * blockDim.y + threadIdx.y;
 
 	const unsigned int samples = 32;
-	//	unsigned int seed = tea<16>(gIdx + gIdy * cRes.x, 0).x;
 
 	hiprtRay ray;
-	float3	 o	  = { gIdx / (float)cRes.x - 0.5f, gIdy / (float)cRes.y - 0.5f, -1.f };
-	float3	 d	  = { 0.f, 0.f, 1.f };
-	ray.origin	  = o;
-	ray.direction = d;
+	ray.origin	  = { gIdx / (float)cRes.x - 0.5f, gIdy / (float)cRes.y - 0.5f, -1.f };
+	ray.direction = { 0.f, 0.f, 1.f };
 	ray.time	  = 0.0f;
 	ray.maxT	  = 1000.f;
 

@@ -26,10 +26,8 @@ extern "C" __global__ void CustomIntersectionKernel( hiprtGeometry geom, unsigne
 	const int gIdy = blockIdx.y * blockDim.y + threadIdx.y;
 
 	hiprtRay ray;
-	float3	 o	  = { gIdx / (float)cRes.x, gIdy / (float)cRes.y, -1.f };
-	float3	 d	  = { 0.f, 0.f, 1.f };
-	ray.origin	  = o;
-	ray.direction = d;
+	ray.origin	  = { gIdx / (float)cRes.x, gIdy / (float)cRes.y, -1.f };
+	ray.direction = { 0.f, 0.f, 1.f };
 	ray.maxT	  = 1000.f;
 
 	int								hitIdx = hiprtInvalidValue;
@@ -37,11 +35,11 @@ extern "C" __global__ void CustomIntersectionKernel( hiprtGeometry geom, unsigne
 	hiprtHit						hit = tr.getNextHit();
 	if ( hit.hasHit() ) hitIdx = hit.primID;
 
-	int2 colors[]		 = { { 255, 0 }, { 0, 255 }, { 255, 255 } };
+	int3 colors[]		 = { { 255, 0, 128 }, { 0, 128, 255 }, { 128, 255, 0 } };
 	int	 dstIdx			 = gIdx + gIdy * cRes.x;
 	gDst[dstIdx * 4 + 0] = hitIdx != hiprtInvalidValue ? colors[hitIdx].x : 0;
 	gDst[dstIdx * 4 + 1] = hitIdx != hiprtInvalidValue ? colors[hitIdx].y : 0;
-	gDst[dstIdx * 4 + 2] = 0;
+	gDst[dstIdx * 4 + 2] = hitIdx != hiprtInvalidValue ? colors[hitIdx].z : 0;
 	gDst[dstIdx * 4 + 3] = 255;
 }
 

@@ -19,15 +19,7 @@ class Test : public TestBase
 		mesh.vertexCount  = 6;
 		mesh.vertexStride = sizeof( hiprtFloat3 );
 		dMalloc( (char*&)mesh.vertices, mesh.vertexCount * sizeof( hiprtFloat3 ) );
-/*
-		hiprtFloat3 v[] = {
-			{ 0.0f, 0.0f, 0.0f },
-			{ 1.0f, 0.0f, 0.0f },
-			{ 0.5f, 1.0f, 0.0f },
-			{ 0.0f, 0.0f, 0.0f },
-			{ -1.0f, 0.0f, 0.0f },
-			{ -0.5f, 1.0f, 0.0f }};
-*/
+
 		float		s	= 0.5f;
 		hiprtFloat3 v[] = {
 			{ 0.5f + s * sin( 0.f ), s * cos( 0.f ), 0.0f },
