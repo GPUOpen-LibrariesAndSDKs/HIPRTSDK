@@ -19,13 +19,23 @@ class Test : public TestBase
 		mesh.vertexCount  = 6;
 		mesh.vertexStride = sizeof( hiprtFloat3 );
 		dMalloc( (char*&)mesh.vertices, mesh.vertexCount * sizeof( hiprtFloat3 ) );
+/*
 		hiprtFloat3 v[] = {
 			{ 0.0f, 0.0f, 0.0f },
 			{ 1.0f, 0.0f, 0.0f },
 			{ 0.5f, 1.0f, 0.0f },
-			{ 0.0f, 0.0f, 1.0f },
-			{ 1.0f, 0.0f, 1.0f },
-			{ 0.5f, 1.0f, 1.0f } };
+			{ 0.0f, 0.0f, 0.0f },
+			{ -1.0f, 0.0f, 0.0f },
+			{ -0.5f, 1.0f, 0.0f }};
+*/
+		float		s	= 0.5f;
+		hiprtFloat3 v[] = {
+			{ 0.5f + s * sin( 0.f ), s * cos( 0.f ), 0.0f },
+			{ 0.5f + s * sin( M_PI * 2.f / 3.f ), s * cos( M_PI * 2.f / 3.f ), 0.0f },
+			{ 0.5f + s * sin( M_PI * 4.f / 3.f ), s * cos( M_PI * 4.f / 3.f ), 0.0f },
+			{ -0.5f + s * sin( 0.f ), s * cos( 0.f ), 0.0f },
+			{ -0.5f + s * sin( M_PI * 2.f / 3.f ), s * cos( M_PI * 2.f / 3.f ), 0.0f },
+			{ -0.5f + s * sin( M_PI * 4.f / 3.f ), s * cos( M_PI * 4.f / 3.f ), 0.0f } };
 		dCopyHtoD( (hiprtFloat3*)mesh.vertices, v, mesh.vertexCount );
 		waitForCompletion();
 
@@ -57,7 +67,7 @@ class Test : public TestBase
 
 		hiprtFrame frame;
 		frame.translation	  = make_hiprtFloat3( 0.0f, 0.0f, 0.0f );
-		frame.scale			  = make_hiprtFloat3( 1.0f, 1.0f, 1.0f );
+		frame.scale			  = make_hiprtFloat3( 0.5f, 0.5f, 0.5f );
 		frame.rotation		  = make_hiprtFloat4( 0.0f, 0.0f, 1.0f, 0.0f );
 		sceneInput.frameCount = 1;
 		dMalloc( (hiprtFrame*&)sceneInput.instanceFrames, 1 );

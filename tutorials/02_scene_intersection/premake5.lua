@@ -1,4 +1,4 @@
-project "02_Scene_intersection"
+project "02_scene_intersection"
     kind "ConsoleApp"
     location "../build"
 

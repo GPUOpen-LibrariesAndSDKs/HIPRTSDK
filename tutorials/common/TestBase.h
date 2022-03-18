@@ -38,10 +38,21 @@ class TestBase
 	void writeImageFromDevice( const char* path, int w, int h, u8* data )
 	{
 		u8* tmp = new u8[w * h * 4];
+		u8* tmp1 = new u8[w * h * 4];
 
 		dCopyDtoH( tmp, data, w * h * 4 );
 		waitForCompletion();
-		writeImage( path, w, h, tmp );
+		for(int j=0; j<h; j++)
+		for(int i=0; i<w; i++)
+		{
+			int idx = i+j*w;
+			int dIdx = i+(h-1-j)*w;
+			for(int k=0; k<4; k++)
+				tmp1[dIdx*4+k] = tmp[idx*4+k];
+		}
+		writeImage( path, w, h, tmp1 );
+		delete [] tmp;
+		delete [] tmp1;
 	};
 
 	template <typename T>
