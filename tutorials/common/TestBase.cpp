@@ -3,7 +3,6 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <contrib/stbi/stbi_image_write.h>
 
-
 void TestBase::init( int deviceIndex )
 {
 	m_res = make_hiprtInt2( 512, 512 );
@@ -72,7 +71,7 @@ void TestBase::readSourceCode( const std::string& path, std::string& sourceCode,
 }
 
 void TestBase::buildTraceKernel(
-	hiprtContext ctxt, const char* path, const char* functionName, oroFunction& function, std::vector<char>* binaryOut )
+	hiprtContext ctxt, const char* path, const char* functionName, oroFunction& function, hiprtArray<char>* binaryOut )
 {
 	std::vector<std::string> includeNamesData;
 	std::string				 sourceCode;

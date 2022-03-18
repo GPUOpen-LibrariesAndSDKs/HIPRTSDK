@@ -1,8 +1,4 @@
-#include <hiprt/hiprt_device.h>
-
-
-extern "C" 
-__global__ void SceneIntersection( hiprtScene scene, unsigned char* gDst, int2 cRes )
+extern "C" __global__ void SceneIntersection( hiprtScene scene, unsigned char* gDst, int2 cRes )
 {
 	const int gIdx = blockIdx.x * blockDim.x + threadIdx.x;
 	const int gIdy = blockIdx.y * blockDim.y + threadIdx.y;

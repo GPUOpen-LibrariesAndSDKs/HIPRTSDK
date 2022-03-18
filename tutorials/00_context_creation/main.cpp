@@ -1,5 +1,7 @@
 #include <hiprt/hiprt.h>
 #include <Orochi/Orochi.h>
+#include <stdio.h>
+#include <string.h>
 
 #define ASSERT( cond )  \
 	if ( !( cond ) )    \

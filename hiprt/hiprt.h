@@ -7,8 +7,8 @@
 #define HIPRT_API_VERSION HIPRT_API_MAJOR_VERSION * 1000000 + HIPRT_API_MINOR_VERSION * 1000 + HIPRT_API_PATCH_VERSION
 
 #include <hiprt/hiprt_vec.h>
+#include <stddef.h>
 #include <stdint.h>
-#include <vector>
 
 #ifdef __cplusplus
 extern "C" {
@@ -608,17 +608,17 @@ HIPRT_API hiprtError hiprtDestroyCustomFuncTable( hiprtContext context, hiprtCus
  * \return HIPRT error in case of a failure, hiprtSuccess otherwise.
  */
 HIPRT_API hiprtError hiprtBuildTraceKernel(
-	hiprtContext			  context,
-	const char*				  functionName,
-	const char*				  src,
-	const char*				  name,
-	int						  numHeaders,
-	const char**			  headers,
-	const char**			  includeNames,
-	const char**	   options,
-	int				   nOptions,
-	hiprtApiFunction&		  functionOut,
-	std::vector<char>*		  binaryOut = nullptr );
+	hiprtContext	  context,
+	const char*		  functionName,
+	const char*		  src,
+	const char*		  name,
+	int				  numHeaders,
+	const char**	  headers,
+	const char**	  includeNames,
+	const char**	  options,
+	int				  nOptions,
+	hiprtApiFunction& functionOut,
+	hiprtArray<char>* binaryOut = nullptr );
 
 /** \brief Setting log level.
  *

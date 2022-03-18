@@ -1,8 +1,10 @@
 #pragma once
 #include <hiprt/hiprt.h>
+#include <hiprt/hiprt_vec.h>
 #include <Orochi/Orochi.h>
 #include <string>
 #include <fstream>
+#include <vector>
 
 #define ASSERT( cond )  \
 	if ( !( cond ) )    \
@@ -29,7 +31,7 @@ class TestBase
 		const char*		   path,
 		const char*		   functionName,
 		oroFunction&	   function,
-		std::vector<char>* binaryOut = 0 );
+		hiprtArray<char>* binaryOut = 0 );
 
 	void launchKernel( oroFunction func, int nx, int ny, void** args );
 

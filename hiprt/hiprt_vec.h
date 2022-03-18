@@ -1,8 +1,11 @@
 #pragma once
 #if !defined( __KERNELCC__ )
+
 #if !defined( HIPRT_EXPORTS )
-#define HIPRT_HOST_DEVICE 
+#define HIPRT_HOST_DEVICE
 #define HIPRT_INLINE inline
+#else
+#include <hiprt/impl/Common.h>
 #endif
 
 struct hiprtInt2
@@ -46,6 +49,30 @@ HIPRT_HOST_DEVICE HIPRT_INLINE hiprtFloat3 make_hiprtFloat3( float x, float y, f
 HIPRT_HOST_DEVICE HIPRT_INLINE hiprtInt4 make_hiprtInt4( int x, int y, int z, int w ) { return { x, y, z, w }; }
 
 HIPRT_HOST_DEVICE HIPRT_INLINE hiprtFloat4 make_hiprtFloat4( float x, float y, float z, float w ) { return { x, y, z, w }; }
+
+template<typename T>
+struct hiprtArray
+{
+  public:
+	hiprtArray() { m_data = 0; }
+	~hiprtArray()
+	{
+		clear();
+	}
+	void	 setSize( int size ) 
+	{
+		clear();
+		m_data = new T[size]; 
+	}
+	void clear() 
+	{
+		if ( m_data ) delete[] m_data;
+	}
+	const T* getPtr() const { return m_data; }
+
+  private:
+	T* m_data;
+};
 
 #if defined( HIPRT_EXPORTS )
 #define int2 hiprtInt2
