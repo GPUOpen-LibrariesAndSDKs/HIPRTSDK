@@ -21,7 +21,7 @@ void TestBase::init( int deviceIndex )
 	ASSERT( e == oroSuccess );
 	printf( "executing on %s\n", props.name );
 
-	if ( strstr( props.name, "AMD" ) != 0 )
+	if ( strstr( props.name, "Radeon" ) != 0 )
 		m_ctxtInput.deviceType = hiprtDeviceAMD;
 	else
 		m_ctxtInput.deviceType = hiprtDeviceNVIDIA;
