@@ -22,6 +22,7 @@ For AMD GPUs, you need a driver newer than 21.40.
 The supported AMD GPUs are 
 
 - Navi2x
+- Navi1x
 - Vega2x
 - Vega1x
 
