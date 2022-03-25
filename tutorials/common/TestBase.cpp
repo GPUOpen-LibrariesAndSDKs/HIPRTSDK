@@ -3,6 +3,11 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <contrib/stbi/stbi_image_write.h>
 
+inline constexpr hiprtError operator|=( hiprtError x, hiprtError y )
+{
+	return static_cast<hiprtError>( static_cast<int>( x ) | static_cast<int>( y ) );
+}
+
 void TestBase::init( int deviceIndex )
 {
 	m_res = make_hiprtInt2( 512, 512 );
@@ -70,8 +75,7 @@ void TestBase::readSourceCode( const std::string& path, std::string& sourceCode,
 	}
 }
 
-void TestBase::buildTraceKernel(
-	hiprtContext ctxt, const char* path, const char* functionName, oroFunction& function, hiprtArray<char>* binaryOut )
+hiprtError TestBase::buildTraceProgram( hiprtContext ctxt, const char* path, const char* functionName, orortcProgram& progOut )
 {
 	std::vector<std::string> includeNamesData;
 	std::string				 sourceCode;
@@ -82,13 +86,12 @@ void TestBase::buildTraceKernel(
 	std::vector<const char*> includeNames;
 	for ( int i = 0; i < includeNamesData.size(); i++ )
 	{
-		readSourceCode( std::string( "../../" ) + includeNamesData[i], headersData[i] );
+		readSourceCode( std::string( "../" ) + includeNamesData[i], headersData[i] );
 		includeNames.push_back( includeNamesData[i].c_str() );
 		headers.push_back( headersData[i].c_str() );
 	}
 	std::vector<const char*> opts;
-	opts.push_back( "-I ../../" );
-	hiprtBuildTraceKernel(
+	return hiprtBuildTraceProgram(
 		ctxt,
 		functionName,
 		sourceCode.c_str(),
@@ -98,8 +101,42 @@ void TestBase::buildTraceKernel(
 		includeNames.data(),
 		opts.data(),
 		opts.size(),
-		*(hiprtApiFunction*)&function,
-		binaryOut );
+		&progOut );
+}
+
+hiprtError TestBase::buildTraceGetBinary( orortcProgram& prog, size_t& size, char* binary )
+{
+	return hiprtBuildTraceGetBinary( &prog, &size, binary );
+}
+
+hiprtError TestBase::buildTraceKernel(
+	hiprtContext ctxt, const char* path, const char* functionName, oroFunction& function, hiprtArray<char>* binaryOut )
+{
+	oroModule	module;
+	oroFunction func;
+	hiprtError	error = hiprtSuccess;
+
+	orortcProgram prog;
+	size_t		  binarySize = 0;
+	error |= buildTraceProgram( ctxt, path, functionName, prog );
+	error |= buildTraceGetBinary( prog, binarySize, nullptr );
+
+	std::vector<char> binary( binarySize );
+	error |= buildTraceGetBinary( prog, binarySize, binary.data() );
+
+	if ( binaryOut )
+	{
+		binaryOut->setSize( binary.size() );
+		memcpy( (void*)binaryOut->getPtr(), binary.data(), sizeof( char ) * binary.size() );
+	}
+
+	const char* loweredName;
+	orortcGetLoweredName( prog, functionName, &loweredName );
+	oroModuleLoadData( &module, binary.data() );
+	oroModuleGetFunction( &function, module, loweredName );
+	orortcDestroyProgram( &prog );
+
+	return error;
 }
 
 void TestBase::launchKernel( oroFunction func, int nx, int ny, void** args )

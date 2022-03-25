@@ -593,21 +593,21 @@ hiprtSetCustomFuncTable( hiprtContext context, hiprtCustomFuncTable outFuncTable
  */
 HIPRT_API hiprtError hiprtDestroyCustomFuncTable( hiprtContext context, hiprtCustomFuncTable outFuncTable );
 
-/** \brief Building trace kernel with HIPRT routines.
+/** \brief Get Program instance with HIPRT routines.
  *
- * \param functionName function to which handle will be returned, canno be NULL.
+ * \param functionName function to which handle will be returned, cannot be NULL.
  * \param context HIPRT API context.
  * \param src HIP program source.
  * \param name Program source filename.
  * \param numHeaders Number of headers, numHeaders must be greater than or equal to 0.
  * \param headers Sources of the headers, headers can be NULL when numHeaders is 0.
  * \param includeNames Name of each header by which they can be included in the HIP program source, includeNames can be NULL
- * when numHeaders is 0. \param options Compiler options, can be NULL.
- * \param functionOut Output HIP function pointer.
- * \param binaryOut Output HIP function in the binary form.
+ * when numHeaders is 0. 
+ * \param options Compiler options, can be NULL.
+ * \param progOut Output build program instance.
  * \return HIPRT error in case of a failure, hiprtSuccess otherwise.
  */
-HIPRT_API hiprtError hiprtBuildTraceKernel(
+HIPRT_API hiprtError hiprtBuildTraceProgram(
 	hiprtContext	  context,
 	const char*		  functionName,
 	const char*		  src,
@@ -617,8 +617,19 @@ HIPRT_API hiprtError hiprtBuildTraceKernel(
 	const char**	  includeNames,
 	const char**	  options,
 	int				  nOptions,
-	hiprtApiFunction& functionOut,
-	hiprtArray<char>* binaryOut = nullptr );
+	void* progOut );
+
+/** \brief Get binary with HIPRT routines.
+ *
+ * \param prog program instance
+ * \param size Output size of binary 
+ * \param binary Output if NULL function returns size of parameter else returned binary(application should allocate for binary).
+ * \return HIPRT error in case of a failure, hiprtSuccess otherwise.
+ */
+HIPRT_API hiprtError hiprtBuildTraceGetBinary(
+	void* prog, 
+	size_t* size, 
+	void* binary);
 
 /** \brief Setting log level.
  *

@@ -25,8 +25,10 @@ class TestBase
 	virtual void run() = 0;
 
 	void readSourceCode( const std::string& path, std::string& sourceCode, std::vector<std::string>* includes = 0 );
+	hiprtError buildTraceProgram( hiprtContext ctxt, const char* path, const char* functionName, orortcProgram& progOut );
+	hiprtError buildTraceGetBinary( orortcProgram& prog, size_t& size, char* binary );
 
-	void buildTraceKernel(
+	hiprtError buildTraceKernel(
 		hiprtContext	   ctxt,
 		const char*		   path,
 		const char*		   functionName,
