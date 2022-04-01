@@ -3,19 +3,18 @@
 HIPRT is a ray tracing library in HIP. The APIs are designed to be minimum and lower level. 
 
 
-## Directories
+## Features
 
-- hiprt
-  - The header and the library
-- tutorials
-  - Tutorial source code
-- contrib
-  - External dependencies
-
+- Ray triangle intersection
+- Ray custom primitive intersection
+- Several bounding volume hierarchy (BVH) options
+- Load and store geometry primitive
+- Load your own BVH
+- Segmented motion blur
 
 ## Requirement
 
-HIPRT runs on AMD and NVIDIA GPUs. HIP and CUDA apis are dynamically loaded so you do not need to have these SDKs if your have these dlls installed with the driver package. 
+HIPRT runs on AMD and NVIDIA GPUs. HIP and CUDA &copy; apis are dynamically loaded so you do not need to have these SDKs if your have these dlls installed with the driver package. Hardware accelerated ray tracing only works on RDNA2 GPUs (Navi2x or newer). 
 
 For AMD GPUs, you need a driver newer than 21.40. 
 
@@ -25,6 +24,19 @@ The supported AMD GPUs are
 - Navi1x
 - Vega2x
 - Vega1x
+
+----
+
+
+## Directories
+
+- hiprt
+  - The header and the library
+- tutorials
+  - Tutorial source code
+- contrib
+  - External dependencies
+
 
 ## Building the Tutorial
 
