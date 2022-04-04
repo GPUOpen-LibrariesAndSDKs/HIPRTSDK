@@ -1,3 +1,25 @@
+//
+// Copyright (c) 2021-2022 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+
 #include <tutorials/common/TestBase.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -75,7 +97,7 @@ void TestBase::readSourceCode( const std::string& path, std::string& sourceCode,
 	}
 }
 
-hiprtError TestBase::buildTraceProgram( hiprtContext ctxt, const char* path, const char* functionName, orortcProgram& progOut )
+hiprtError TestBase::buildTraceProgram( hiprtContext ctxt, const char* path, const char* functionName, orortcProgram& progOut, std::vector<const char*>* opts)
 {
 	std::vector<std::string> includeNamesData;
 	std::string				 sourceCode;
@@ -86,11 +108,11 @@ hiprtError TestBase::buildTraceProgram( hiprtContext ctxt, const char* path, con
 	std::vector<const char*> includeNames;
 	for ( int i = 0; i < includeNamesData.size(); i++ )
 	{
-		readSourceCode( std::string( "../" ) + includeNamesData[i], headersData[i] );
+		readSourceCode( std::string( "../../" ) + includeNamesData[i], headersData[i] );
 		includeNames.push_back( includeNamesData[i].c_str() );
 		headers.push_back( headersData[i].c_str() );
 	}
-	std::vector<const char*> opts;
+	
 	return hiprtBuildTraceProgram(
 		ctxt,
 		functionName,
@@ -99,8 +121,8 @@ hiprtError TestBase::buildTraceProgram( hiprtContext ctxt, const char* path, con
 		headers.size(),
 		headers.data(),
 		includeNames.data(),
-		opts.data(),
-		opts.size(),
+		opts != nullptr ? opts->data() : nullptr,
+		opts != nullptr ? opts->size() : 0,
 		&progOut );
 }
 
@@ -110,7 +132,12 @@ hiprtError TestBase::buildTraceGetBinary( orortcProgram& prog, size_t& size, cha
 }
 
 hiprtError TestBase::buildTraceKernel(
-	hiprtContext ctxt, const char* path, const char* functionName, oroFunction& function, hiprtArray<char>* binaryOut )
+	hiprtContext			  ctxt,
+	const char*				  path,
+	const char*				  functionName,
+	oroFunction&			  function,
+	hiprtArray<char>*		  binaryOut,
+	std::vector<const char*>* opts )
 {
 	oroModule	module;
 	oroFunction func;
@@ -118,7 +145,8 @@ hiprtError TestBase::buildTraceKernel(
 
 	orortcProgram prog;
 	size_t		  binarySize = 0;
-	error |= buildTraceProgram( ctxt, path, functionName, prog );
+	error |= buildTraceProgram( ctxt, path, functionName, prog, opts);
+
 	error |= buildTraceGetBinary( prog, binarySize, nullptr );
 
 	std::vector<char> binary( binarySize );
@@ -139,13 +167,12 @@ hiprtError TestBase::buildTraceKernel(
 	return error;
 }
 
-void TestBase::launchKernel( oroFunction func, int nx, int ny, void** args )
+void TestBase::launchKernel( oroFunction func, int nx, int ny, void** args, size_t threadPerBlockX, size_t threadPerBlockY, size_t threadPerBlockZ)
 {
-	hiprtInt3 tpb = { 16, 16, 1 };
 	hiprtInt3 nb;
-	nb.x	   = ( nx + tpb.x - 1 ) / tpb.x;
-	nb.y	   = ( ny + tpb.y - 1 ) / tpb.y;
-	oroError e = oroModuleLaunchKernel( func, nb.x, nb.y, 1, tpb.x, tpb.y, 1, 0, 0, args, 0 );
+	nb.x	   = ( nx + threadPerBlockX - 1 ) / threadPerBlockX;
+	nb.y	   = ( ny + threadPerBlockY - 1 ) / threadPerBlockY;
+	oroError e = oroModuleLaunchKernel( func, nb.x, nb.y, 1, threadPerBlockX, threadPerBlockY, threadPerBlockZ, 0, 0, args, 0 );
 	ASSERT( e == oroSuccess );
 }
 

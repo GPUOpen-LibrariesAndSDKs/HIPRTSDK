@@ -1,3 +1,25 @@
+//
+// Copyright (c) 2021-2022 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+
 #pragma once
 #include <hiprt/hiprt.h>
 #include <hiprt/hiprt_vec.h>
@@ -25,7 +47,7 @@ class TestBase
 	virtual void run() = 0;
 
 	void readSourceCode( const std::string& path, std::string& sourceCode, std::vector<std::string>* includes = 0 );
-	hiprtError buildTraceProgram( hiprtContext ctxt, const char* path, const char* functionName, orortcProgram& progOut );
+	hiprtError buildTraceProgram( hiprtContext ctxt, const char* path, const char* functionName, orortcProgram& progOut, std::vector<const char*>* opts);
 	hiprtError buildTraceGetBinary( orortcProgram& prog, size_t& size, char* binary );
 
 	hiprtError buildTraceKernel(
@@ -33,9 +55,10 @@ class TestBase
 		const char*		   path,
 		const char*		   functionName,
 		oroFunction&	   function,
-		hiprtArray<char>* binaryOut = 0 );
+		hiprtArray<char>* binaryOut = nullptr,
+		std::vector<const char*>* opts		= nullptr );
 
-	void launchKernel( oroFunction func, int nx, int ny, void** args );
+	void launchKernel( oroFunction func, int nx, int ny, void** args, size_t threadPerBlockX = 8, size_t threadPerBlockY = 8, size_t threadPerBlockZ = 1 );
 
 	void writeImage( const char* path, int w, int h, u8* data );
 

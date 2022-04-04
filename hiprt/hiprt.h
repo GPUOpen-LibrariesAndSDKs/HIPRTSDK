@@ -1,3 +1,25 @@
+//
+// Copyright (c) 2021-2022 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+
 #ifndef HIPRT_H
 #define HIPRT_H
 
@@ -128,7 +150,7 @@ typedef enum
 enum hiprtTraversalType
 {
 	/*!< 0 or 1 element iterator with any hit along the ray */
-	hiprtTraversalTerminateAtAnytHit = 1,
+	hiprtTraversalTerminateAtAnyHit = 1,
 	/*!< 0 or 1 element iterator with a closest hit along the ray */
 	hiprtTraversalTerminateAtClosestHit = 2,
 };
@@ -178,22 +200,23 @@ struct hiprtHit
 
 /** \brief Insersection function for custom primitives.
  *
+ * \param ray Ray.
+ * \param primID Primtive ID.
+ * \param userPtr User data.
+ * \param payload Payload for additional outputs.
+ * \param uv Output texture coordinates.
+ * \param normal Output normal.
+ * \param t Output distance.
+ * \return A flag indicating hit.
  */
 typedef bool ( *hiprtIntersectFunc )(
-	/*!< Ray */
 	const hiprtRay& ray,
-	/*!< Primitive ID */
-	uint32_t primID,
-	/*!< User data */
-	const void* userPtr,
-	/*!< Payload for additional outputs */
-	const void* payload,
-	/*!< Ouput texture coordinates */
-	hiprtFloat2& uv,
-	/*!< Ouput normal */
-	hiprtFloat3& normal,
-	/*!< Output distance */
-	float& t );
+	uint32_t		primID,
+	const void*		userPtr,
+	const void*		payload,
+	hiprtFloat2&	uv,
+	hiprtFloat3&	normal,
+	float&			t );
 
 /** \brief Set of functions for custom primitives.
  *
@@ -487,8 +510,8 @@ HIPRT_API hiprtError hiprtGetGeometryBuildTemporaryBufferSize(
 /** \brief Get temporary storage requirements for scene trace.
  *
  * \param context HIPRT API context.
- * \param scene Built scene for trace
- * \param numRays Rays to be issued
+ * \param scene Built scene for trace.
+ * \param numRays Rays to be issued.
  * \param outSize Pointer to write result to.
  * \return HIPRT error in case of a failure, hiprtSuccess otherwise.
  */
@@ -593,8 +616,43 @@ hiprtSetCustomFuncTable( hiprtContext context, hiprtCustomFuncTable outFuncTable
  */
 HIPRT_API hiprtError hiprtDestroyCustomFuncTable( hiprtContext context, hiprtCustomFuncTable outFuncTable );
 
-/** \brief Get Program instance with HIPRT routines.
+/** \brief Saves hiprtGeometry to a binary file.
  *
+ * \param context HIPRT API context.
+ * \param inGeometry Geometry to be saved.
+ * \param filename File name with full path.
+ * \return HIPRT error in case of a failure, hiprtSuccess otherwise.
+ */
+HIPRT_API hiprtError hiprtSaveGeometry( hiprtContext context, hiprtGeometry inGeometry, const char* filename );
+
+/** \brief Loads hiprtGeometry to a binary file.
+ *
+ * \param context HIPRT API context.
+ * \param outGeometry Geometry to be loaded.
+ * \param filename File name with full path.
+ * \return HIPRT error in case of a failure, hiprtSuccess otherwise.
+ */
+HIPRT_API hiprtError hiprtLoadGeometry( hiprtContext context, hiprtGeometry* outGeometry, const char* filename );
+
+/** \brief Saves hiprtScene to a binary file.
+ *
+ * \param context HIPRT API context.
+ * \param inScene Scene to be saved.
+ * \param filename File name with full path.
+ * \return HIPRT error in case of a failure, hiprtSuccess otherwise.
+ */
+HIPRT_API hiprtError hiprtSaveScene( hiprtContext context, hiprtScene inScene, const char* filename );
+
+/** \brief Loads hiprtScene to a binary file.
+ *
+ * \param context HIPRT API context.
+ * \param outScene Scene to be loaded.
+ * \param filename File name with full path.
+ * \return HIPRT error in case of a failure, hiprtSuccess otherwise.
+ */
+HIPRT_API hiprtError hiprtLoadScene( hiprtContext context, hiprtScene* outScene, const char* filename );
+
+/** \brief Get Program instance with HIPRT routines.
  * \param functionName function to which handle will be returned, cannot be NULL.
  * \param context HIPRT API context.
  * \param src HIP program source.
@@ -621,15 +679,23 @@ HIPRT_API hiprtError hiprtBuildTraceProgram(
 
 /** \brief Get binary with HIPRT routines.
  *
- * \param prog program instance
- * \param size Output size of binary 
- * \param binary Output if NULL function returns size of parameter else returned binary(application should allocate for binary).
+ * \param prog program instance.
+ * \param size Output size of binary .
+ * \param binary Output if NULL function returns size of parameter else returned binary(application should allocate for binary)..
  * \return HIPRT error in case of a failure, hiprtSuccess otherwise.
  */
 HIPRT_API hiprtError hiprtBuildTraceGetBinary(
 	void* prog, 
 	size_t* size, 
 	void* binary);
+
+/** \brief Setting log level.
+ *
+ * \param path user defined path to cache kernels.
+ */
+HIPRT_API void hiprtSetCacheDirPath( 
+	const char* path );
+
 
 /** \brief Setting log level.
  *
