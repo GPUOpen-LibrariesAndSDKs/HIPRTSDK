@@ -24,7 +24,7 @@ It works on AMD GPUs which supports HIP. The supported AMD GPUs are
 - Vega2x
 - Vega1x
 
-You need a driver newer than 21.40. 
+You need a driver newer than 21.40. However, we recommend using 21.50 or 22.10.
 
 ----
 
