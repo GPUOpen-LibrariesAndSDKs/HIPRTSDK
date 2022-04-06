@@ -102,7 +102,7 @@ class Test : public TestBase
 
 		void* args[] = { &scene, &dst, &res };
 		launchKernel( func, m_res.x, m_res.y, args );
-		writeImageFromDevice( "SceneIntersection.png", m_res.x, m_res.y, dst );
+		writeImageFromDevice( "02_scene_intersection.png", m_res.x, m_res.y, dst );
 
 		dFree( sceneInput.instanceGeometries );
 		dFree( sceneInput.instanceFrames );

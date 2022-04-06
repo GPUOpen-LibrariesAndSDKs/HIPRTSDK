@@ -158,8 +158,8 @@ class Test : public TestBase
 
 		oroModule	module;
 		oroFunction func;
-		hiprtArray<char> binary;
-		buildTraceKernel( ctxt, "../10_motion_blur/TestKernel.h", "MotionBlurKernel", func, &binary);
+		std::vector<char> binary;
+		buildTraceKernel( ctxt, "../07_motion_blur/TestKernel.h", "MotionBlurKernel", func, &binary);
 
 		u8* dst;
 		dMalloc( dst, m_res.x * m_res.y * 4 );
@@ -168,7 +168,7 @@ class Test : public TestBase
 
 		void* args[] = { &scene, &dst, &res };
 		launchKernel( func, m_res.x, m_res.y, args );
-		writeImageFromDevice( "MotionBlur.png", m_res.x, m_res.y, dst );
+		writeImageFromDevice( "07_motion_blur.png", m_res.x, m_res.y, dst );
 
 		dFree( sceneInput.instanceGeometries );
 		dFree( sceneInput.instanceFrames );

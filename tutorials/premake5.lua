@@ -63,6 +63,8 @@ workspace "hiprtSdkTutorial"
 	include "02_scene_intersection"
 	include "03_custom_intersection"
 	include "04_global_stack"
-    include "10_motion_blur"
+	include "05_custom_bvh_import"
+	include "06_obj_AO"
+    include "07_motion_blur"
 
     copydir( "../hiprt/win/", "./build/" )

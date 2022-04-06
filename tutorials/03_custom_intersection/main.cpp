@@ -42,9 +42,9 @@ class Test : public TestBase
 
 		oroModule		 module;
 		oroFunction		 func;
-		hiprtArray<char> binary;
+		std::vector<char> binary;
 		buildTraceKernel( ctxt, "../03_custom_intersection/TestKernel.h", "CustomIntersectionKernel", func, &binary );
-		oroError ee = oroModuleLoadData( &module, binary.getPtr() );
+		oroError ee = oroModuleLoadData( &module, binary.data() );
 		ASSERT( ee == oroSuccess );
 
 		hiprtCustomFuncSet hCustomFuncSet;
@@ -73,7 +73,7 @@ class Test : public TestBase
 		void* args[] = { &geom, &dst, &dFuncSet, &res };
 		launchKernel( func, m_res.x, m_res.y, args );
 
-		writeImageFromDevice( "CustomIntersection.png", m_res.x, m_res.y, dst );
+		writeImageFromDevice( "03_custom_intersection.png", m_res.x, m_res.y, dst );
 
 		dFree( list.aabbs );
 		dFree( geomTemp );

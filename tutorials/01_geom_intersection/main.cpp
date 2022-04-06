@@ -75,7 +75,7 @@ class Test : public TestBase
 		void* args[] = { &geom, &dst, &res };
 		launchKernel( func, m_res.x, m_res.y, args );
 		writeImageFromDevice(
-			"MeshIntersection.png", m_res.x, m_res.y, dst );
+			"01_geom_intersection.png", m_res.x, m_res.y, dst );
 
 		dFree( mesh.triangleIndices );
 		dFree( mesh.vertices );
