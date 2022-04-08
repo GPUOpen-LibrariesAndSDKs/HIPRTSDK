@@ -20,7 +20,12 @@
 // THE SOFTWARE.
 //
 
-__device__ bool intersectCircle(
+__device__ float dot3F4( const float4& a, const float4& b ) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+__device__ float  dot( const float3& a, const float3& b ) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+__device__ float3 normalize( const float3& a ) { return a / sqrtf( dot( a, a ) ); }
+
+//check if there is a hit before ray.maxT. if there is, set it to tOut. hiprt will overwrite ray.maxT after this function
+__device__ bool intersect(
 	const hiprtRay& ray,
 	unsigned int	primIdx,
 	const void*		userPtr,
@@ -29,18 +34,31 @@ __device__ bool intersectCircle(
 	float3&			normalOut,
 	float&			tOut )
 {
-	const float* o = (const float*)userPtr;
-	float		 r = 0.1f;
-	float2		 c = { o[primIdx], 0.5f };
-	c.x			   = c.x - ray.origin.x;
-	c.y			   = c.y - ray.origin.y;
-	float d		   = sqrtf( c.x * c.x + c.y * c.y );
+	const float4 from = make_float4( ray.origin.x, ray.origin.y, ray.origin.z, 0.f );
+	const float4  to	 = from + make_float4( ray.direction.x, ray.direction.y, ray.direction.z, 0.f ) * ray.maxT;
+	const float4* o		 = (const float4*)userPtr;
+	const float4  sphere = make_float4( o[primIdx].x, o[primIdx].y, o[primIdx].z, 0.f );
+	const float	  r		 = o[primIdx].w;
 
-	bool hit = d < r;
-	return hit;
+	float4 m  = from - sphere;
+	float4 d  = to - from;
+	float  a  = dot3F4( d, d );
+	float  b  = 2 * dot3F4( m, d );
+	float  c  = dot3F4( m, m ) - r * r;
+	float  dd = b * b - 4.f * a * c;
+	if ( dd < 0.f ) return false;
+
+	float t = ( -b - sqrtf( dd ) ) / ( 2.f * a );
+	if( t > 1.f )
+		return false;
+
+	tOut	  = t * ray.maxT;
+	float4 n  = from + make_float4( ray.direction.x, ray.direction.y, ray.direction.z, 0.f ) * tOut - sphere;
+	normalOut = normalize( make_float3( n.x, n.y, n.z ) );
+	return true;
 }
 
-__device__ hiprtIntersectFunc circleFunc = intersectCircle;
+__device__ hiprtIntersectFunc sphereIntersect = intersect;
 
 extern "C" __global__ void CustomIntersectionKernel( hiprtGeometry geom, unsigned char* gDst, hiprtCustomFuncTable table, int2 cRes )
 {
@@ -48,20 +66,17 @@ extern "C" __global__ void CustomIntersectionKernel( hiprtGeometry geom, unsigne
 	const int gIdy = blockIdx.y * blockDim.y + threadIdx.y;
 
 	hiprtRay ray;
-	ray.origin	  = { gIdx / (float)cRes.x, gIdy / (float)cRes.y, -1.f };
+	ray.origin	  = { gIdx / (float)cRes.x - 0.5f, gIdy / (float)cRes.y - 0.5f, -1.f };
 	ray.direction = { 0.f, 0.f, 1.f };
 	ray.maxT	  = 1000.f;
 
-	int								hitIdx = hiprtInvalidValue;
 	hiprtGeomCustomTraversalClosest tr( geom, ray, *(hiprtCustomFuncSet*)table );
 	hiprtHit						hit = tr.getNextHit();
-	if ( hit.hasHit() ) hitIdx = hit.primID;
 
-	int3 colors[]		 = { { 255, 0, 128 }, { 0, 128, 255 }, { 128, 255, 0 } };
 	int	 dstIdx			 = gIdx + gIdy * cRes.x;
-	gDst[dstIdx * 4 + 0] = hitIdx != hiprtInvalidValue ? colors[hitIdx].x : 0;
-	gDst[dstIdx * 4 + 1] = hitIdx != hiprtInvalidValue ? colors[hitIdx].y : 0;
-	gDst[dstIdx * 4 + 2] = hitIdx != hiprtInvalidValue ? colors[hitIdx].z : 0;
+	gDst[dstIdx * 4 + 0] = hit.hasHit() ? (hit.normal.x+1.f)/2.f * 255 : 0;
+	gDst[dstIdx * 4 + 1] = hit.hasHit() ? (hit.normal.y+1.f)/2.f * 255 : 0;
+	gDst[dstIdx * 4 + 2] = hit.hasHit() ? (hit.normal.z+1.f)/2.f * 255 : 0;
 	gDst[dstIdx * 4 + 3] = 255;
 }
 

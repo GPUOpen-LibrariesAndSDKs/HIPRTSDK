@@ -10,19 +10,45 @@ class Test : public TestBase
 		hiprtContext ctxt;
 		hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, &ctxt );
 
-		hiprtAABBListPrimitive list;
-		list.aabbCount	= 3;
-		list.aabbStride = 8 * sizeof( float );
-		dMalloc( (hiprtFloat4*&)list.aabbs, 6 );
+		const int nSpheres = 8*2;
+#if 0
+		const hiprtFloat4 spheres[] = { 
+			{ 0.25f, 0.5f, 0.f, 0.05f },
+			{ 0.50f, 0.5f, 0.f, 0.1f },
+			{ 0.75f, 0.5f, 0.f, 0.2f },
+		};
+#else
 
-		hiprtFloat4 b[] = {
-			{ 0.15f, 0.40f, 0.0f, 0.0f },
-			{ 0.35f, 0.60f, 0.0f, 0.0f },
-			{ 0.40f, 0.40f, 0.0f, 0.0f },
-			{ 0.60f, 0.60f, 0.0f, 0.0f },
-			{ 0.65f, 0.40f, 0.0f, 0.0f },
-			{ 0.85f, 0.60f, 0.0f, 0.0f } };
-		dCopyHtoD( (hiprtFloat4*)list.aabbs, b, 6 );
+		hiprtFloat4 spheres[nSpheres];
+		for(int i=0; i<nSpheres / 2; i++)
+		{
+			float r = 0.1f;
+			float t = i/(float)(nSpheres/2) * 2.f * 3.1415f;
+			spheres[i] = { sin(t) * 0.4f, cos(t) * 0.4f, 0.f, r };
+		}
+		for ( int i = 0; i < nSpheres / 2; i++ )
+		{
+			float r	   = 0.1f;
+			float t	   = i / (float)(nSpheres/2) * 2.f * 3.1415f + 0.2f;
+			spheres[i+nSpheres/2] = { sin( t ) * 0.35f, cos( t ) * 0.35f, 0.4f, r };
+		}
+
+#endif
+		hiprtAABBListPrimitive list;
+		list.aabbCount	= nSpheres;
+		list.aabbStride = 8 * sizeof( float );
+		dMalloc( (hiprtFloat4*&)list.aabbs, nSpheres*2 );
+
+		hiprtFloat4 b[nSpheres*2];
+
+		for ( int i = 0; i < nSpheres ; i++)
+		{
+			const hiprtFloat4& c = spheres[i];
+			b[i * 2 + 0]		 = { c.x - c.w, c.y - c.w, c.z - c.w, 0.f };
+			b[i * 2 + 1]		 = { c.x + c.w, c.y + c.w, c.z + c.w, 0.f };
+		}
+
+		dCopyHtoD( (hiprtFloat4*)list.aabbs, b, nSpheres*2 );
 
 		hiprtGeometryBuildInput geomInput;
 		geomInput.type				  = hiprtPrimitiveTypeAABBList;
@@ -51,14 +77,13 @@ class Test : public TestBase
 		oroDeviceptr	   dFuncPtr;
 		size_t			   numBytes = 0;
 
-		ee = oroModuleGetGlobal( &dFuncPtr, &numBytes, module, "circleFunc" );
+		ee = oroModuleGetGlobal( &dFuncPtr, &numBytes, module, "sphereIntersect" );
 		ASSERT( ee == oroSuccess );
 		oroMemcpyDtoH( &hCustomFuncSet.intersectFunc, dFuncPtr, numBytes );
 
-		float* centers;
-		dMalloc( centers, 3 );
-		float h[] = { 0.25f, 0.5f, 0.75f };
-		dCopyHtoD( centers, h, 3 );
+		hiprtFloat4* centers;
+		dMalloc( centers, nSpheres );
+		dCopyHtoD( centers, (hiprtFloat4*)spheres, nSpheres );
 		waitForCompletion();
 		hCustomFuncSet.intersectFuncData = centers;
 
