@@ -455,15 +455,6 @@ void TestBase::render(
 		&stackBuffer,
 		&stackSize,
 		&m_camera,
-		&m_scene.m_bufMaterialIndices,
-		&m_scene.m_bufMaterials,
-		&m_scene.m_bufMatIdsPerInstance,
-		&m_scene.m_indices,
-		&m_scene.m_indexOffsets,
-		&m_scene.m_normals,
-		&m_scene.m_normalOffsets,
-		&m_scene.m_numOfLights,
-		&m_scene.m_lights,
 		&aoRadius };
 	
 	launchKernel( func, width, height, args, blockWidth, blockHeight);

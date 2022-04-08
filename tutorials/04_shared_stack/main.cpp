@@ -75,7 +75,7 @@ class Test : public TestBase
 		hiprtBuildGeometry( ctxt, hiprtBuildOperationBuild, &geomInput, &options, geomTemp, 0, geom );
 
 		oroFunction func;
-		buildTraceKernel( ctxt, "../04_global_stack/TestKernel.h", "CornellBoxKernel", func, nullptr, &opts );
+		buildTraceKernel( ctxt, "../04_shared_stack/TestKernel.h", "CornellBoxKernel", func, nullptr, &opts );
 
 		u8* dst;
 		dMalloc( dst, m_res.x * m_res.y * 4 );
@@ -86,7 +86,7 @@ class Test : public TestBase
 
 		void* args[] = { &geom, &dst, &res, &stackBuffer, &stackSize };
 		launchKernel( func, m_res.x, m_res.y, args );
-		writeImageFromDevice( "04_global_stack.png", m_res.x, m_res.y, dst );
+		writeImageFromDevice( "04_shared_stack.png", m_res.x, m_res.y, dst );
 
 		dFree( mesh.triangleIndices );
 		dFree( mesh.vertices );

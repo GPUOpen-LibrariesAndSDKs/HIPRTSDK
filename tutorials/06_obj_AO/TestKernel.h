@@ -28,22 +28,6 @@
 
 typedef float4 Quaternion;
 
-struct Material_t
-{
-	float4 m_diffuse;
-	float4		m_emission;
-	float4 m_params; // m_params.x - is light
-};
-
-struct Light_t
-{
-	float4		m_le;
-	float3 m_lv0;
-	float3		m_lv1;
-	float3		m_lv2;
-	float3		pad;
-};
-
 struct Camera
 {
 	float4		m_translation; // eye/rayorigin
@@ -65,6 +49,10 @@ __device__ float3 cross( const float3& a, const float3& b )
 {
 	return make_float3( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x );
 }
+
+__device__ float	  dot( const float3& a, const float3& b ) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+
+__device__ float3 normalize( const float3& a ) { return a / sqrtf( dot( a, a ) ); }
 
 __device__ unsigned int lcg( unsigned int& seed )
 {
@@ -102,19 +90,37 @@ __device__ float3 sampleHemisphereCosine( float3 n, unsigned int& seed )
 
 	float3 axis = fabs( n.x ) > 0.001f ? make_float3( 0.0f, 1.0f, 0.0f ) : make_float3( 1.0f, 0.0f, 0.0f );
 	float3 t	= cross( axis, n );
-	t			= hiprt::normalize( t );
+	t			= normalize( t );
 	float3 s	= cross( n, t );
 
-	return hiprt::normalize( s * cos( phi ) * sinTheta + t * sin( phi ) * sinTheta + n * sqrt( 1.0f - sinThetaSqr ) );
+	return normalize( s * cos( phi ) * sinTheta + t * sin( phi ) * sinTheta + n * sqrt( 1.0f - sinThetaSqr ) );
 }
 
-inline __device__ float4 qtRotate( Quaternion q, float4 vec )
+inline __device__ float4 qtMul( const float4& a, const float4& b )
 {
-	Quaternion qInv = hiprt::qtInvert( q );
-	float4	   vcpy = vec;
-	vcpy.w			= 0.f;
-	float4 out		= hiprt::qtMul( hiprt::qtMul( q, vcpy ), qInv );
-	return out;
+	float4 ans;
+	ans = make_float4( cross( make_float3( a ), make_float3( b ) ), 0.0f );
+	// ans += a.w * b + b.w * a;
+	ans = ans + make_float4( a.w * b.x, a.w * b.y, a.w * b.z, a.w * b.w ) +
+		  make_float4( b.w * a.x, b.w * a.y, b.w * a.z, b.w * a.w );
+	ans.w = a.w * b.w - dot( make_float3( a ), make_float3( b ) );
+	return ans;
+}
+
+inline __device__ float4 qtInvert( const float4& q )
+{
+	float4 ans;
+	ans	  = -q;
+	ans.w = q.w;
+	return ans;
+}
+
+inline __device__ float3 qtRotate( const float4& q, const float3& p )
+{
+	float4 qp	= make_float4( p, 0.0f );
+	float4 qInv = qtInvert( q );
+	float4 out	= qtMul( qtMul( q, qp ), qInv );
+	return make_float3( out );
 }
 
 __device__ void
@@ -129,15 +135,14 @@ generateRay( float x, float y, int2 res, Camera* cam, float4* to, float4* from, 
 	const float2 xy		= make_float2( ( x + offset ) / res.x, ( y + offset ) / res.y ) - make_float2( 0.5f, 0.5f );
 	float3 dir = make_float3( xy.x * m_sensorSize.x, xy.y * m_sensorSize.y, m_sensorSize.y / ( 2.f * tan( fov / 2.f ) ) );
 
-	const float3 holDir	 = hiprt::qtRotate( cam->m_quat, make_float3( 1.f, 0.f, 0.f ) );
-	const float3 upDir	 = hiprt::qtRotate( cam->m_quat, make_float3( 0.f, 1.f, 0.f ) );
-	const float3 viewDir = hiprt::qtRotate( cam->m_quat, make_float3( 0.f, 0.f, -1.f) );
+	const float3 holDir	 = qtRotate( cam->m_quat, make_float3( 1.f, 0.f, 0.f ) );
+	const float3 upDir	 = qtRotate( cam->m_quat, make_float3( 0.f, 1.f, 0.f ) );
+	const float3 viewDir = qtRotate( cam->m_quat, make_float3( 0.f, 0.f, -1.f) );
 	dir					 = dir.x * holDir + dir.y * upDir + dir.z * viewDir;
 
 	from[0]		= cam->m_translation;
 	to[0]		= cam->m_translation + make_float4( dir.x * cam->m_far, dir.y * cam->m_far, dir.z * cam->m_far, 0.0f );
 }
-
 
 __global__ void AORayKernel(
 	hiprtScene	   scene,
@@ -146,15 +151,6 @@ __global__ void AORayKernel(
 	int*		   globalStackBuffer,
 	int			   stackSize,
 	Camera*		   cam,
-	int*		   matIndices,
-	Material_t*	   materials,
-	int*		   matOffsetPerInstance,
-	unsigned int*  indices,
-	int*		   indxOffsets,
-	float3*		   normals,
-	int*		   normOffset,
-	int*		   numOfLights,
-	Light_t*	   lights,
 	float		   aoRadius )
 {
 	const int gIdx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -183,7 +179,7 @@ __global__ void AORayKernel(
 		hiprtRay ray;
 		float4	 dir  = ( to - from );
 		ray.origin	  = make_float3( from.x, from.y, from.z );
-		ray.direction = hiprt::normalize( make_float3( dir.x, dir.y, dir.z ) );
+		ray.direction = normalize( make_float3( dir.x, dir.y, dir.z ) );
 		ray.maxT	  = 100000.0f;
 
 		hiprtSceneTraversalClosestCustomStack<Stack> tr( scene, ray, 0xffffffff, stack );
@@ -194,28 +190,23 @@ __global__ void AORayKernel(
 			{
 				float3 surfacePt = ray.origin + hit.t * ( 1.0f - 1.0e-2f ) * ray.direction;
 
-				int matOffset = matOffsetPerInstance[hit.instanceID] + hit.primID;
-				int matIndex  = matIndices[matOffset];
-
 				float3 Ng = hit.normal;
-				if ( hiprt::dot( ray.direction, Ng ) > 0.f ) Ng = -Ng;
-				Ng = hiprt::normalize( Ng );
+				if ( dot( ray.direction, Ng ) > 0.f ) Ng = -Ng;
+				Ng = normalize( Ng );
 
-				if ( !materials[matIndex].m_params.x )
+				hiprtRay aoRay;
+				aoRay.origin = surfacePt;
+				aoRay.maxT	 = aoRadius;
+				hiprtHit aoHit;
+
+				for ( int i = 0; i < nAOSamples; i++ )
 				{
-					hiprtRay aoRay;
-					aoRay.origin = surfacePt;
-					aoRay.maxT	 = aoRadius;
-					hiprtHit aoHit;
-
-					for ( int i = 0; i < nAOSamples; i++ )
-					{
-						aoRay.direction = sampleHemisphereCosine( Ng, seed );
-						hiprtSceneTraversalClosestCustomStack<Stack> tr( scene, aoRay, 0xffffffff, stack );
-						aoHit = tr.getNextHit();
-						ao += !aoHit.hasHit() ? 1.0f : 0.0f;
-					}
+					aoRay.direction = sampleHemisphereCosine( Ng, seed );
+					hiprtSceneTraversalClosestCustomStack<Stack> tr( scene, aoRay, 0xffffffff, stack );
+					aoHit = tr.getNextHit();
+					ao += !aoHit.hasHit() ? 1.0f : 0.0f;
 				}
+				
 			}
 		}
 	}

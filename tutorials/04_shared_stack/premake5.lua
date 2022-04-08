@@ -1,4 +1,4 @@
-project "04_global_stack"
+project "04_shared_stack"
     kind "ConsoleApp"
     location "../build"
 
