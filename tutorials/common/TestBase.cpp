@@ -519,7 +519,9 @@ hiprtError TestBase::buildTraceProgram( hiprtContext ctxt, const char* path, con
 	std::vector<const char*> includeNames;
 	for ( int i = 0; i < includeNamesData.size(); i++ )
 	{
-		readSourceCode( std::string( "../../" ) + includeNamesData[i], headersData[i] );
+		if ( !readSourceCode( std::string( "../../" ) + includeNamesData[i], headersData[i] ) ) {
+			readSourceCode( std::string( "../" ) + includeNamesData[i], headersData[i] );
+		}
 
 		includeNames.push_back( includeNamesData[i].c_str() );
 		headers.push_back( headersData[i].c_str() );

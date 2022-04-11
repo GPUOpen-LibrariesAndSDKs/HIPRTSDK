@@ -22,37 +22,10 @@
 
 #include <hiprt/hiprt_device.h>
 #include <hiprt/hiprt_vec.h>
+#include <common/shared.h>
 
 #define M_PI 3.1415926535898f
 #define TWO_PI 6.28318530718f
-
-typedef float4 Quaternion;
-
-struct Camera
-{
-	float4		m_translation; // eye/rayorigin
-	Quaternion	m_quat;
-	float		m_fov;
-	float		m_near;
-	float		m_far;
-	float		padd;
-};
-
-__device__ float dot3F4( const float4& a, const float4& b ) { return a.x * b.x + a.y * b.y + a.z * b.z; }
-
-__device__ const float4 cross3( const float3 aa, const float3 bb )
-{
-	return make_float4( aa.y * bb.z - aa.z * bb.y, aa.z * bb.x - aa.x * bb.z, aa.x * bb.y - aa.y * bb.x, 0 );
-}
-
-__device__ float3 cross( const float3& a, const float3& b )
-{
-	return make_float3( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x );
-}
-
-__device__ float	  dot( const float3& a, const float3& b ) { return a.x * b.x + a.y * b.y + a.z * b.z; }
-
-__device__ float3 normalize( const float3& a ) { return a / sqrtf( dot( a, a ) ); }
 
 __device__ unsigned int lcg( unsigned int& seed )
 {
@@ -94,33 +67,6 @@ __device__ float3 sampleHemisphereCosine( float3 n, unsigned int& seed )
 	float3 s	= cross( n, t );
 
 	return normalize( s * cos( phi ) * sinTheta + t * sin( phi ) * sinTheta + n * sqrt( 1.0f - sinThetaSqr ) );
-}
-
-inline __device__ float4 qtMul( const float4& a, const float4& b )
-{
-	float4 ans;
-	ans = make_float4( cross( make_float3( a ), make_float3( b ) ), 0.0f );
-	// ans += a.w * b + b.w * a;
-	ans = ans + make_float4( a.w * b.x, a.w * b.y, a.w * b.z, a.w * b.w ) +
-		  make_float4( b.w * a.x, b.w * a.y, b.w * a.z, b.w * a.w );
-	ans.w = a.w * b.w - dot( make_float3( a ), make_float3( b ) );
-	return ans;
-}
-
-inline __device__ float4 qtInvert( const float4& q )
-{
-	float4 ans;
-	ans	  = -q;
-	ans.w = q.w;
-	return ans;
-}
-
-inline __device__ float3 qtRotate( const float4& q, const float3& p )
-{
-	float4 qp	= make_float4( p, 0.0f );
-	float4 qInv = qtInvert( q );
-	float4 out	= qtMul( qtMul( q, qp ), qInv );
-	return make_float3( out );
 }
 
 __device__ void
