@@ -1,6 +1,6 @@
 # HIP RT SDK
 
-**This repository is only for tutorials. The SDK binaries needs to be downloaded from [HIP RT prject page](https://gpuopen.com/hiprt/).**
+**This repository is only for tutorials. The SDK binaries needs to be downloaded from [HIP RT product page](https://gpuopen.com/hiprt/).**
 
 HIP RT is a ray tracing library in HIP. The APIs are designed to be minimal and low level, making it easy to write a ray tracing application in HIP. We designed the library and APIs to be simple to use and integrate into any existing HIP applications. Although there are a few other ray tracing APIs which, we designed HIP RT to be simpler and easier to use, so you do not need to learn many new kernel types. 
 
@@ -33,7 +33,7 @@ You need an AMDGPU driver newer than 21.40. However, we recommend using 21.50 or
 ## Directories
 
 - [hiprt](hiprt)
-  - The header and the library which you need to download from [HIP RT prject page](https://gpuopen.com/hiprt/). 
+  - The header and the library which you need to download from [HIP RT product page](https://gpuopen.com/hiprt/). 
 - [tutorials](tutorials)
   - Tutorial source code
 - [contrib](contrib)
@@ -48,7 +48,7 @@ You need an AMDGPU driver newer than 21.40. However, we recommend using 21.50 or
 git submodule init
 git submodule update
 ````
-2. Download the HIP RT SDK from [HIP RT prject page](https://gpuopen.com/hiprt/), copy hiprt directory to here. 
+2. Download the HIP RT SDK from [HIP RT product page](https://gpuopen.com/hiprt/), copy hiprt directory to here. 
 
 3. Run premake like this on Windows, which will generate a solution for Visual Studio 2019:
 
