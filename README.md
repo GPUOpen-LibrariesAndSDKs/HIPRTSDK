@@ -42,22 +42,22 @@ You need an AMDGPU driver newer than 21.40. However, we recommend using 21.50 or
 
 ## Building the Tutorial
 
-
-First you need to clone the repository, then init and update the submodules if you didn't clone with `--recursive`:
+1. First you need to clone the repository, then init and update the submodules if you didn't clone with `--recursive`:
 
 ````
 git submodule init
 git submodule update
 ````
+2. Download the HIP RT SDK from [HIP RT prject page](https://gpuopen.com/hiprt/), copy hiprt directory to here. 
 
-After that, run premake like this on Windows, which wikll generate a solution for Visual Studio 2019:
+3. Run premake like this on Windows, which will generate a solution for Visual Studio 2019:
 
 ````
 cd tutorials
 ../tools/premake5/win/premake5.exe vs2019
 ````
 
-Then open the solution, compile & run. These tutorials are made to run on both AMD and NVIDIA by specifying the device index. 
+4. Open the solution, compile & run. These tutorials are made to run on both AMD and NVIDIA by specifying the device index. 
 
 
 ## Introduction to the HIP RT APIs
