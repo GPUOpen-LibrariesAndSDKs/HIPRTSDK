@@ -20,9 +20,10 @@ HIP RT runs on AMD and NVIDIA GPUs. HIP and CUDA &copy; APIs are dynamically loa
 
 It works on any AMD GPU which supports HIP. The supported AMD GPU architecture families are:
 
-- RDNA1
-- RDNA2
-- Vega
+- Navi2x (Radeon™ RX 6000 series).
+- Navi1x (Radeon™ RX 5000 series).
+- Vega2x.
+- Vega1x.
 
 You need an AMDGPU driver newer than 21.40. However, we recommend using 21.50 or newer.
 
