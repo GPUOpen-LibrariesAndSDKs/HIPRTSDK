@@ -1,3 +1,6 @@
+#if !defined( HIPRT_DEVICE_H )
+#define HIPRT_DEVICE_H
+
 //
 // Copyright (c) 2021-2022 Advanced Micro Devices, Inc. All rights reserved.
 //
@@ -19,9 +22,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-
-#if !defined( HIPRT_DEVICE_H )
-#define HIPRT_DEVICE_H
 
 /** \brief Ray traversal type.
  *
