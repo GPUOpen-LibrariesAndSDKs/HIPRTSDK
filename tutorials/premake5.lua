@@ -66,5 +66,6 @@ workspace "hiprtSdkTutorial"
 	include "05_custom_bvh_import"
 	include "06_obj_AO"
     include "07_motion_blur"
+	include "08_multi_cutsom_intersection"
 
     copydir( "../hiprt/win/", "./build/" )
