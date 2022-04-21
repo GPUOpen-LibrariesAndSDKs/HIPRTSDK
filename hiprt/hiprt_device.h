@@ -220,7 +220,7 @@ class hiprtSceneTraversalClosest
 {
   public:
 	HIPRT_DEVICE hiprtSceneTraversalClosest( hiprtScene scene, const hiprtRay& ray, hiprtRayMask mask );
-	HIPRT_DEVICE hiprtSceneTraversalClosest( hiprtScene scene, const hiprtRay& ray, hiprtRayMask mask, hiprtCustomFuncSet funcSet );
+	HIPRT_DEVICE hiprtSceneTraversalClosest( hiprtScene scene, const hiprtRay& ray, hiprtRayMask mask, hiprtCustomFuncTable funcSet );
 	HIPRT_DEVICE hiprtHit			 getNextHit();
 	HIPRT_DEVICE hiprtTraversalState getCurrentState();
 };
