@@ -1,4 +1,4 @@
-project "10_motion_blur"
+project "07_motion_blur"
     kind "ConsoleApp"
     location "../build"
 

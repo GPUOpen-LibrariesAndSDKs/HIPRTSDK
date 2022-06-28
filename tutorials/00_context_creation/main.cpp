@@ -25,11 +25,24 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifndef ASSERT
+#if defined( _MSC_VER )
 #define ASSERT( cond )  \
 	if ( !( cond ) )    \
 	{                   \
 		__debugbreak(); \
 	}
+#elif defined( __GNUC__ )
+#include <signal.h>
+#define ASSERT( cond )    \
+	if ( !( cond ) )      \
+	{                     \
+		raise( SIGTRAP ); \
+	}
+#else
+#define ASSERT( cond )
+#endif
+#endif
 
 int main( int argc, char** argv )
 {

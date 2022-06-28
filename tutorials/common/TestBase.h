@@ -30,12 +30,24 @@
 #include <array>
 #include "../common/shared.h"
 
+#ifndef ASSERT
+#if defined( _MSC_VER )
 #define ASSERT( cond )  \
 	if ( !( cond ) )    \
 	{                   \
 		__debugbreak(); \
 	}
-
+#elif defined( __GNUC__ )
+#include <signal.h>
+#define ASSERT( cond )    \
+	if ( !( cond ) )      \
+	{                     \
+		raise( SIGTRAP ); \
+	}
+#else
+#define ASSERT( cond )
+#endif
+#endif
 typedef unsigned char u8;
 #define M_PI 3.1415f
 

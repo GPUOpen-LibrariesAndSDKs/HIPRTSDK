@@ -22,6 +22,7 @@
 
 #include <tutorials/common/TestBase.h>
 #include <cstdlib>
+#include <cstring>
 #include <numeric>
 #include <array>
 
@@ -30,25 +31,6 @@
 #include <cfloat>
 #include <hiprt/hiprt.h>
 #include <queue>
-
-#ifndef ASSERT
-#if defined( _MSC_VER )
-#define ASSERT( cond )  \
-	if ( !( cond ) )    \
-	{                   \
-		__debugbreak(); \
-	}
-#elif defined( __GNUC__ )
-#include <signal.h>
-#define ASSERT( cond )    \
-	if ( !( cond ) )      \
-	{                     \
-		raise( SIGTRAP ); \
-	}
-#else
-#define ASSERT( cond )
-#endif
-#endif
 
 struct Aabb
 {

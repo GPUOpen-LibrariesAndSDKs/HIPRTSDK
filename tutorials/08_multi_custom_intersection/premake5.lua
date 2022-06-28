@@ -1,4 +1,4 @@
-project "08_multi_cutsom_intersection"
+project "08_multi_custom_intersection"
     kind "ConsoleApp"
     location "../build"
 
