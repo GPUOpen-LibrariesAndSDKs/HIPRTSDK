@@ -130,7 +130,7 @@ class Test : public TestBase
 		oroModule		 module;
 		oroFunction		 func;
 		std::vector<char> binary;
-		buildTraceKernel( ctxt, "../08_multi_cutsom_intersection/TestKernel.h", "CustomIntersectionKernel", func, &binary );
+		buildTraceKernel( ctxt, "../08_multi_custom_intersection/TestKernel.h", "CustomIntersectionKernel", func, &binary );
 		oroError ee = oroModuleLoadData( &module, binary.data() );
 		ASSERT( ee == oroSuccess );
 
@@ -178,7 +178,7 @@ class Test : public TestBase
 		void* args[] = { &scene, &dst, &dFuncSet, &res };
 		launchKernel( func, m_res.x, m_res.y, args );
 
-		writeImageFromDevice( "08_multi_cutsom_intersection.png", m_res.x, m_res.y, dst );
+		writeImageFromDevice( "08_multi_custom_intersection.png", m_res.x, m_res.y, dst );
 
 		dFree( sphereAabbList.aabbs );
 		dFree( circleAabbList.aabbs );

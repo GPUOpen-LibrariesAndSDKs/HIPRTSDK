@@ -11,4 +11,4 @@
 |[05_custom_bvh](./05_custom_bvh_import)   | <img src="./imgs/05_custom_bvh_import.png" alt="drawing" width="100"/>  | Loading a BVH a user provides. |
 |[06_obj_AO](./06_obj_AO)   | <img src="./imgs/06_obj_AO.png" alt="drawing" width="100"/>  | Loading obj file and rendering AO. |
 |[07_motion_blur](./07_motion_blur)   | <img src="./imgs/MotionBlur.png" alt="drawing" width="100"/>  | Rendering objects under motion. |
-|[08_multi_cutsom_intersection](./08_multi_cutsom_intersection)   | <img src="./imgs/08_multi_cutsom_intersection.png" alt="drawing" width="100"/>  | Multiple primitives with custom intersection. |
+|[08_multi_custom_intersection](./08_multi_custom_intersection)   | <img src="./imgs/08_multi_custom_intersection.png" alt="drawing" width="100"/>  | Multiple primitives with custom intersection. |
