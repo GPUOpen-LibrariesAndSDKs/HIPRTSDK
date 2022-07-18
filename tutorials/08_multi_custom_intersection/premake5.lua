@@ -1,4 +1,4 @@
-project "07_motion_blur"
+project "08_multi_custom_intersection"
     kind "ConsoleApp"
     location "../build"
 

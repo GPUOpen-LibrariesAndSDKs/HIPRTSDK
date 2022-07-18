@@ -35,7 +35,9 @@ workspace "hiprtSdkTutorial"
     platforms "x64"
     architecture "x86_64"
 
-    defines {"__WINDOWS__"}
+    if os.ishost("windows") then
+        defines {"__WINDOWS__"}
+    end
     characterset("MBCS")
 
     filter {"platforms:x64", "configurations:Debug or configurations:DebugGpu"}
@@ -66,6 +68,8 @@ workspace "hiprtSdkTutorial"
 	include "05_custom_bvh_import"
 	include "06_obj_AO"
     include "07_motion_blur"
-	include "08_multi_cutsom_intersection"
+	include "08_multi_custom_intersection"
 
-    copydir( "../hiprt/win/", "./build/" )
+    if os.ishost("windows") then
+        copydir( "../hiprt/win/", "./build/" )
+    end

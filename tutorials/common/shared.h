@@ -5,6 +5,10 @@
 #endif
 
 #if !defined( __KERNELCC__ )
+#include <cmath>
+#endif
+
+#if !defined( __KERNELCC__ )
 #define HOST
 #define DEVICE
 #define HOST_DEVICE

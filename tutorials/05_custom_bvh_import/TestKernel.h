@@ -52,9 +52,9 @@ __global__ void CornellBoxKernel( hiprtGeometry geom, unsigned char* gDst, int2 
 		}
 
 		int dstIdx			 = gIdx + gIdy * cRes.x;
-		gDst[dstIdx * 4 + 0] = min( 255, int( gDst[dstIdx * 4 + 0] ) + color.x );
-		gDst[dstIdx * 4 + 1] = min( 255, int( gDst[dstIdx * 4 + 1] ) + color.y );
-		gDst[dstIdx * 4 + 2] = min( 255, int( gDst[dstIdx * 4 + 2] ) + color.z );
+		gDst[dstIdx * 4 + 0] = min( 255, color.x );
+		gDst[dstIdx * 4 + 1] = min( 255, color.y );
+		gDst[dstIdx * 4 + 2] = min( 255, color.z );
 		gDst[dstIdx * 4 + 3] = 255;
 	}
 }
