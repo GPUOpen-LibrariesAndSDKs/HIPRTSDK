@@ -1,30 +1,8 @@
-//
-// Copyright (c) 2021-2022 Advanced Micro Devices, Inc. All rights reserved.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-
 #ifndef HIPRT_H
 #define HIPRT_H
 
-#define HIPRT_API_MAJOR_VERSION 0x000000
-#define HIPRT_API_MINOR_VERSION 0x000001
+#define HIPRT_API_MAJOR_VERSION 0x000001
+#define HIPRT_API_MINOR_VERSION 0x000000
 #define HIPRT_API_PATCH_VERSION 0x000001
 #define HIPRT_API_VERSION HIPRT_API_MAJOR_VERSION * 1000000 + HIPRT_API_MINOR_VERSION * 1000 + HIPRT_API_PATCH_VERSION
 
@@ -350,7 +328,7 @@ typedef struct
 		{
 			/*!< Bounding boxes of custom primitives */
 			hiprtAABBListPrimitive* primitive;
-			/*!< Type of custim primitives */
+			/*!< Type of custom primitives */
 			hiprtCustomType customType;
 		} aabbList;
 	};
@@ -362,14 +340,18 @@ typedef struct
  *
  * Scene consists of a set of instances. Each of the instances is defined by:
  *  - Root pointer of the corresponding geometry
- *  - Transformation matrix
+ *  - Transformation header
  *  - Mask
  *
- * Instances can refer to the same geometry, but with different transformation
- * matrices (essentially implementing instancing). Mask is used to implement ray
- * masking: ray mask is bitwise &ded with an instance mask and no intersections
+ * Instances can refer to the same geometry but with different transformations
+ * (essentially implementing instancing). Mask is used to implement ray
+ * masking: ray mask is bitwise &ded with an instance mask, and no intersections
  * are evaluated with the primitive of corresponding instance if the result is
- * 0.
+ * 0. The transformation header defines the offset and the number of consecutive 
+ * transformation frames in the frame array for each instance. More than one frame 
+ * is interpreted as motion blur. If the transformation headers is NULL, it 
+ * assumes one frame per instance. Optionally, it is possible to import a custom 
+ * BVH by setting nodes and the corresponding build flag.
  */
 typedef struct
 {
@@ -651,6 +633,26 @@ HIPRT_API hiprtError hiprtSaveScene( hiprtContext context, hiprtScene inScene, c
  * \return HIPRT error in case of a failure, hiprtSuccess otherwise.
  */
 HIPRT_API hiprtError hiprtLoadScene( hiprtContext context, hiprtScene* outScene, const char* filename );
+
+/** \brief Output scene's AABB.
+ *
+ * \param context HIPRT API context.
+ * \param inGeometry Geometry to be queried.
+ * \param outAabbMin The bounding box min. bound.
+ * \param outAabbMax The bounding box max. bound.
+ * \return HIPRT error in case of a failure, hiprtSuccess otherwise.
+ */
+HIPRT_API hiprtError hiprtExportGeometryAabb( hiprtContext context, hiprtGeometry inGeometry, hiprtFloat3& outAabbMin, hiprtFloat3& outAabbMax );
+
+/** \brief Output scene's AABB.
+ *
+ * \param context HIPRT API context.
+ * \param inScene Scene to be queried.
+ * \param outAabbMin The bounding box min. bound.
+ * \param outAabbMax The bounding box max. bound.
+ * \return HIPRT error in case of a failure, hiprtSuccess otherwise.
+ */
+HIPRT_API hiprtError hiprtExportSceneAabb( hiprtContext context, hiprtScene inScene, hiprtFloat3& outAabbMin, hiprtFloat3& outAabbMax );
 
 /** \brief Get Program instance with HIPRT routines.
  * \param functionName function to which handle will be returned, cannot be NULL.
