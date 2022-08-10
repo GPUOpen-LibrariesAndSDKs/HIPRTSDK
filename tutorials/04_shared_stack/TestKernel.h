@@ -43,14 +43,13 @@ __global__ void CornellBoxKernel(
 		sqrtf( ray.direction.x * ray.direction.x + ray.direction.y * ray.direction.y + ray.direction.z * ray.direction.z );
 	ray.maxT = 100000.0f;
 
-	typedef hiprtCustomSharedStack<SHARED_STACK_SIZE> Stack;
 	__shared__ int sharedStackBuffer[SHARED_STACK_SIZE * BLOCK_SIZE];
 
 	int*  threadSharedStackBuffer = sharedStackBuffer + SHARED_STACK_SIZE * ( threadIdx.x + threadIdx.y * blockDim.x );
 	int*  threadGlobalStackBuffer = globalStackBuffer + stackSize * ( gIdx + gIdy * cRes.x );
-	Stack stack( threadGlobalStackBuffer, threadSharedStackBuffer );
+	hiprtGlobalStack stack( threadGlobalStackBuffer, stackSize, threadSharedStackBuffer, SHARED_STACK_SIZE );
 
-	hiprtGeomTraversalClosestCustomStack<Stack> tr( geom, ray, stack );
+	hiprtGeomTraversalClosestCustomStack<hiprtGlobalStack> tr( geom, ray, stack );
 	{
 		hiprtHit hit = tr.getNextHit();
 

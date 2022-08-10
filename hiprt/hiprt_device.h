@@ -21,7 +21,8 @@ typedef enum
 {
 	hiprtTraversalStateInit,
 	hiprtTraversalStateFinished,
-	hiprtTraversalStateHit
+	hiprtTraversalStateHit,
+	hiprtTraversalStateStackOverflow
 } hiprtTraversalState;
 
 struct _hiprtContext;
@@ -39,7 +40,7 @@ typedef _hiprtCustomFuncTable* hiprtCustomFuncTable;
  *
  * \param ray Ray.
  * \param primID Primtive ID.
- * \param userPtr User data.
+ * \param data User data.
  * \param payload Payload for additional outputs.
  * \param uv Output texture coordinates.
  * \param normal Output normal.
@@ -48,12 +49,12 @@ typedef _hiprtCustomFuncTable* hiprtCustomFuncTable;
  */
 typedef bool ( *hiprtIntersectFunc )(
 	const hiprtRay& ray,
-	uint32_t primID,
-	const void* userPtr,
-	const void* payload,
-	hiprtFloat2& uv,
-	hiprtFloat3& normal,
-	float& t );
+	uint32_t		primID,
+	const void*		data,
+	void*			payload,
+	hiprtFloat2&	uv,
+	hiprtFloat3&	normal,
+	float&			t );
 
 /** \brief Set of functions for custom primitives.
  *
@@ -115,6 +116,7 @@ class hiprtCustomPrivateStack
 	HIPRT_DEVICE int  pop();
 	HIPRT_DEVICE void push( int val );
 	HIPRT_DEVICE bool empty();
+	HIPRT_DEVICE int  vacancy();
 	HIPRT_DEVICE void reset();
 };
 
@@ -123,24 +125,22 @@ class hiprtCustomPrivateStack
  * The stack uses shared memory if there is enough space.
  * Otherwise, it uses global memory as a backup.
  */
-template <uint32_t SharedStackSize>
 class hiprtCustomSharedStack
 {
   public:
-	HIPRT_DEVICE hiprtCustomSharedStack( int* globalStackBuffer, int* sharedStackBuffer = nullptr );
+	HIPRT_DEVICE hiprtCustomSharedStack(
+		int* globalStackBuffer, u32 globalStackSize, int* sharedStackBuffer = nullptr, u32 sharedStackSize = 0u );
 	HIPRT_DEVICE int  pop();
 	HIPRT_DEVICE void push( int val );
 	HIPRT_DEVICE bool empty();
+	HIPRT_DEVICE int  vacancy();
 	HIPRT_DEVICE void reset();
 };
 
-typedef hiprtCustomPrivateStack<48> hiprtPrivateStack48;
-typedef hiprtCustomPrivateStack<64> hiprtPrivateStack64;
+typedef hiprtCustomPrivateStack<48>	 hiprtPrivateStack48;
+typedef hiprtCustomPrivateStack<64>	 hiprtPrivateStack64;
 typedef hiprtCustomPrivateStack<128> hiprtPrivateStack128;
-
-typedef hiprtCustomSharedStack<0> hiprtGlobalStack;
-typedef hiprtCustomSharedStack<16> hiprtSharedStack16;
-typedef hiprtCustomSharedStack<24> hiprtSharedStack24;
+typedef hiprtCustomSharedStack		 hiprtGlobalStack;
 
 /** \brief A traversal object for finding the closest hit with hiprtGeometry containing triangles.
  *
@@ -173,7 +173,7 @@ class hiprtGeomTraversalAnyHit
 class hiprtGeomCustomTraversalClosest
 {
   public:
-	HIPRT_DEVICE hiprtGeomCustomTraversalClosest( hiprtGeometry geom, const hiprtRay& ray, hiprtCustomFuncSet funcSet );
+	HIPRT_DEVICE hiprtGeomCustomTraversalClosest( hiprtGeometry geom, const hiprtRay& ray, hiprtCustomFuncSet funcSet, void* payload = nullptr );
 	HIPRT_DEVICE hiprtHit			 getNextHit();
 	HIPRT_DEVICE hiprtTraversalState getCurrentState();
 };
@@ -185,7 +185,7 @@ class hiprtGeomCustomTraversalClosest
 class hiprtGeomCustomTraversalAnyHit
 {
   public:
-	HIPRT_DEVICE hiprtGeomCustomTraversalAnyHit( hiprtGeometry geom, const hiprtRay& ray, hiprtCustomFuncSet funcSet );
+	HIPRT_DEVICE hiprtGeomCustomTraversalAnyHit( hiprtGeometry geom, const hiprtRay& ray, hiprtCustomFuncSet funcSet, void* payload = nullptr );
 	HIPRT_DEVICE hiprtHit			 getNextHit();
 	HIPRT_DEVICE hiprtTraversalState getCurrentState();
 };
@@ -198,7 +198,8 @@ class hiprtSceneTraversalClosest
 {
   public:
 	HIPRT_DEVICE hiprtSceneTraversalClosest( hiprtScene scene, const hiprtRay& ray, hiprtRayMask mask );
-	HIPRT_DEVICE hiprtSceneTraversalClosest( hiprtScene scene, const hiprtRay& ray, hiprtRayMask mask, hiprtCustomFuncSet funcSet );
+	HIPRT_DEVICE hiprtSceneTraversalClosest(
+		hiprtScene scene, const hiprtRay& ray, hiprtRayMask mask, hiprtCustomFuncTable funcTable, void* payload = nullptr );
 	HIPRT_DEVICE hiprtHit			 getNextHit();
 	HIPRT_DEVICE hiprtTraversalState getCurrentState();
 };
@@ -211,7 +212,8 @@ class hiprtSceneTraversalAnyHit
 {
   public:
 	HIPRT_DEVICE hiprtSceneTraversalAnyHit( hiprtScene scene, const hiprtRay& ray, hiprtRayMask mask );
-	HIPRT_DEVICE hiprtSceneTraversalAnyHit( hiprtScene scene, const hiprtRay& ray, hiprtRayMask mask, hiprtCustomFuncSet funcSet );
+	HIPRT_DEVICE hiprtSceneTraversalAnyHit(
+		hiprtScene scene, const hiprtRay& ray, hiprtRayMask mask, hiprtCustomFuncTable funcTable, void* payload = nullptr );
 	HIPRT_DEVICE hiprtHit			 getNextHit();
 	HIPRT_DEVICE hiprtTraversalState getCurrentState();
 };
@@ -250,7 +252,8 @@ template <typename hiprtStack>
 class hiprtGeomCustomTraversalClosestCustomStack
 {
   public:
-	HIPRT_DEVICE hiprtGeomCustomTraversalClosestCustomStack( hiprtGeometry geom, const hiprtRay& ray, hiprtCustomFuncSet funcSet, hiprtStack& stack );
+	HIPRT_DEVICE hiprtGeomCustomTraversalClosestCustomStack(
+		hiprtGeometry geom, const hiprtRay& ray, hiprtCustomFuncSet funcSet, hiprtStack& stack, void* payload = nullptr );
 	HIPRT_DEVICE hiprtHit getNextHit();
 	HIPRT_DEVICE hiprtTraversalState getCurrentState();
 };
@@ -263,7 +266,8 @@ template <typename hiprtStack>
 class hiprtGeomCustomTraversalAnyHitCustomStack
 {
   public:
-	HIPRT_DEVICE hiprtGeomCustomTraversalAnyHitCustomStack( hiprtGeometry geom, const hiprtRay& ray, hiprtCustomFuncSet funcSet, hiprtStack& stack );
+	HIPRT_DEVICE hiprtGeomCustomTraversalAnyHitCustomStack(
+		hiprtGeometry geom, const hiprtRay& ray, hiprtCustomFuncSet funcSet, hiprtStack& stack, void* payload = nullptr );
 	HIPRT_DEVICE hiprtHit			 getNextHit();
 	HIPRT_DEVICE hiprtTraversalState getCurrentState();
 };
@@ -277,7 +281,13 @@ class hiprtSceneTraversalClosestCustomStack
 {
   public:
 	HIPRT_DEVICE hiprtSceneTraversalClosestCustomStack( hiprtScene scene, const hiprtRay& ray, hiprtRayMask mask, hiprtStack& stack );
-	HIPRT_DEVICE hiprtSceneTraversalClosestCustomStack( hiprtScene scene, const hiprtRay& ray, hiprtRayMask mask, hiprtCustomFuncSet funcSet, hiprtStack& stack );
+	HIPRT_DEVICE hiprtSceneTraversalClosestCustomStack(
+		hiprtScene			 scene,
+		const hiprtRay&		 ray,
+		hiprtRayMask		 mask,
+		hiprtCustomFuncTable funcTable,
+		hiprtStack&			 stack,
+		void*				 payload = nullptr );
 	HIPRT_DEVICE hiprtHit getNextHit();
 	HIPRT_DEVICE hiprtTraversalState getCurrentState();
 };
@@ -291,7 +301,13 @@ class hiprtSceneTraversalAnyHitCustomStack
 {
   public:
 	HIPRT_DEVICE hiprtSceneTraversalAnyHitCustomStack( hiprtScene scene, const hiprtRay& ray, hiprtRayMask mask, hiprtStack& stack );
-	HIPRT_DEVICE hiprtSceneTraversalAnyHitCustomStack( hiprtScene scene, const hiprtRay& ray, hiprtRayMask mask, hiprtCustomFuncSet funcSet, hiprtStack& stack );
+	HIPRT_DEVICE hiprtSceneTraversalAnyHitCustomStack(
+		hiprtScene			 scene,
+		const hiprtRay&		 ray,
+		hiprtRayMask		 mask,
+		hiprtCustomFuncTable funcTable,
+		hiprtStack&			 stack,
+		void*				 payload = nullptr );
 	HIPRT_DEVICE hiprtHit getNextHit();
 	HIPRT_DEVICE hiprtTraversalState getCurrentState();
 };

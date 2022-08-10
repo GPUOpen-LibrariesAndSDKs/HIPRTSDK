@@ -2,8 +2,8 @@
 #define HIPRT_H
 
 #define HIPRT_API_MAJOR_VERSION 0x000001
-#define HIPRT_API_MINOR_VERSION 0x000000
-#define HIPRT_API_PATCH_VERSION 0x000001
+#define HIPRT_API_MINOR_VERSION 0x000001
+#define HIPRT_API_PATCH_VERSION 0x000000
 #define HIPRT_API_VERSION HIPRT_API_MAJOR_VERSION * 1000000 + HIPRT_API_MINOR_VERSION * 1000 + HIPRT_API_PATCH_VERSION
 
 #include <hiprt/hiprt_vec.h>
@@ -57,7 +57,7 @@ typedef void* hiprtApiFunction; // hipFunction, cuFunction
 enum : uint32_t
 {
 	hiprtInvalidValue		= ~0u,
-	hiprtMaxCustomFunctions = 256,
+	hiprtMaxCustomFunctions = 65536,
 };
 
 /** \brief Error codes.
@@ -92,10 +92,11 @@ typedef enum
  */
 typedef enum
 {
-	hiprtBuildFlagBitPreferFastBuild		= 1,
+	hiprtBuildFlagBitPreferFastBuild		= 0,
+	hiprtBuildFlagBitPreferBalancedBuild	= 1,
 	hiprtBuildFlagBitPreferHighQualityBuild = 2,
-	hiprtBuildFlagBitPreferBalancedBuild	= 3,
-	hiprtBuildFlagBitCustomBvhImport		= 4
+	hiprtBuildFlagBitCustomBvhImport		= 3,
+	hiprtBuildFlagBitDisableSpatialSplits	= 1 << 2
 } hiprtBuildFlagBits;
 
 /** \brief Geometric primitive type.
@@ -119,7 +120,8 @@ typedef enum
 {
 	hiprtTraversalStateInit,
 	hiprtTraversalStateFinished,
-	hiprtTraversalStateHit
+	hiprtTraversalStateHit,
+	hiprtTraversalStateStackOverflow
 } hiprtTraversalState;
 
 /** \brief Ray traversal type.
@@ -180,7 +182,7 @@ struct hiprtHit
  *
  * \param ray Ray.
  * \param primID Primtive ID.
- * \param userPtr User data.
+ * \param data User data.
  * \param payload Payload for additional outputs.
  * \param uv Output texture coordinates.
  * \param normal Output normal.
@@ -190,8 +192,8 @@ struct hiprtHit
 typedef bool ( *hiprtIntersectFunc )(
 	const hiprtRay& ray,
 	uint32_t		primID,
-	const void*		userPtr,
-	const void*		payload,
+	const void*		data,
+	void*			payload,
 	hiprtFloat2&	uv,
 	hiprtFloat3&	normal,
 	float&			t );
