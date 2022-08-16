@@ -72,4 +72,5 @@ workspace "hiprtSdkTutorial"
 
     if os.ishost("windows") then
         copydir( "../hiprt/win/", "./build/" )
+		copydir( "../contrib/Orochi/contrib/bin/win64", "./build/" )
     end
