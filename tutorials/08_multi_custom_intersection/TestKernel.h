@@ -29,7 +29,7 @@ __device__ bool intersectCircle(
 	const hiprtRay& ray,
 	unsigned int	primIdx,
 	const void*		userPtr,
-	const void*		payload,
+	void*			payload,
 	float2&			uvOut,
 	float3&			normalOut,
 	float&			tOut )
@@ -53,7 +53,7 @@ __device__ bool intersectSphere(
 	const hiprtRay& ray,
 	unsigned int	primIdx,
 	const void*		userPtr,
-	const void*		payload,
+	void*			payload,
 	float2&			uvOut,
 	float3&			normalOut,
 	float&			tOut )
