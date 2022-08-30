@@ -13,6 +13,7 @@ HIP RT is a ray tracing library in HIP. The APIs are designed to be minimal and 
 - Offline BVH load and store
 - BVH import
 - Motion blur
+- Intersection filter function
 
 ## Requirement
 

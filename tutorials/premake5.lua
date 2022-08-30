@@ -69,6 +69,7 @@ workspace "hiprtSdkTutorial"
 	include "06_obj_AO"
     include "07_motion_blur"
 	include "08_multi_custom_intersection"
+	include "09_alpha_geom_cut"
 
     if os.ishost("windows") then
         copydir( "../hiprt/win/", "./build/" )
