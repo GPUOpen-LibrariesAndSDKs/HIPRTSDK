@@ -29,6 +29,11 @@ function copydir(src_dir, dst_dir, filter, single_dst_dir)
     end
 end
 
+newoption {
+  trigger = "hiprtroot",
+  description = "hiprtroot"
+}
+
 workspace "hiprtSdkTutorial"
     configurations {"Debug", "Release", "RelWithDebInfo", "DebugGpu" }
     language "C++"
@@ -70,7 +75,13 @@ workspace "hiprtSdkTutorial"
     include "07_motion_blur"
 	include "08_multi_custom_intersection"
 
+    hiprtroot = "../"
+    if _OPTIONS["hiprtroot"] then
+        hiprtroot = _OPTIONS["hiprtroot"]
+        print( "hiprtroot set "..hiprtroot )
+    end
+
     if os.ishost("windows") then
-        copydir( "../hiprt/win/", "./build/" )
+        copydir( hiprtroot.."/hiprt/win/", "./build/" )
 		copydir( "../contrib/Orochi/contrib/bin/win64", "./build/" )
     end
