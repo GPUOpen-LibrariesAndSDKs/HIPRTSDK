@@ -108,12 +108,11 @@ __global__ void AORayKernel(
 	float  ao			= 0.0f;
 	int	   nAOSamples	= 32;
 
-	typedef hiprtCustomSharedStack<SHARED_STACK_SIZE> Stack;
-	__shared__ int									  sharedStackBuffer[SHARED_STACK_SIZE * BLOCK_SIZE];
+	__shared__ int sharedStackBuffer[SHARED_STACK_SIZE * BLOCK_SIZE];
 
-	int*  threadSharedStackBuffer = sharedStackBuffer + SHARED_STACK_SIZE * ( threadIdx.x + threadIdx.y * blockDim.x );
-	int*  threadGlobalStackBuffer = globalStackBuffer + stackSize * ( gIdx + gIdy * cRes.x );
-	Stack stack( threadGlobalStackBuffer, threadSharedStackBuffer );
+	int* threadSharedStackBuffer = sharedStackBuffer + SHARED_STACK_SIZE * ( threadIdx.x + threadIdx.y * blockDim.x );
+	int* threadGlobalStackBuffer = globalStackBuffer + stackSize * ( gIdx + gIdy * cRes.x );
+	hiprtGlobalStack stack( threadGlobalStackBuffer, stackSize, threadSharedStackBuffer, SHARED_STACK_SIZE );
 
 	for ( int p = 0; p < nSpp; p++ )
 	{
@@ -128,7 +127,7 @@ __global__ void AORayKernel(
 		ray.direction = normalize( make_float3( dir.x, dir.y, dir.z ) );
 		ray.maxT	  = 100000.0f;
 
-		hiprtSceneTraversalClosestCustomStack<Stack> tr( scene, ray, 0xffffffff, stack );
+		hiprtSceneTraversalClosestCustomStack<hiprtGlobalStack> tr( scene, ray, 0xffffffff, stack );
 		{
 			hiprtHit hit = tr.getNextHit();
 
@@ -148,7 +147,7 @@ __global__ void AORayKernel(
 				for ( int i = 0; i < nAOSamples; i++ )
 				{
 					aoRay.direction = sampleHemisphereCosine( Ng, seed );
-					hiprtSceneTraversalClosestCustomStack<Stack> tr( scene, aoRay, 0xffffffff, stack );
+					hiprtSceneTraversalClosestCustomStack<hiprtGlobalStack> tr( scene, aoRay, 0xffffffff, stack );
 					aoHit = tr.getNextHit();
 					ao += !aoHit.hasHit() ? 1.0f : 0.0f;
 				}
