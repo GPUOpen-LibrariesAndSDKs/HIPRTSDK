@@ -263,6 +263,8 @@ class Test : public TestBase
 	void buildBvh( hiprtGeometryBuildInput& buildInput );
 	void run() 
 	{
+		using namespace std;
+
 		hiprtContext ctxt;
 		hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, &ctxt );
 

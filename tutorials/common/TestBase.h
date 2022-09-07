@@ -278,7 +278,7 @@ class TestBase
 	};
 
 	template <typename T>
-	void dMalloc( T*& ptr, int n )
+	void dMalloc( T*& ptr, size_t n )
 	{
 		oroError e = oroMalloc( (oroDeviceptr*)&ptr, sizeof( T ) * n );
 		ASSERT( e == oroSuccess );
@@ -290,21 +290,21 @@ class TestBase
 		ASSERT( e == oroSuccess );
 	}
 
-	void dMemset( void* ptr, int val, int n )
+	void dMemset( void* ptr, int val, size_t n )
 	{
 		oroError e = oroMemset( (oroDeviceptr)ptr, val, n );
 		ASSERT( e == oroSuccess );
 	}
 
 	template <typename T>
-	void dCopyHtoD( T* dst, T* src, int n )
+	void dCopyHtoD( T* dst, T* src, size_t n )
 	{
 		oroError e = oroMemcpyHtoD( (oroDeviceptr)dst, src, sizeof( T ) * n );
 		ASSERT( e == oroSuccess );
 	}
 
 	template <typename T>
-	void dCopyDtoH( T* dst, T* src, int n )
+	void dCopyDtoH( T* dst, T* src, size_t n )
 	{
 		oroError e = oroMemcpyDtoH( dst, (oroDeviceptr)src, sizeof( T ) * n );
 		ASSERT( e == oroSuccess );
