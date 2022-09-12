@@ -1,10 +1,11 @@
-includedirs { "../../contrib/Orochi/" }
-files {"../../contrib/Orochi/Orochi/**.h", "../../contrib/Orochi/Orochi/**.cpp"}
-files {"../../contrib/Orochi/contrib/**.h", "../../contrib/Orochi/contrib/**.cpp"}
+local hiproot = os.getenv("HIP_PATH"):gsub([[\]],[[/]])
+includedirs { hiproot .. "/include/", "../../contrib/Orochi/" }
 
 if os.istarget("windows") then
     links{ "version" }
     libdirs{"../../hiprt/win/"}
+	libdirs { hiproot .. "/lib/" }
+    links { "amdhip64" }
 end
 if os.ishost("linux") then
     links { "pthread", "dl" }
