@@ -72,6 +72,8 @@ workspace "hiprtSdkTutorial"
 	include "09-hiprt-hip"
 	
     if os.ishost("windows") then
+		local hiproot = os.getenv("HIP_PATH"):gsub([[\]],[[/]])
         copydir( "../hiprt/win/", "./build/" )
 		copydir( "../contrib/Orochi/contrib/bin/win64", "./build/" )
+		copydir( hiproot .."/bin/", "./build/", "amdhip64.dll" )
     end

@@ -4,8 +4,6 @@ includedirs { hiproot .. "/include/", "../../contrib/Orochi/" }
 if os.istarget("windows") then
     links{ "version" }
     libdirs{"../../hiprt/win/"}
-	libdirs { hiproot .. "/lib/" }
-    links { "amdhip64" }
 end
 if os.ishost("linux") then
     links { "pthread", "dl" }

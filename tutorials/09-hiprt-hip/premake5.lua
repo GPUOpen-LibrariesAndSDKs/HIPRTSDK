@@ -6,7 +6,11 @@ project "09-hiprt-hip"
 
     files { "../common/HipTestBase.h"} 
     files { "./**.h", "./**.cpp"} 
-
+	
     includedirs{ "../../" } 
-
+	
+	local hiproot = os.getenv("HIP_PATH"):gsub([[\]],[[/]])
+	libdirs { hiproot .. "/lib/" }
+    links { "amdhip64" }
+	
     targetdir "../dist/bin/%{cfg.buildcfg}"
