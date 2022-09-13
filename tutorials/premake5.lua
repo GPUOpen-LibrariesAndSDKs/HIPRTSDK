@@ -72,7 +72,10 @@ workspace "hiprtSdkTutorial"
 	include "09-hiprt-hip"
 	
     if os.ishost("windows") then
-		local hiproot = os.getenv("HIP_PATH"):gsub([[\]],[[/]])
+		local hiproot = os.getenv("HIP_PATH")
+		if hiproot ~= nil then
+			hiproot = hiproot:gsub([[\]],[[/]])
+		end
         copydir( "../hiprt/win/", "./build/" )
 		copydir( "../contrib/Orochi/contrib/bin/win64", "./build/" )
 		if hiproot ~= nil then

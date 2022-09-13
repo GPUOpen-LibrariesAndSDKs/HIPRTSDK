@@ -2,7 +2,11 @@ project "09-hiprt-hip"
     kind "ConsoleApp"
     location "../build"
   
-	local hiproot = os.getenv("HIP_PATH"):gsub([[\]],[[/]])
+	local hiproot = os.getenv("HIP_PATH")
+	if hiproot ~= nil then
+		hiproot = hiproot:gsub([[\]],[[/]])
+	end
+	
 	if hiproot ~= nil then
 		includedirs { hiproot .. "/include/" }
 	end
