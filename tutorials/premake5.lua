@@ -69,8 +69,16 @@ workspace "hiprtSdkTutorial"
 	include "06_obj_AO"
     include "07_motion_blur"
 	include "08_multi_custom_intersection"
-
+	include "09-hiprt-hip"
+	
     if os.ishost("windows") then
+		local hiproot = os.getenv("HIP_PATH")
+		if hiproot ~= nil then
+			hiproot = hiproot:gsub([[\]],[[/]])
+		end
         copydir( "../hiprt/win/", "./build/" )
 		copydir( "../contrib/Orochi/contrib/bin/win64", "./build/" )
+		if hiproot ~= nil then
+			copydir( hiproot .."/bin/", "./build/", "amdhip64.dll" )
+		end
     end

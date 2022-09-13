@@ -30,7 +30,7 @@
 #include <map>
 
 
-namespace tinyobj
+namespace std
 {
 inline bool operator<( const tinyobj::index_t& a, const tinyobj::index_t& b )
 {
