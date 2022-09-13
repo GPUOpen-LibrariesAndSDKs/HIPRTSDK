@@ -10,12 +10,18 @@ project "09-hiprt-hip"
 	files { "../../hiprt/*.h"}
 	
 if os.istarget("windows") then
-	libdirs { hiproot .. "/lib/", "../../hiprt/win/" }
-	links { "amdhip64" }
+	if hiproot ~= nil then
+		libdirs { hiproot .. "/lib/"}
+		links { "amdhip64" }
+	end
+	libdirs {"../../hiprt/win/" }
 end
 if os.ishost("linux") then
-	libdirs { hiproot .. "/lib/", "../../hiprt/linux64/" }
-    links { "libamdhip64" }
+	if hiproot ~= nil then
+		libdirs { hiproot .. "/lib/"}
+		links { "libamdhip64" }
+	end
+	libdirs { "../../hiprt/linux64/" }
 end
 	
 links {"hiprt64"}
