@@ -110,8 +110,8 @@ __global__ void AORayKernel(
 
 	__shared__ int sharedStackBuffer[SHARED_STACK_SIZE * BLOCK_SIZE];
 
-	int* threadSharedStackBuffer = sharedStackBuffer + SHARED_STACK_SIZE * ( threadIdx.x + threadIdx.y * blockDim.x );
-	int* threadGlobalStackBuffer = globalStackBuffer + stackSize * ( gIdx + gIdy * cRes.x );
+	int*  threadSharedStackBuffer = sharedStackBuffer + SHARED_STACK_SIZE * ( threadIdx.x + threadIdx.y * blockDim.x );
+	int*  threadGlobalStackBuffer = globalStackBuffer + stackSize * ( gIdx + gIdy * cRes.x );
 	hiprtGlobalStack stack( threadGlobalStackBuffer, stackSize, threadSharedStackBuffer, SHARED_STACK_SIZE );
 
 	for ( int p = 0; p < nSpp; p++ )
