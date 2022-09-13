@@ -5,6 +5,7 @@ project "09-hiprt-hip"
 	local hiproot = os.getenv("HIP_PATH")
 	if hiproot ~= nil then
 		hiproot = hiproot:gsub([[\]],[[/]])
+		defines {"__USE_HIP__"}
 	end
 	
 	if hiproot ~= nil then

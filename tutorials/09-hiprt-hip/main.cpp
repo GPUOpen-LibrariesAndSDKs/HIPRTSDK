@@ -1,9 +1,12 @@
+
+#if defined( __USE_HIP__ )
 #include <tutorials/common/HipTestBase.h>
 #include <cstdlib>
 #include <numeric>
 
 class Test : public HipTestBase
 {
+
   public:
 	void run() 
 	{
@@ -13,14 +16,15 @@ class Test : public HipTestBase
 		printf( "Create hip-hiprt context\n" );
 	}
 };
+#endif
 
 int main( int argc, char** argv )
 {
+#if defined( __USE_HIP__ )
 	Test test;
 	test.init( 0 );
 	test.run();
-
+#endif 
 	return 0;
 }
-
 
