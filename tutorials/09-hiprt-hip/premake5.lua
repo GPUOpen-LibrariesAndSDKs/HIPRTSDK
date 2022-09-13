@@ -3,8 +3,12 @@ project "09-hiprt-hip"
     location "../build"
   
 	local hiproot = os.getenv("HIP_PATH"):gsub([[\]],[[/]])
-	includedirs { hiproot .. "/include/", "../../" }
+	if hiproot ~= nil then
+		includedirs { hiproot .. "/include/" }
+	end
 
+	includedirs { "../../" }
+	
     files { "../common/HipTestBase.h"} 
     files { "./**.h", "./**.cpp"} 
 	files { "../../hiprt/*.h"}
