@@ -110,18 +110,12 @@ hiprtError TestBase::createScene(
 	std::vector<tinyobj::shape_t>	 shapes;
 	std::vector<tinyobj::material_t> materials;
 	std::string						 err;
-	std::string						 warning;
 
-	bool ret = tinyobj::LoadObj( &attrib, &shapes, &materials, &warning, &err, fileName.c_str(), mtlBaseDir.c_str() );
-
-	if ( !warning.empty() )
-	{
-		std::cout << "OBJ Loader WARN : " << warning << '\n';
-	}
+	const bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, fileName.c_str(), mtlBaseDir.c_str());
 
 	if ( !err.empty() )
 	{
-		std::cout << "OBJ Loader ERROR : " << err << '\n';
+		std::cout << "Failed to load obj file" << std::endl;
 	}
 
 	if ( !ret )
