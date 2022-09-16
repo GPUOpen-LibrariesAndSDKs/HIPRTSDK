@@ -23,9 +23,9 @@
 #include <tutorials/common/TestBase.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <contrib/stbi/stbi_image_write.h>
+#include <stb_image_write.h>
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "../common/tiny_obj_loader.h"
+#include <tiny_obj_loader.h>
 #include <iostream>
 #include <map>
 

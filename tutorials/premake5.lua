@@ -77,7 +77,7 @@ workspace "hiprtSdkTutorial"
 			hiproot = hiproot:gsub([[\]],[[/]])
 		end
         copydir( "../hiprt/win/", "./build/" )
-		copydir( "../contrib/Orochi/contrib/bin/win64", "./build/" )
+
 		if hiproot ~= nil then
 			copydir( hiproot .."/bin/", "./build/", "amdhip64.dll" )
 		end
