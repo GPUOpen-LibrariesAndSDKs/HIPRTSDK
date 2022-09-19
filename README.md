@@ -41,10 +41,13 @@ You need an AMDGPU driver newer than 21.40. However, we recommend using 21.50 or
 ## Building the Tutorial
 
 1. First you need to get the dependencies. Use [Conan](https://conan.io/) to fetch and build them for you.
-
+- Fetch and build Orochi:
 ````
 cd orochi_recipe
 conan create .
+````
+- Go to the root directory and configure the dependencies for the tutorial:
+````
 mkdir build
 cd build
 conan install .. -s compiler.cppstd=17 --build missing
