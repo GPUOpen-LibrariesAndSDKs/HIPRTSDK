@@ -6,6 +6,7 @@ required_conan_version = ">=1.43.0"
 class OrochiConan(ConanFile):
     name = "orochi"
     homepage = "https://github.com/GPUOpen-LibrariesAndSDKs/Orochi"
+    url = "https://github.com/GPUOpen-LibrariesAndSDKs/Orochi.git"
 
     description = "Orochi is a library loading HIP and CUDA APIs dynamically, allowing the user to switch APIs at runtime."
     license = "MIT"
@@ -30,9 +31,13 @@ class OrochiConan(ConanFile):
 
         if self.version == "latest":
             git = tools.Git(folder=self._source_subfolder)
-            git.clone("https://github.com/GPUOpen-LibrariesAndSDKs/Orochi.git", "main")
+            git.clone(self.url, "main")
         else:
-            tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+            tools.get(
+                **self.conan_data["sources"][self.version],
+                destination=self._source_subfolder,
+                strip_root=True
+            )
 
     def build(self):
         cmake = CMake(self)
