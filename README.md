@@ -58,7 +58,7 @@ conan install .. -s compiler.cppstd=17 --build missing
 
 ````
 cd tutorials
-../tools/premake5/win/premake5.exe vs2019
+../tools/premake5/win/premake5.exe vs2022
 ````
 
 4. Open the solution, compile & run. These tutorials are made to run on both AMD and NVIDIA by specifying the device index. 
