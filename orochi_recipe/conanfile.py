@@ -51,6 +51,12 @@ class OrochiConan(ConanFile):
         cmake.configure(build_folder=self._build_subfolder)
         cmake.install()
 
+        self.copy(
+            pattern="*.dll",
+            src=self._source_subfolder + "/contrib/bin/win64",
+            dst="bin",
+        )
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "orochi"
         self.cpp_info.names["cmake_find_package_multi"] = "orochi"
