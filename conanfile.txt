@@ -1,0 +1,7 @@
+[requires]
+stb/cci.20210910
+tinyobjloader/1.0.6
+orochi/1.00
+
+[generators]
+premake

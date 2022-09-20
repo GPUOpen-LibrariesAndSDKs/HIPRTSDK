@@ -29,7 +29,14 @@ function copydir(src_dir, dst_dir, filter, single_dst_dir)
     end
 end
 
+
+
 workspace "hiprtSdkTutorial"
+
+    include("../build/conanbuildinfo.premake.lua")
+
+    conan_basic_setup()
+
     configurations {"Debug", "Release", "RelWithDebInfo", "DebugGpu" }
     language "C++"
     platforms "x64"
@@ -57,7 +64,7 @@ workspace "hiprtSdkTutorial"
     if os.ishost("windows") then
         buildoptions {"/wd4244", "/wd4305", "/wd4018", "/wd4996"}
     end
-    buildoptions "-std=c++11"
+    buildoptions "-std=c++17"
 
 
     include "00_context_creation"
@@ -77,7 +84,7 @@ workspace "hiprtSdkTutorial"
 			hiproot = hiproot:gsub([[\]],[[/]])
 		end
         copydir( "../hiprt/win/", "./build/" )
-		copydir( "../contrib/Orochi/contrib/bin/win64", "./build/" )
+
 		if hiproot ~= nil then
 			copydir( hiproot .."/bin/", "./build/", "amdhip64.dll" )
 		end

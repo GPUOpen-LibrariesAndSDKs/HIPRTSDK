@@ -36,17 +36,21 @@ You need an AMDGPU driver newer than 21.40. However, we recommend using 21.50 or
   - The header and the library which you need to download from [HIP RT prject page](https://gpuopen.com/hiprt/). 
 - [tutorials](tutorials)
   - Tutorial source code
-- [contrib](contrib)
-  - External dependencies
 
 
 ## Building the Tutorial
 
-1. First you need to clone the repository, then init and update the submodules if you didn't clone with `--recursive`:
-
+1. First you need to get the dependencies. Use [Conan](https://conan.io/) to fetch and build them for you.
+- Fetch and build Orochi:
 ````
-git submodule init
-git submodule update
+cd orochi_recipe
+conan create .
+````
+- Go to the root directory and configure the dependencies for the tutorial:
+````
+mkdir build
+cd build
+conan install .. -s compiler.cppstd=17 --build missing
 ````
 2. Download the HIP RT SDK from [HIP RT prject page](https://gpuopen.com/hiprt/), copy hiprt directory to here. 
 
@@ -54,7 +58,7 @@ git submodule update
 
 ````
 cd tutorials
-../tools/premake5/win/premake5.exe vs2019
+../tools/premake5/win/premake5.exe vs2022
 ````
 
 4. Open the solution, compile & run. These tutorials are made to run on both AMD and NVIDIA by specifying the device index. 

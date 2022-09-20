@@ -1,0 +1,7 @@
+sources:
+  "0.00":
+    sha256: 361d0e66f64ea4d24e3fb5ea3a5adab9bb0ace9bd4b188ec6c025a4272ac84eb
+    url: https://github.com/GPUOpen-LibrariesAndSDKs/Orochi/archive/refs/tags/v0.00.tar.gz
+  "1.00":
+    sha256: 2DDE75B4FE54B226D3EA0B1D5EDC4E73783F541FABC3B985D1057054541CEB5D
+    url: https://github.com/GPUOpen-LibrariesAndSDKs/Orochi/archive/refs/tags/v1.00.tar.gz
