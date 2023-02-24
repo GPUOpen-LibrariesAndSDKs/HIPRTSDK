@@ -12,6 +12,5 @@ if os.ishost("linux") then
 end
 
 files { "../../hiprt/*.h"}
-links {"hiprt64"}
+links {"hiprt0200064"}
 
-print("depencency")

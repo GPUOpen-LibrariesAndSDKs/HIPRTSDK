@@ -1,4 +1,4 @@
-project "02_scene_intersection"
+project "07_motion_blur_srt"
     cppdialect "C++17"
     kind "ConsoleApp"
     location "../build"

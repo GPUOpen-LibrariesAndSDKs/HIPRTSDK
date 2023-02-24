@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2022 Advanced Micro Devices, Inc. All rights reserved.
+// Copyright (c) 2021-2023 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,44 +20,44 @@
 // THE SOFTWARE.
 //
 
-#include <tutorials/common/TestBase.h>
-#include <cstdlib>
+#include <tutorials/common/TutorialBase.h>
+#include <tutorials/common/CornellBox.h>
 #include <numeric>
-#include <array>
 
-class Test : public TestBase
+class Tutorial : public TutorialBase
 {
   public:
 	void run() 
 	{
 		hiprtContext ctxt;
-		hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, &ctxt );
+		CHECK_HIPRT( hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, &ctxt ) );
 
-		int			stackSize		   = 64;
-		const int	sharedStackSize	   = 24;// make it 4KB to get a good occupancy
-		const int	blockWidth		   = 8;
-		const int	blockHeight		   = 8;
-		const int	blockSize		   = blockWidth * blockHeight;
-		std::string blockSizeDef	   = "-D BLOCK_SIZE=" + std::to_string( blockSize );
-		std::string sharedStackSizeDef = "-D SHARED_STACK_SIZE=" + std::to_string( sharedStackSize );
+		int			stackSize			  = 64;
+		const int	sharepixelsackSize	  = 16;
+		const int	blockWidth			  = 8;
+		const int	blockHeight			  = 8;
+		const int	blockSize			  = blockWidth * blockHeight;
+		std::string blockSizeDef		  = "-D BLOCK_SIZE=" + std::to_string( blockSize );
+		std::string sharepixelsackSizeDef = "-D SHARED_STACK_SIZE=" + std::to_string( sharepixelsackSize );
 
 		std::vector<const char*> opts;
 		opts.push_back( blockSizeDef.c_str() );
-		opts.push_back( sharedStackSizeDef.c_str() );
+		opts.push_back( sharepixelsackSizeDef.c_str() );
 
 		hiprtTriangleMeshPrimitive mesh;
-		mesh.triangleCount	= CORNELL_BOX_TRIANGLE_COUNT;
-		mesh.triangleStride = sizeof( int ) * 3;
-		dMalloc( (char*&)mesh.triangleIndices, 3 * mesh.triangleCount * sizeof( int ) );
-		std::array<int, 3 * CORNELL_BOX_TRIANGLE_COUNT> idx;
-		std::iota( idx.begin(), idx.end(), 0 );
-		dCopyHtoD( (int*)mesh.triangleIndices, idx.data(), 3 * mesh.triangleCount );
+		mesh.triangleCount	= CornellBoxTriangleCount;
+		mesh.triangleStride = sizeof( hiprtInt3 );
+		std::array<int, 3 * CornellBoxTriangleCount> triangleIndices;
+		std::iota( triangleIndices.begin(), triangleIndices.end(), 0 );
+		CHECK_ORO( oroMalloc( (oroDeviceptr*)&mesh.triangleIndices, mesh.triangleCount * sizeof( hiprtInt3 ) ) );
+		CHECK_ORO(
+			oroMemcpyHtoD( (oroDeviceptr)mesh.triangleIndices, triangleIndices.data(), mesh.triangleCount * sizeof( hiprtInt3 ) ) );
 
 		mesh.vertexCount  = 3 * mesh.triangleCount;
 		mesh.vertexStride = sizeof( hiprtFloat3 );
-		dMalloc( (char*&)mesh.vertices, mesh.vertexCount * sizeof( hiprtFloat3 ) );
-		dCopyHtoD( (hiprtFloat3*)mesh.vertices, (hiprtFloat3*)cornellBoxVertices.data(), mesh.vertexCount );
-		waitForCompletion();
+		CHECK_ORO( oroMalloc( (oroDeviceptr*)&mesh.vertices, mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
+		CHECK_ORO( oroMemcpyHtoD(
+			(oroDeviceptr)mesh.vertices, (hiprtFloat3*)cornellBoxVertices.data(), mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
 
 		hiprtGeometryBuildInput geomInput;
 		geomInput.type					 = hiprtPrimitiveTypeTriangleMesh;
@@ -67,41 +67,42 @@ class Test : public TestBase
 		hiprtDevicePtr	  geomTemp;
 		hiprtBuildOptions options;
 		options.buildFlags = hiprtBuildFlagBitPreferFastBuild;
-		hiprtGetGeometryBuildTemporaryBufferSize( ctxt, &geomInput, &options, &geomTempSize );
-		dMalloc( (u8*&)geomTemp, geomTempSize );
+		CHECK_HIPRT( hiprtGetGeometryBuildTemporaryBufferSize( ctxt, &geomInput, &options, &geomTempSize ) );
+		CHECK_ORO( oroMalloc( (oroDeviceptr*)&geomTemp, geomTempSize ) );
 
 		hiprtGeometry geom;
-		hiprtCreateGeometry( ctxt, &geomInput, &options, &geom );
-		hiprtBuildGeometry( ctxt, hiprtBuildOperationBuild, &geomInput, &options, geomTemp, 0, geom );
+		CHECK_HIPRT( hiprtCreateGeometry( ctxt, &geomInput, &options, &geom ) );
+		CHECK_HIPRT( hiprtBuildGeometry( ctxt, hiprtBuildOperationBuild, &geomInput, &options, geomTemp, 0, geom ) );
 
 		oroFunction func;
-		buildTraceKernel( ctxt, "../04_shared_stack/TestKernel.h", "CornellBoxKernel", func, nullptr, &opts );
+		buildTraceKernelFromBitcode( ctxt, "../common/TutorialKernels.h", "SharedStackKernel", func, &opts );
 
-		u8* dst;
-		dMalloc( dst, m_res.x * m_res.y * 4 );
-		hiprtInt2 res = make_hiprtInt2( m_res.x, m_res.y );
+		u8* pixels;
+		CHECK_ORO( oroMalloc( (oroDeviceptr*)&pixels, m_res.x * m_res.y * 4 ) );
 
 		int* stackBuffer;
-		dMalloc( stackBuffer, m_res.x * m_res.y * stackSize );
+		CHECK_ORO( oroMalloc( (oroDeviceptr*)&stackBuffer, m_res.x * m_res.y * stackSize * sizeof( int ) ) );
 
-		void* args[] = { &geom, &dst, &res, &stackBuffer, &stackSize };
-		launchKernel( func, m_res.x, m_res.y, args );
-		writeImageFromDevice( "04_shared_stack.png", m_res.x, m_res.y, dst );
+		void* args[] = { &geom, &pixels, &m_res, &stackBuffer, &stackSize };
+		launchKernel( func, m_res.x, m_res.y, blockWidth, blockHeight, args );
+		writeImage( "04_shared_stack.png", m_res.x, m_res.y, pixels );
 
-		dFree( mesh.triangleIndices );
-		dFree( mesh.vertices );
-		dFree( geomTemp );
-		dFree( dst );
-		hiprtDestroyGeometry( ctxt, geom );
-		hiprtDestroyContext( ctxt );
+		CHECK_ORO( oroFree( (oroDeviceptr)stackBuffer ) );
+		CHECK_ORO( oroFree( (oroDeviceptr)mesh.triangleIndices ) );
+		CHECK_ORO( oroFree( (oroDeviceptr)mesh.vertices ) );
+		CHECK_ORO( oroFree( (oroDeviceptr)geomTemp ) );
+		CHECK_ORO( oroFree( (oroDeviceptr)pixels ) );
+
+		CHECK_HIPRT( hiprtDestroyGeometry( ctxt, geom ) );
+		CHECK_HIPRT( hiprtDestroyContext( ctxt ) );
 	}
 };
 
 int main( int argc, char** argv )
 {
-	Test test;
-	test.init( 0 );
-	test.run();
+	Tutorial tutorial;
+	tutorial.init( 0 );
+	tutorial.run();
 
 	return 0;
 }

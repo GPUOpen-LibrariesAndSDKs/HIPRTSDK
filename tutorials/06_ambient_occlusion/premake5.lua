@@ -1,4 +1,5 @@
-project "06_obj_AO"
+project "06_ambient_occlusion"
+    cppdialect "C++17"
     kind "ConsoleApp"
     location "../build"
 

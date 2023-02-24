@@ -1,4 +1,5 @@
-project "08_multi_cutsom_intersection"
+project "08_motion_blur_matrix"
+    cppdialect "C++17"
     kind "ConsoleApp"
     location "../build"
 

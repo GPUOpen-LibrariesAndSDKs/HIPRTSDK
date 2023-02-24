@@ -1,4 +1,4 @@
-project "02_scene_intersection"
+project "11_concurrent_scene_build"
     cppdialect "C++17"
     kind "ConsoleApp"
     location "../build"

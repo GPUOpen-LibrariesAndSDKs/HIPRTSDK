@@ -1,4 +1,5 @@
 project "03_custom_intersection"
+    cppdialect "C++17"
     kind "ConsoleApp"
     location "../build"
 

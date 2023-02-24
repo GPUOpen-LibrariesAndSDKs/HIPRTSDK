@@ -45,7 +45,7 @@ workspace "hiprtSdkTutorial"
       defines {"DEBUG"}
       symbols "On"
     filter {"platforms:x64", "configurations:DebugGpu"}
-      defines {"TH_DEBUG_GPU"}
+      defines {"DEBUG_GPU"}
     filter {"platforms:x64", "configurations:Release or configurations:RelWithDebInfo"}
       targetsuffix "64"
       defines {"NDEBUG"}
@@ -57,7 +57,6 @@ workspace "hiprtSdkTutorial"
     if os.ishost("windows") then
         buildoptions {"/wd4244", "/wd4305", "/wd4018", "/wd4996"}
     end
-    buildoptions "-std=c++11"
 
 
     include "00_context_creation"
@@ -66,10 +65,13 @@ workspace "hiprtSdkTutorial"
 	include "03_custom_intersection"
 	include "04_shared_stack"
 	include "05_custom_bvh_import"
-	include "06_obj_AO"
-    include "07_motion_blur"
-	include "08_multi_custom_intersection"
-	include "09-hiprt-hip"
+	include "06_ambient_occlusion"
+    include "07_motion_blur_srt"
+	include "08_motion_blur_matrix"
+	include "09_multi_custom_intersection"
+    include "10_cutout"
+	include "11_concurrent_scene_build"
+    include "12_hiprt_hip"
 	
     if os.ishost("windows") then
 		local hiproot = os.getenv("HIP_PATH")
@@ -78,7 +80,10 @@ workspace "hiprtSdkTutorial"
 		end
         copydir( "../hiprt/win/", "./build/" )
 		copydir( "../contrib/Orochi/contrib/bin/win64", "./build/" )
+		copydir( "../hiprt/win/", "./dist/bin/Release/" )
+		copydir( "../contrib/Orochi/contrib/bin/win64", "./dist/bin/Release/" )
 		if hiproot ~= nil then
 			copydir( hiproot .."/bin/", "./build/", "amdhip64.dll" )
+			copydir( hiproot .."/bin/", "./dist/bin/Release/", "amdhip64.dll" )
 		end
     end
