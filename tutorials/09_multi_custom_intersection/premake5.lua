@@ -1,4 +1,5 @@
-project "07_motion_blur"
+project "09_multi_custom_intersection"
+    cppdialect "C++17"
     kind "ConsoleApp"
     location "../build"
 

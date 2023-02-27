@@ -41,38 +41,10 @@
 #define INLINE inline
 #endif
 
-typedef float4 Quaternion;
-
-struct Material_t
-{
-	float4		m_diffuse;
-	float4		m_emission;
-	float4		m_params; // m_params.x - is light
-} ;
-
-struct Light_t
-{
-	float4		m_le;
-	float3		m_lv0;
-	float3		m_lv1;
-	float3		m_lv2;
-	float3		pad;
-};
-
-struct Camera
-{
-	float4	   m_translation; // eye/rayorigin
-	Quaternion m_quat;
-	float	   m_fov;
-	float	   m_near;
-	float	   m_far;
-	float	   padd;
-};
-
 #define RT_MIN( a, b ) ( ( ( b ) < ( a ) ) ? ( b ) : ( a ) )
 #define RT_MAX( a, b ) ( ( ( b ) > ( a ) ) ? ( b ) : ( a ) )
 
-#if !defined( __KERNELCC__ )
+//#if !defined( __KERNELCC__ )
 HOST_DEVICE INLINE int2 make_int2( const float2 a ) { return make_int2( (int)a.x, (int)a.y ); }
 
 HOST_DEVICE INLINE int2 make_int2( const int3& a ) { return make_int2( a.x, a.y ); }
@@ -947,7 +919,7 @@ HOST_DEVICE INLINE float4 operator/( const float c, const float4& a )
 {
 	return make_float4( c / a.x, c / a.y, c / a.z, c / a.w );
 }
-#endif
+//#endif
 
 HOST_DEVICE INLINE float3 cross( const float3& a, const float3& b )
 {
@@ -958,36 +930,7 @@ HOST_DEVICE INLINE float dot( const float3& a, const float3& b ) { return a.x * 
 
 HOST_DEVICE INLINE float3 normalize( const float3& a ) { return a / sqrtf( dot( a, a ) ); }
 
-HOST_DEVICE INLINE float dot3F4( const float4& a, const float4& b ) { return a.x * b.x + a.y * b.y + a.z * b.z; }
-
 HOST_DEVICE INLINE const float4 cross3( const float3 aa, const float3 bb )
 {
 	return make_float4( aa.y * bb.z - aa.z * bb.y, aa.z * bb.x - aa.x * bb.z, aa.x * bb.y - aa.y * bb.x, 0 );
-}
-
-HOST_DEVICE INLINE float4 qtMul( const float4& a, const float4& b )
-{
-	float4 ans;
-	ans = make_float4( cross( make_float3( a ), make_float3( b ) ), 0.0f );
-	// ans += a.w * b + b.w * a;
-	ans = ans + make_float4( a.w * b.x, a.w * b.y, a.w * b.z, a.w * b.w ) +
-		  make_float4( b.w * a.x, b.w * a.y, b.w * a.z, b.w * a.w );
-	ans.w = a.w * b.w - dot( make_float3( a ), make_float3( b ) );
-	return ans;
-}
-
-HOST_DEVICE INLINE float4 qtInvert( const float4& q )
-{
-	float4 ans;
-	ans	  = -q;
-	ans.w = q.w;
-	return ans;
-}
-
-HOST_DEVICE INLINE float3 qtRotate( const float4& q, const float3& p )
-{
-	float4 qp	= make_float4( p, 0.0f );
-	float4 qInv = qtInvert( q );
-	float4 out	= qtMul( qtMul( q, qp ), qInv );
-	return make_float3( out );
 }

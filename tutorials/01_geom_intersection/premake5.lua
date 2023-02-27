@@ -1,4 +1,5 @@
 project "01_geom_intersection"
+    cppdialect "C++17"
     kind "ConsoleApp"
     location "../build"
 

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2022 Advanced Micro Devices, Inc. All rights reserved.
+// Copyright (c) 2021-2023 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,35 +20,35 @@
 // THE SOFTWARE.
 //
 
-#include <tutorials/common/TestBase.h>
+#include <tutorials/common/TutorialBase.h>
 
-class Test : public TestBase
+class Tutorial : public TutorialBase
 {
   public:
 	void run() 
 	{
 		hiprtContext ctxt;
-		hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, &ctxt );
+		CHECK_HIPRT( hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, &ctxt ) );
 
 		hiprtTriangleMeshPrimitive mesh;
-		mesh.triangleCount	= 2;
-		mesh.triangleStride = sizeof( int ) * 3;
-		dMalloc( (char*&)mesh.triangleIndices, 3 * mesh.triangleCount * sizeof( int ) );
-		int idx[] = { 0, 1, 2, 3, 4, 5 };
-		dCopyHtoD( (int*)mesh.triangleIndices, idx, 3 * mesh.triangleCount );
+		mesh.triangleCount	  = 2;
+		mesh.triangleStride	  = sizeof( hiprtInt3 );
+		int triangleIndices[] = { 0, 1, 2, 3, 4, 5 };
+		CHECK_ORO( oroMalloc( (oroDeviceptr*)&mesh.triangleIndices, mesh.triangleCount * sizeof( hiprtInt3 ) ) );
+		CHECK_ORO(
+			oroMemcpyHtoD( (oroDeviceptr)mesh.triangleIndices, triangleIndices, mesh.triangleCount * sizeof( hiprtInt3 ) ) );
 
 		mesh.vertexCount  = 6;
 		mesh.vertexStride = sizeof( hiprtFloat3 );
-		dMalloc( (char*&)mesh.vertices, mesh.vertexCount * sizeof( hiprtFloat3 ) );
-		hiprtFloat3 v[] = {
+		hiprtFloat3 vertices[] = {
 			{ 0.0f, 0.0f, 0.0f },
 			{ 1.0f, 0.0f, 0.0f },
 			{ 0.5f, 1.0f, 0.0f },
 			{ 0.0f, 0.0f, 1.0f },
 			{ 1.0f, 0.0f, 1.0f },
 			{ 0.5f, 1.0f, 1.0f } };
-		dCopyHtoD( (hiprtFloat3*)mesh.vertices, v, mesh.vertexCount );
-		waitForCompletion();
+		CHECK_ORO( oroMalloc( (oroDeviceptr*)&mesh.vertices, mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
+		CHECK_ORO( oroMemcpyHtoD( (oroDeviceptr)mesh.vertices, vertices, mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
 
 		hiprtGeometryBuildInput geomInput;
 		geomInput.type					 = hiprtPrimitiveTypeTriangleMesh;
@@ -58,41 +58,38 @@ class Test : public TestBase
 		hiprtDevicePtr	  geomTemp;
 		hiprtBuildOptions options;
 		options.buildFlags = hiprtBuildFlagBitPreferFastBuild;
-		hiprtGetGeometryBuildTemporaryBufferSize( ctxt, &geomInput, &options, &geomTempSize );
-		dMalloc( (u8*&)geomTemp, geomTempSize );
+		CHECK_HIPRT( hiprtGetGeometryBuildTemporaryBufferSize( ctxt, &geomInput, &options, &geomTempSize ) );
+		CHECK_ORO( oroMalloc( (oroDeviceptr*)&geomTemp, geomTempSize ) );
 
 		hiprtGeometry geom;
-		hiprtCreateGeometry( ctxt, &geomInput, &options, &geom );
-		hiprtBuildGeometry( ctxt, hiprtBuildOperationBuild, &geomInput, &options, geomTemp, 0, geom );
+		CHECK_HIPRT( hiprtCreateGeometry( ctxt, &geomInput, &options, &geom ) );
+		CHECK_HIPRT( hiprtBuildGeometry( ctxt, hiprtBuildOperationBuild, &geomInput, &options, geomTemp, 0, geom ) );
 
 		oroFunction func;
-		buildTraceKernel( ctxt, "../01_geom_intersection/TestKernel.h", "MeshIntersectionKernel", func );
+		buildTraceKernelFromBitcode( ctxt, "../common/TutorialKernels.h", "GeomIntersectionKernel", func );
 
-		u8* dst;
-		dMalloc( dst, m_res.x * m_res.y * 4 );
-		hiprtInt2 res = make_hiprtInt2( m_res.x, m_res.y );
+		u8* pixels;
+		CHECK_ORO( oroMalloc( (oroDeviceptr*)&pixels, m_res.x * m_res.y * 4 ) );
 
-		void* args[] = { &geom, &dst, &res };
+		void* args[] = { &geom, &pixels, &m_res };
 		launchKernel( func, m_res.x, m_res.y, args );
-		writeImageFromDevice(
-			"01_geom_intersection.png", m_res.x, m_res.y, dst );
+		writeImage( "01_geom_intersection.png", m_res.x, m_res.y, pixels );
 
-		dFree( mesh.triangleIndices );
-		dFree( mesh.vertices );
-		dFree( geomTemp );
-		dFree( dst );
-		hiprtDestroyGeometry( ctxt, geom );
-		hiprtDestroyContext( ctxt );
+		CHECK_ORO( oroFree( (oroDeviceptr)mesh.triangleIndices ) );
+		CHECK_ORO( oroFree( (oroDeviceptr)mesh.vertices ) );
+		CHECK_ORO( oroFree( (oroDeviceptr)geomTemp ) );
+		CHECK_ORO( oroFree( (oroDeviceptr)pixels ) );
+
+		CHECK_HIPRT( hiprtDestroyGeometry( ctxt, geom ) );
+		CHECK_HIPRT( hiprtDestroyContext( ctxt ) );
 	}
 };
 
 int main( int argc, char** argv )
 {
-	Test test;
-	test.init( 0 );
-	test.run();
+	Tutorial tutorial;
+	tutorial.init( 0 );
+	tutorial.run();
 
 	return 0;
 }
-
-

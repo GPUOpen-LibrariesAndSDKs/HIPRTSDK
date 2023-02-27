@@ -1,4 +1,5 @@
 project "05_custom_bvh_import"
+    cppdialect "C++17"
     kind "ConsoleApp"
     location "../build"
 

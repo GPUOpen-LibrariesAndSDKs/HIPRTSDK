@@ -1,4 +1,5 @@
-project "08_multi_custom_intersection"
+project "10_cutout"
+    cppdialect "C++17"
     kind "ConsoleApp"
     location "../build"
 

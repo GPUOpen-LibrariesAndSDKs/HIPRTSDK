@@ -1,119 +1,118 @@
-#include <tutorials/common/TestBase.h>
-#include <cstdlib>
-#include <numeric>
+//
+// Copyright (c) 2021-2023 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
 
-class Test : public TestBase
+#include <tutorials/common/TutorialBase.h>
+
+class Tutorial : public TutorialBase
 {
   public:
 	void run() 
 	{
-		hiprtContext ctxt;
-		hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, &ctxt );
-
-		const int nSpheres = 8*2;
-#if 0
-		const hiprtFloat4 spheres[] = { 
-			{ 0.25f, 0.5f, 0.f, 0.05f },
-			{ 0.50f, 0.5f, 0.f, 0.1f },
-			{ 0.75f, 0.5f, 0.f, 0.2f },
-		};
-#else
-
-		hiprtFloat4 spheres[nSpheres];
-		for(int i=0; i<nSpheres / 2; i++)
-		{
-			float r = 0.1f;
-			float t = i/(float)(nSpheres/2) * 2.f * 3.1415f;
-			spheres[i] = { sin(t) * 0.4f, cos(t) * 0.4f, 0.f, r };
-		}
-		for ( int i = 0; i < nSpheres / 2; i++ )
+		const int	sphereCount = 8 * 2;
+		hiprtFloat4 spheres[sphereCount];
+		for ( int i = 0; i < sphereCount / 2; i++ )
 		{
 			float r	   = 0.1f;
-			float t	   = i / (float)(nSpheres/2) * 2.f * 3.1415f + 0.2f;
-			spheres[i+nSpheres/2] = { sin( t ) * 0.35f, cos( t ) * 0.35f, 0.4f, r };
+			float t	   = i / (float)( sphereCount / 2 ) * 2.f * 3.1415f;
+			spheres[i] = { sin( t ) * 0.4f, cos( t ) * 0.4f, 0.f, r };
+		}
+		for ( int i = 0; i < sphereCount / 2; i++ )
+		{
+			float r					  = 0.1f;
+			float t					  = i / (float)( sphereCount / 2 ) * 2.f * 3.1415f + 0.2f;
+			spheres[i + sphereCount / 2] = { sin( t ) * 0.35f, cos( t ) * 0.35f, 0.4f, r };
 		}
 
-#endif
+		hiprtContext ctxt;
+		CHECK_HIPRT( hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, &ctxt ) );
+
 		hiprtAABBListPrimitive list;
-		list.aabbCount	= nSpheres;
-		list.aabbStride = 8 * sizeof( float );
-		dMalloc( (hiprtFloat4*&)list.aabbs, nSpheres*2 );
-
-		hiprtFloat4 b[nSpheres*2];
-
-		for ( int i = 0; i < nSpheres ; i++)
+		list.aabbCount	= sphereCount;
+		list.aabbStride = 2 * sizeof( hiprtFloat4 );
+		hiprtFloat4 aabbs[2 * sphereCount];
+		for ( int i = 0; i < sphereCount ; i++)
 		{
 			const hiprtFloat4& c = spheres[i];
-			b[i * 2 + 0]		 = { c.x - c.w, c.y - c.w, c.z - c.w, 0.f };
-			b[i * 2 + 1]		 = { c.x + c.w, c.y + c.w, c.z + c.w, 0.f };
+			aabbs[i * 2 + 0]	 = { c.x - c.w, c.y - c.w, c.z - c.w, 0.0f };
+			aabbs[i * 2 + 1]	 = { c.x + c.w, c.y + c.w, c.z + c.w, 0.0f };
 		}
-
-		dCopyHtoD( (hiprtFloat4*)list.aabbs, b, nSpheres*2 );
+		CHECK_ORO( oroMalloc( (oroDeviceptr*)&list.aabbs, 2 * sphereCount * sizeof( hiprtFloat4 ) ) );
+		CHECK_ORO( oroMemcpyHtoD( (oroDeviceptr)list.aabbs, aabbs, 2 * sphereCount * sizeof( hiprtFloat4 ) ) );
 
 		hiprtGeometryBuildInput geomInput;
-		geomInput.type				  = hiprtPrimitiveTypeAABBList;
-		geomInput.aabbList.primitive  = &list;
-		geomInput.aabbList.customType = 0;
+		geomInput.type				 = hiprtPrimitiveTypeAABBList;
+		geomInput.aabbList.primitive = &list;
+		geomInput.geomType			 = 0;
 
 		size_t			  geomTempSize;
 		hiprtDevicePtr	  geomTemp;
 		hiprtBuildOptions options;
 		options.buildFlags = hiprtBuildFlagBitPreferFastBuild;
-		hiprtGetGeometryBuildTemporaryBufferSize( ctxt, &geomInput, &options, &geomTempSize );
-		dMalloc( (u8*&)geomTemp, geomTempSize );
+		CHECK_HIPRT( hiprtGetGeometryBuildTemporaryBufferSize( ctxt, &geomInput, &options, &geomTempSize ) );
+		CHECK_ORO( oroMalloc( (oroDeviceptr*)&geomTemp, geomTempSize ) );
 
 		hiprtGeometry geom;
-		hiprtCreateGeometry( ctxt, &geomInput, &options, &geom );
-		hiprtBuildGeometry( ctxt, hiprtBuildOperationBuild, &geomInput, &options, geomTemp, 0, geom );
+		CHECK_HIPRT( hiprtCreateGeometry( ctxt, &geomInput, &options, &geom ) );
+		CHECK_HIPRT( hiprtBuildGeometry( ctxt, hiprtBuildOperationBuild, &geomInput, &options, geomTemp, 0, geom ) );
 
-		oroModule		 module;
+		hiprtFuncNameSet funcNameSet;
+		funcNameSet.intersectFuncName			   = "intersectSphere";
+		std::vector<hiprtFuncNameSet> funcNameSets = { funcNameSet };
+
+		hiprtFuncDataSet funcDataSet;
+		CHECK_ORO( oroMalloc( (oroDeviceptr*)&funcDataSet.intersectFuncData, sphereCount * sizeof( hiprtFloat4 ) ) );
+		CHECK_ORO(
+			oroMemcpyHtoD( (oroDeviceptr)funcDataSet.intersectFuncData, spheres, sphereCount * sizeof( hiprtFloat4 ) ) );
+
+		hiprtFuncTable funcTable;
+		CHECK_HIPRT( hiprtCreateFuncTable( ctxt, 1, 1, &funcTable ) );
+		CHECK_HIPRT( hiprtSetFuncTable( ctxt, funcTable, 0, 0, funcDataSet ) );
+
 		oroFunction		 func;
-		std::vector<char> binary;
-		buildTraceKernel( ctxt, "../03_custom_intersection/TestKernel.h", "CustomIntersectionKernel", func, &binary );
-		oroError ee = oroModuleLoadData( &module, binary.data() );
-		ASSERT( ee == oroSuccess );
+		buildTraceKernelFromBitcode( ctxt, "../common/TutorialKernels.h", "CustomIntersectionKernel", func, nullptr, &funcNameSets, 1, 1 );
 
-		hiprtCustomFuncSet hCustomFuncSet;
-		oroDeviceptr	   dFuncPtr;
-		size_t			   numBytes = 0;
+		u8* pixels;
+		CHECK_ORO( oroMalloc( (oroDeviceptr*)&pixels, m_res.x * m_res.y * 4 ) );
 
-		ee = oroModuleGetGlobal( &dFuncPtr, &numBytes, module, "sphereIntersect" );
-		ASSERT( ee == oroSuccess );
-		oroMemcpyDtoH( &hCustomFuncSet.intersectFunc, dFuncPtr, numBytes );
-
-		hiprtFloat4* centers;
-		dMalloc( centers, nSpheres );
-		dCopyHtoD( centers, (hiprtFloat4*)spheres, nSpheres );
-		waitForCompletion();
-		hCustomFuncSet.intersectFuncData = centers;
-
-		hiprtCustomFuncTable dFuncSet;
-		hiprtCreateCustomFuncTable( ctxt, &dFuncSet );
-		hiprtSetCustomFuncTable( ctxt, dFuncSet, 0, hCustomFuncSet );
-
-		u8* dst;
-		dMalloc( dst, m_res.x * m_res.y * 4 );
-		hiprtInt2 res = make_hiprtInt2( m_res.x, m_res.y );
-
-		void* args[] = { &geom, &dst, &dFuncSet, &res };
+		void* args[] = { &geom, &pixels, &funcTable, &m_res };
 		launchKernel( func, m_res.x, m_res.y, args );
+		writeImage( "03_custom_intersection.png", m_res.x, m_res.y, pixels );
 
-		writeImageFromDevice( "03_custom_intersection.png", m_res.x, m_res.y, dst );
+		CHECK_ORO( oroFree( (oroDeviceptr)funcDataSet.intersectFuncData ) );
+		CHECK_ORO( oroFree( (oroDeviceptr)list.aabbs ) );
+		CHECK_ORO( oroFree( (oroDeviceptr)geomTemp ) );
+		CHECK_ORO( oroFree( (oroDeviceptr)pixels ) );
 
-		dFree( list.aabbs );
-		dFree( geomTemp );
-		dFree( centers );
-		dFree( dst );
-		hiprtDestroyGeometry( ctxt, geom );
-		hiprtDestroyContext( ctxt );
+		CHECK_HIPRT( hiprtDestroyFuncTable( ctxt, funcTable ) );
+		CHECK_HIPRT( hiprtDestroyGeometry( ctxt, geom ) );
+		CHECK_HIPRT( hiprtDestroyContext( ctxt ) );
 	}
 };
 
 int main( int argc, char** argv )
 {
-	Test test;
-	test.init( 0 );
-	test.run();
+	Tutorial tutorial;
+	tutorial.init( 0 );
+	tutorial.run();
 
 	return 0;
 }

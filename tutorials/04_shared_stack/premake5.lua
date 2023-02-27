@@ -1,4 +1,5 @@
 project "04_shared_stack"
+    cppdialect "C++17"
     kind "ConsoleApp"
     location "../build"
 
