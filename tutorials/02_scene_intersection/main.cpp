@@ -25,18 +25,21 @@
 class Tutorial : public TutorialBase
 {
   public:
-	void run() 
+	void run()
 	{
 		hiprtContext ctxt;
-		CHECK_HIPRT( hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, &ctxt ) );
+		CHECK_HIPRT( hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, ctxt ) );
 
 		hiprtTriangleMeshPrimitive mesh;
-		mesh.triangleCount	= 2;
-		mesh.triangleStride = sizeof( hiprtInt3 );
+		mesh.triangleCount	  = 2;
+		mesh.triangleStride	  = sizeof( hiprtInt3 );
 		int triangleIndices[] = { 0, 1, 2, 3, 4, 5 };
-		CHECK_ORO( oroMalloc( (oroDeviceptr*)&mesh.triangleIndices, mesh.triangleCount * sizeof( hiprtInt3 ) ) );
 		CHECK_ORO(
-			oroMemcpyHtoD( (oroDeviceptr)mesh.triangleIndices, triangleIndices, mesh.triangleCount * sizeof( hiprtInt3 ) ) );
+			oroMalloc( reinterpret_cast<oroDeviceptr*>( &mesh.triangleIndices ), mesh.triangleCount * sizeof( hiprtInt3 ) ) );
+		CHECK_ORO( oroMemcpyHtoD(
+			reinterpret_cast<oroDeviceptr>( mesh.triangleIndices ),
+			triangleIndices,
+			mesh.triangleCount * sizeof( hiprtInt3 ) ) );
 
 		mesh.vertexCount	   = 6;
 		mesh.vertexStride	   = sizeof( hiprtFloat3 );
@@ -49,65 +52,68 @@ class Tutorial : public TutorialBase
 			{ -s, s, 0.0f },
 			{ -s + t * s, -s * s, 0.0f },
 			{ -s - t * s, -s * s, 0.0f } };
-		CHECK_ORO( oroMalloc( (oroDeviceptr*)&mesh.vertices, mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
-		CHECK_ORO( oroMemcpyHtoD( (oroDeviceptr)mesh.vertices, vertices, mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
+		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &mesh.vertices ), mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
+		CHECK_ORO( oroMemcpyHtoD(
+			reinterpret_cast<oroDeviceptr>( mesh.vertices ), vertices, mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
 
 		hiprtGeometryBuildInput geomInput;
 		geomInput.type					 = hiprtPrimitiveTypeTriangleMesh;
-		geomInput.triangleMesh.primitive = &mesh;
+		geomInput.triangleMesh.primitive = mesh;
 
 		size_t			  geomTempSize;
 		hiprtDevicePtr	  geomTemp;
 		hiprtBuildOptions options;
 		options.buildFlags = hiprtBuildFlagBitPreferFastBuild;
-		CHECK_HIPRT( hiprtGetGeometryBuildTemporaryBufferSize( ctxt, &geomInput, &options, &geomTempSize ) );
-		CHECK_ORO( oroMalloc( (oroDeviceptr*)&geomTemp, geomTempSize ) );
+		CHECK_HIPRT( hiprtGetGeometryBuildTemporaryBufferSize( ctxt, geomInput, options, geomTempSize ) );
+		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &geomTemp ), geomTempSize ) );
 
 		hiprtGeometry geom;
-		CHECK_HIPRT( hiprtCreateGeometry( ctxt, &geomInput, &options, &geom ) );
-		CHECK_HIPRT( hiprtBuildGeometry( ctxt, hiprtBuildOperationBuild, &geomInput, &options, geomTemp, 0, geom ) );
+		CHECK_HIPRT( hiprtCreateGeometry( ctxt, geomInput, options, geom ) );
+		CHECK_HIPRT( hiprtBuildGeometry( ctxt, hiprtBuildOperationBuild, geomInput, options, geomTemp, 0, geom ) );
 
 		hiprtSceneBuildInput sceneInput;
 		sceneInput.instanceCount			= 1;
 		sceneInput.instanceMasks			= nullptr;
 		sceneInput.instanceTransformHeaders = nullptr;
 		hiprtDevicePtr geoms[]				= { geom };
-		CHECK_ORO( oroMalloc( (oroDeviceptr*)&sceneInput.instanceGeometries, sizeof( hiprtDevicePtr ) ) );
-		CHECK_ORO( oroMemcpyHtoD( (oroDeviceptr)sceneInput.instanceGeometries, geoms, sizeof( hiprtDevicePtr ) ) );
+		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &sceneInput.instanceGeometries ), sizeof( hiprtDevicePtr ) ) );
+		CHECK_ORO(
+			oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( sceneInput.instanceGeometries ), geoms, sizeof( hiprtDevicePtr ) ) );
 
 		hiprtFrameSRT frame;
 		frame.translation	  = make_hiprtFloat3( 0.0f, 0.0f, 0.0f );
 		frame.scale			  = make_hiprtFloat3( 0.5f, 0.5f, 0.5f );
 		frame.rotation		  = make_hiprtFloat4( 0.0f, 0.0f, 1.0f, 0.0f );
 		sceneInput.frameCount = 1;
-		CHECK_ORO( oroMalloc( (oroDeviceptr*)&sceneInput.instanceFrames, sizeof( hiprtFrameSRT ) ) );
-		CHECK_ORO( oroMemcpyHtoD( (oroDeviceptr)sceneInput.instanceFrames, &frame, sizeof( hiprtFrameSRT ) ) );
+		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &sceneInput.instanceFrames ), sizeof( hiprtFrameSRT ) ) );
+		CHECK_ORO(
+			oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( sceneInput.instanceFrames ), &frame, sizeof( hiprtFrameSRT ) ) );
 
 		size_t		   sceneTempSize;
 		hiprtDevicePtr sceneTemp;
-		CHECK_HIPRT( hiprtGetSceneBuildTemporaryBufferSize( ctxt, &sceneInput, &options, &sceneTempSize ) );
-		CHECK_ORO( oroMalloc( (oroDeviceptr*)&sceneTemp, sceneTempSize ) );
+		CHECK_HIPRT( hiprtGetSceneBuildTemporaryBufferSize( ctxt, sceneInput, options, sceneTempSize ) );
+		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &sceneTemp ), sceneTempSize ) );
 
 		hiprtScene scene;
-		CHECK_HIPRT( hiprtCreateScene( ctxt, &sceneInput, &options, &scene ) );
-		CHECK_HIPRT( hiprtBuildScene( ctxt, hiprtBuildOperationBuild, &sceneInput, &options, sceneTemp, 0, scene ) );
+		CHECK_HIPRT( hiprtCreateScene( ctxt, sceneInput, options, scene ) );
+		CHECK_HIPRT( hiprtBuildScene( ctxt, hiprtBuildOperationBuild, sceneInput, options, sceneTemp, 0, scene ) );
 
 		oroFunction func;
 		buildTraceKernelFromBitcode( ctxt, "../common/TutorialKernels.h", "SceneIntersectionKernel", func );
 
 		u8* pixels;
-		CHECK_ORO( oroMalloc( (oroDeviceptr*)&pixels, m_res.x * m_res.y *  4 ) );
+		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &pixels ), m_res.x * m_res.y * 4 ) );
 
 		void* args[] = { &scene, &pixels, &m_res };
 		launchKernel( func, m_res.x, m_res.y, args );
 		writeImage( "02_scene_intersection.png", m_res.x, m_res.y, pixels );
 
-		CHECK_ORO( oroFree( (oroDeviceptr)sceneInput.instanceGeometries ) );
-		CHECK_ORO( oroFree( (oroDeviceptr)sceneInput.instanceFrames ) );
-		CHECK_ORO( oroFree( (oroDeviceptr)mesh.triangleIndices ) );
-		CHECK_ORO( oroFree( (oroDeviceptr)mesh.vertices ) );
-		CHECK_ORO( oroFree( (oroDeviceptr)geomTemp ) );
-		CHECK_ORO( oroFree( (oroDeviceptr)pixels ) );
+		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( sceneInput.instanceGeometries ) ) );
+		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( sceneInput.instanceFrames ) ) );
+		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( mesh.triangleIndices ) ) );
+		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( mesh.vertices ) ) );
+		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( geomTemp ) ) );
+		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( pixels ) ) );
 
 		CHECK_HIPRT( hiprtDestroyGeometry( ctxt, geom ) );
 		CHECK_HIPRT( hiprtDestroyScene( ctxt, scene ) );
@@ -123,5 +129,3 @@ int main( int argc, char** argv )
 
 	return 0;
 }
-
-

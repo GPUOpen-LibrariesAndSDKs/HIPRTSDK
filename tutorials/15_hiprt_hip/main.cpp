@@ -20,24 +20,47 @@
 // THE SOFTWARE.
 //
 
-#include <tutorials/common/TutorialBase.h>
+#if defined( __USE_HIP__ )
+#include <hip/hip_runtime.h>
+#include <hiprt/hiprt.h>
+#include <hiprt/hiprt_vec.h>
+
+#define CHECK_HIP( error ) ( checkHip( error, __FILE__, __LINE__ ) )
+void checkHip( hipError_t res, const char* file, int line )
+{
+	if ( res != hipSuccess )
+	{
+		std::cerr << "HIP error: '" << hipGetErrorString( res ) << "' on line " << line << " "
+				  << " in '" << file << "'." << std::endl;
+		exit( EXIT_FAILURE );
+	}
+}
+
+#define CHECK_HIPRT( error ) ( checkHiprt( error, __FILE__, __LINE__ ) )
+void checkHiprt( hiprtError res, const char* file, int line )
+{
+	if ( res != hiprtSuccess )
+	{
+		std::cerr << "HIPRT error: '" << res << "' on line " << line << " "
+				  << " in '" << file << "'." << std::endl;
+		exit( EXIT_FAILURE );
+	}
+}
+#endif
 
 int main( int argc, char** argv )
 {
-	const int deviceIndex = 0;
+#if defined( __USE_HIP__ )
+	CHECK_HIP( hipInit( 0 ) );
 
-	CHECK_ORO( (oroError)oroInitialize( (oroApi)( ORO_API_HIP | ORO_API_CUDA ), 0 ) );
+	hipDevice_t hipDevice;
+	CHECK_HIP( hipGetDevice( &hipDevice ) );
 
-	CHECK_ORO( oroInit( 0 ) );
+	hipCtx_t hipCtx;
+	CHECK_HIP( hipCtxCreate( &hipCtx, 0, hipDevice ) );
 
-	oroDevice oroDevice;
-	CHECK_ORO( oroDeviceGet( &oroDevice, deviceIndex ) );
-
-	oroCtx oroCtx;
-	CHECK_ORO( oroCtxCreate( &oroCtx, 0, oroDevice ) );
-
-	oroDeviceProp props;
-	CHECK_ORO( oroGetDeviceProperties( &props, oroDevice ) );
+	hipDeviceProp_t props;
+	CHECK_HIP( hipGetDeviceProperties( &props, hipDevice ) );
 	std::cout << "Executing on '" << props.name << "'" << std::endl;
 
 	hiprtContextCreationInput ctxtInput;
@@ -45,12 +68,12 @@ int main( int argc, char** argv )
 		ctxtInput.deviceType = hiprtDeviceNVIDIA;
 	else
 		ctxtInput.deviceType = hiprtDeviceAMD;
-	ctxtInput.ctxt	 = oroGetRawCtx( oroCtx );
-	ctxtInput.device = oroGetRawDevice( oroDevice );
+	ctxtInput.ctxt	 = hipCtx;
+	ctxtInput.device = hipDevice;
 
 	hiprtContext ctxt;
 	CHECK_HIPRT( hiprtCreateContext( HIPRT_API_VERSION, ctxtInput, ctxt ) );
 	CHECK_HIPRT( hiprtDestroyContext( ctxt ) );
-
+#endif
 	return 0;
 }
