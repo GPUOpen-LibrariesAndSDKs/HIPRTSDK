@@ -58,32 +58,24 @@ workspace "hiprtSdkTutorial"
         buildoptions {"/wd4244", "/wd4305", "/wd4018", "/wd4996"}
     end
 
-
     include "00_context_creation"
     include "01_geom_intersection"
-	include "02_scene_intersection"
-	include "03_custom_intersection"
-	include "04_shared_stack"
-	include "05_custom_bvh_import"
-	include "06_ambient_occlusion"
-    include "07_motion_blur_srt"
-	include "08_motion_blur_matrix"
-	include "09_multi_custom_intersection"
-    include "10_cutout"
-	include "11_concurrent_scene_build"
-    include "12_hiprt_hip"
+    include "02_scene_intersection"
+    include "03_custom_intersection"
+    include "04_global_stack"
+    include "05_dynamic_stack"
+    include "06_custom_bvh_import"
+    include "07_ambient_occlusion"
+    include "08_motion_blur_srt"
+    include "09_motion_blur_matrix"
+    include "10_multi_custom_intersection"
+    include "11_cutout"
+    include "12_concurrent_scene_build"
+    include "13_batch_build"
+    include "14_fluid_simulation"
+    include "15_hiprt_hip"
 	
     if os.ishost("windows") then
-		local hiproot = os.getenv("HIP_PATH")
-		if hiproot ~= nil then
-			hiproot = hiproot:gsub([[\]],[[/]])
-		end
-        copydir( "../hiprt/win/", "./build/" )
-		copydir( "../contrib/Orochi/contrib/bin/win64", "./build/" )
-		copydir( "../hiprt/win/", "./dist/bin/Release/" )
-		copydir( "../contrib/Orochi/contrib/bin/win64", "./dist/bin/Release/" )
-		if hiproot ~= nil then
-			copydir( hiproot .."/bin/", "./build/", "amdhip64.dll" )
-			copydir( hiproot .."/bin/", "./dist/bin/Release/", "amdhip64.dll" )
-		end
+		  copydir( "../hiprt/win/", "./dist/bin/Release/" )
+      copydir( "../hiprt/win/", "./dist/bin/Debug/" )
     end

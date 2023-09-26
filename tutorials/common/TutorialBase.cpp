@@ -62,7 +62,7 @@ void TutorialBase::init( int deviceIndex )
 	m_res = make_hiprtInt2( 512, 512 );
 
 	CHECK_ORO( (oroError)oroInitialize( (oroApi)( ORO_API_HIP | ORO_API_CUDA ), 0 ) );
-	
+
 	CHECK_ORO( oroInit( 0 ) );
 	CHECK_ORO( oroDeviceGet( &m_oroDevice, deviceIndex ) );
 	CHECK_ORO( oroCtxCreate( &m_oroCtx, 0, m_oroDevice ) );
@@ -79,39 +79,34 @@ void TutorialBase::init( int deviceIndex )
 
 	m_ctxtInput.ctxt   = oroGetRawCtx( m_oroCtx );
 	m_ctxtInput.device = oroGetRawDevice( m_oroDevice );
+	hiprtSetLogLevel( hiprtLogLevelError );
 }
 
-bool TutorialBase::readSourceCode( const std::string& path, std::string& sourceCode, std::vector<std::string>* includes )
+bool TutorialBase::readSourceCode(
+	const std::filesystem::path& path, std::string& sourceCode, std::optional<std::vector<std::filesystem::path>> includes )
 {
 	std::fstream f( path );
 	if ( f.is_open() )
 	{
 		size_t sizeFile;
 		f.seekg( 0, std::fstream::end );
-		size_t size = sizeFile = (size_t)f.tellg();
+		size_t size = sizeFile = static_cast<size_t>( f.tellg() );
 		f.seekg( 0, std::fstream::beg );
 		if ( includes )
 		{
 			sourceCode.clear();
 			std::string line;
-			char		buf[512];
 			while ( std::getline( f, line ) )
 			{
-				if ( strstr( line.c_str(), "#include" ) != 0 )
+				if ( line.find( "#include" ) != std::string::npos )
 				{
-					const char* a = strstr( line.c_str(), "<" );
-					const char* b = strstr( line.c_str(), ">" );
-
-					int n = b - a - 1;
-					memcpy( buf, a + 1, n );
-					buf[n] = '\0';
-					includes->push_back( buf );
+					size_t		pa	= line.find( "<" );
+					size_t		pb	= line.find( ">" );
+					std::string buf = line.substr( pa + 1, pb - pa - 1 );
+					includes.value().push_back( buf );
 					sourceCode += line + '\n';
 				}
-				else
-				{
-					sourceCode += line + '\n';
-				}
+				sourceCode += line + '\n';
 			}
 		}
 		else
@@ -136,14 +131,14 @@ void TutorialBase::buildTraceKernelFromBitcode(
 	int							   numGeomTypes,
 	int							   numRayTypes )
 {
-	size_t					 binarySize = 0;
-	std::vector<const char*> options;
-	std::vector<std::string> includeNamesData;
-	std::string				 sourceCode;
+	std::vector<const char*>		   options;
+	std::vector<std::filesystem::path> includeNamesData;
+	std::string						   sourceCode;
 
-	if ( !readSourceCode( path, sourceCode, &includeNamesData ) )
+	if ( !readSourceCode( path, sourceCode, includeNamesData ) )
 	{
-		std::cerr << "Unable to find file '" << path << "'" << std::endl;;
+		std::cerr << "Unable to find file '" << path << "'" << std::endl;
+		;
 		exit( EXIT_FAILURE );
 	}
 
@@ -152,15 +147,15 @@ void TutorialBase::buildTraceKernelFromBitcode(
 	std::vector<const char*> includeNames;
 	for ( int i = 0; i < includeNamesData.size(); i++ )
 	{
-		if ( !readSourceCode( std::string( "../../" ) + includeNamesData[i], headersData[i] ) )
+		if ( !readSourceCode( std::string( "../../" ) / includeNamesData[i], headersData[i] ) )
 		{
-			if ( !readSourceCode( std::string( "../" ) + includeNamesData[i], headersData[i] ) )
+			if ( !readSourceCode( std::string( "../" ) / includeNamesData[i], headersData[i] ) )
 			{
 				std::cerr << "Failed to find header file '" << includeNamesData[i] << "' in path ../ or ../../!" << std::endl;
 				exit( EXIT_FAILURE );
 			}
 		}
-		includeNames.push_back( includeNamesData[i].c_str() );
+		includeNames.push_back( includeNamesData[i].string().c_str() );
 		headers.push_back( headersData[i].c_str() );
 	}
 
@@ -175,6 +170,8 @@ void TutorialBase::buildTraceKernelFromBitcode(
 	{
 		options.push_back( "-fgpu-rdc" );
 		options.push_back( "-Xclang" );
+		options.push_back( "-disable-llvm-passes" );
+		options.push_back( "-Xclang" );
 		options.push_back( "-mno-constructor-aliases" );
 	}
 	else
@@ -187,10 +184,11 @@ void TutorialBase::buildTraceKernelFromBitcode(
 	options.push_back( "-I../../" );
 
 	orortcProgram prog;
-	CHECK_ORORTC( orortcCreateProgram( &prog, sourceCode.data(), path, headers.size(), headers.data(), includeNames.data() ) );
+	CHECK_ORORTC( orortcCreateProgram(
+		&prog, sourceCode.data(), path, static_cast<int>( headers.size() ), headers.data(), includeNames.data() ) );
 	CHECK_ORORTC( orortcAddNameExpression( prog, functionName ) );
 
-	orortcResult e = orortcCompileProgram( prog, options.size(), options.data() );
+	orortcResult e = orortcCompileProgram( prog, static_cast<int>( options.size() ), options.data() );
 	if ( e != ORORTC_SUCCESS )
 	{
 		size_t logSize;
@@ -230,12 +228,13 @@ void TutorialBase::buildTraceKernelFromBitcode(
 		numGeomTypes,
 		numRayTypes,
 		funcNameSets != nullptr ? funcNameSets->data() : nullptr,
-		&function ) );
+		&function,
+		false ) );
 
-	functionOut = *(oroFunction*)&function;
+	functionOut = *reinterpret_cast<oroFunction*>( &function );
 }
 
-void TutorialBase::launchKernel( oroFunction func, int nx, int ny, void** args) { launchKernel( func, nx, ny, 8, 8, args ); }
+void TutorialBase::launchKernel( oroFunction func, int nx, int ny, void** args ) { launchKernel( func, nx, ny, 8, 8, args ); }
 
 void TutorialBase::launchKernel( oroFunction func, int nx, int ny, int bx, int by, void** args )
 {
@@ -246,9 +245,9 @@ void TutorialBase::launchKernel( oroFunction func, int nx, int ny, int bx, int b
 }
 
 void TutorialBase::writeImage( const std::string& path, int w, int h, u8* pixels )
-{ 
+{
 	std::vector<u8> image( w * h * 4 );
-	CHECK_ORO( oroMemcpyDtoH( image.data(), (oroDeviceptr)pixels, w * h * 4 ) );
+	CHECK_ORO( oroMemcpyDtoH( image.data(), reinterpret_cast<oroDeviceptr>( pixels ), w * h * 4 ) );
 	stbi_write_png( path.c_str(), w, h, 4, image.data(), w * 4 );
 	std::cout << "image written at " << path.c_str() << std::endl;
 }

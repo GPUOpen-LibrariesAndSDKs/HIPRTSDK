@@ -23,9 +23,11 @@
 #pragma once
 #include <Orochi/Orochi.h>
 #include <array>
+#include <filesystem>
 #include <fstream>
 #include <hiprt/hiprt.h>
 #include <hiprt/hiprt_vec.h>
+#include <optional>
 #include <string>
 #include <tutorials/common/Common.h>
 #include <vector>
@@ -67,7 +69,10 @@ class TutorialBase
 
 	static void writeImage( const std::string& path, int w, int h, u8* pixels );
 
-	static bool readSourceCode( const std::string& path, std::string& sourceCode, std::vector<std::string>* includes = 0 );
+	static bool readSourceCode(
+		const std::filesystem::path&					  path,
+		std::string&									  sourceCode,
+		std::optional<std::vector<std::filesystem::path>> includes = std::nullopt );
 
   protected:
 	hiprtContextCreationInput m_ctxtInput;

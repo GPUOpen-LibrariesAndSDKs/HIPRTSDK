@@ -20,7 +20,10 @@
 // THE SOFTWARE.
 //
 
+#include <common/Aabb.h>
 #include <common/Common.h>
+#include <common/FluidSimulation.h>
+
 #include <hiprt/hiprt_device.h>
 #include <hiprt/hiprt_vec.h>
 
@@ -41,25 +44,25 @@ __device__ float3 gammaCorrect( float3 a )
 	return { pow( a.x, g ), pow( a.y, g ), pow( a.z, g ) };
 }
 
-__device__ unsigned int lcg( unsigned int& seed )
+__device__ u32 lcg( u32& seed )
 {
-	const unsigned int LCG_A = 1103515245u;
-	const unsigned int LCG_C = 12345u;
-	const unsigned int LCG_M = 0x00FFFFFFu;
-	seed					 = ( LCG_A * seed + LCG_C );
+	constexpr u32 LCG_A = 1103515245u;
+	constexpr u32 LCG_C = 12345u;
+	constexpr u32 LCG_M = 0x00FFFFFFu;
+	seed				= ( LCG_A * seed + LCG_C );
 	return seed & LCG_M;
 }
 
-__device__ float randf( unsigned int& seed ) { return ( (float)lcg( seed ) / (float)0x01000000 ); }
+__device__ float randf( u32& seed ) { return ( static_cast<float>( lcg( seed ) ) / static_cast<float>( 0x01000000 ) ); }
 
-template <unsigned int N>
-__device__ uint2 tea( unsigned int val0, unsigned int val1 )
+template <u32 N>
+__device__ uint2 tea( u32 val0, u32 val1 )
 {
-	unsigned int v0 = val0;
-	unsigned int v1 = val1;
-	unsigned int s0 = 0;
+	u32 v0 = val0;
+	u32 v1 = val1;
+	u32 s0 = 0;
 
-	for ( unsigned int n = 0; n < N; n++ )
+	for ( u32 n = 0; n < N; n++ )
 	{
 		s0 += 0x9e3779b9;
 		v0 += ( ( v1 << 4 ) + 0xa341316c ) ^ ( v1 + s0 ) ^ ( ( v1 >> 5 ) + 0xc8013ea4 );
@@ -67,20 +70,6 @@ __device__ uint2 tea( unsigned int val0, unsigned int val1 )
 	}
 
 	return make_uint2( v0, v1 );
-}
-
-__device__ float3 sampleHemisphereCosine( float3 n, unsigned int& seed )
-{
-	float phi		  = TwoPi * randf( seed );
-	float sinThetaSqr = randf( seed );
-	float sinTheta	  = sqrt( sinThetaSqr );
-
-	float3 axis = fabs( n.x ) > 0.001f ? make_float3( 0.0f, 1.0f, 0.0f ) : make_float3( 1.0f, 0.0f, 0.0f );
-	float3 t	= cross( axis, n );
-	t			= normalize( t );
-	float3 s	= cross( n, t );
-
-	return normalize( s * cos( phi ) * sinTheta + t * sin( phi ) * sinTheta + n * sqrt( 1.0f - sinThetaSqr ) );
 }
 
 __device__ bool cutoutFilter( const hiprtRay& ray, const void* data, void* payload, const hiprtHit& hit )
@@ -99,7 +88,7 @@ __device__ bool cutoutFilter( const hiprtRay& ray, const void* data, void* paylo
 // check if there is a hit before ray.maxT. if there is, set it to tOut. hiprt will overwrite ray.maxT after this function
 __device__ bool intersectCircle( const hiprtRay& ray, const void* data, void* payload, hiprtHit& hit )
 {
-	const float4* o = (const float4*)data;
+	const float4* o = reinterpret_cast<const float4*>( data );
 	float2		  c = make_float2( o[hit.primID].x, o[hit.primID].y );
 	const float	  r = o[hit.primID].w;
 
@@ -119,7 +108,7 @@ __device__ bool intersectSphere( const hiprtRay& ray, const void* data, void* pa
 {
 	float3 from	  = ray.origin;
 	float3 to	  = from + ray.direction * ray.maxT;
-	float4 sphere = ( (const float4*)data )[hit.primID];
+	float4 sphere = reinterpret_cast<const float4*>( data )[hit.primID];
 	float3 center = make_float3( sphere );
 	float  r	  = sphere.w;
 
@@ -140,12 +129,30 @@ __device__ bool intersectSphere( const hiprtRay& ray, const void* data, void* pa
 	return true;
 }
 
+__device__ bool intersectParticleImpactSphere( const hiprtRay& ray, const void* data, void* payload, hiprtHit& hit )
+{
+	float3		from	 = ray.origin;
+	Particle	particle = reinterpret_cast<const Particle*>( data )[hit.primID];
+	Simulation* sim		 = reinterpret_cast<Simulation*>( payload );
+	float3		center	 = particle.Pos;
+	float		r		 = sim->m_smoothRadius;
+
+	float3 d  = center - from;
+	float  r2 = dot( d, d );
+	if ( r2 >= r * r ) return false;
+
+	hit.t	   = r2;
+	hit.normal = d;
+
+	return true;
+}
+
 extern "C" __global__ void GeomIntersectionKernel( hiprtGeometry geom, u8* pixels, int2 res )
 {
 	const int x = blockIdx.x * blockDim.x + threadIdx.x;
 	const int y = blockIdx.y * blockDim.y + threadIdx.y;
 
-	float3 o = { x / (float)res.x, y / (float)res.y, -1.0f };
+	float3 o = { x / static_cast<float>( res.x ), y / static_cast<float>( res.y ), -1.0f };
 	float3 d = { 0.0f, 0.0f, 1.0f };
 
 	hiprtRay ray;
@@ -156,8 +163,8 @@ extern "C" __global__ void GeomIntersectionKernel( hiprtGeometry geom, u8* pixel
 	hiprtHit				  hit = tr.getNextHit();
 
 	int pixelIndex			   = x + y * res.x;
-	pixels[pixelIndex * 4 + 0] = hit.hasHit() ? ( (float)x / res.x ) * 255 : 0;
-	pixels[pixelIndex * 4 + 1] = hit.hasHit() ? ( (float)y / res.y ) * 255 : 0;
+	pixels[pixelIndex * 4 + 0] = hit.hasHit() ? ( static_cast<float>( x ) / res.x ) * 255 : 0;
+	pixels[pixelIndex * 4 + 1] = hit.hasHit() ? ( static_cast<float>( y ) / res.y ) * 255 : 0;
 	pixels[pixelIndex * 4 + 2] = 0;
 	pixels[pixelIndex * 4 + 3] = 255;
 }
@@ -167,7 +174,7 @@ extern "C" __global__ void SceneIntersectionKernel( hiprtScene scene, u8* pixels
 	const int x = blockIdx.x * blockDim.x + threadIdx.x;
 	const int y = blockIdx.y * blockDim.y + threadIdx.y;
 
-	float3 o = { x / (float)res.x - 0.5f, y / (float)res.y - 0.5f, -1.0f };
+	float3 o = { x / static_cast<float>( res.x ) - 0.5f, y / static_cast<float>( res.y ) - 0.5f, -1.0f };
 	float3 d = { 0.0f, 0.0f, 1.0f };
 
 	hiprtRay ray;
@@ -178,8 +185,8 @@ extern "C" __global__ void SceneIntersectionKernel( hiprtScene scene, u8* pixels
 	hiprtHit				   hit = tr.getNextHit();
 
 	int pixelIndex			   = x + y * res.x;
-	pixels[pixelIndex * 4 + 0] = hit.hasHit() ? ( (float)x / res.x ) * 255 : 0;
-	pixels[pixelIndex * 4 + 1] = hit.hasHit() ? ( (float)y / res.y ) * 255 : 0;
+	pixels[pixelIndex * 4 + 0] = hit.hasHit() ? ( static_cast<float>( x ) / res.x ) * 255 : 0;
+	pixels[pixelIndex * 4 + 1] = hit.hasHit() ? ( static_cast<float>( y ) / res.y ) * 255 : 0;
 	pixels[pixelIndex * 4 + 2] = 0;
 	pixels[pixelIndex * 4 + 3] = 255;
 }
@@ -190,7 +197,7 @@ extern "C" __global__ void CustomIntersectionKernel( hiprtGeometry geom, u8* pix
 	const int y = blockIdx.y * blockDim.y + threadIdx.y;
 
 	hiprtRay ray;
-	ray.origin	  = { x / (float)res.x - 0.5f, y / (float)res.y - 0.5f, -1.0f };
+	ray.origin	  = { x / static_cast<float>( res.x ) - 0.5f, y / static_cast<float>( res.y ) - 0.5f, -1.0f };
 	ray.direction = { 0.0f, 0.0f, 1.0f };
 	ray.maxT	  = 100000.0f;
 
@@ -204,13 +211,14 @@ extern "C" __global__ void CustomIntersectionKernel( hiprtGeometry geom, u8* pix
 	pixels[pixelIndex * 4 + 3] = 255;
 }
 
-extern "C" __global__ void SharedStackKernel( hiprtGeometry geom, u8* pixels, int2 res, int* globalStackBuffer, int stackSize )
+extern "C" __global__ void
+SharedStackKernel( hiprtGeometry geom, u8* pixels, int2 res, hiprtGlobalStackBuffer globalStackBuffer )
 {
 	const int x = blockIdx.x * blockDim.x + threadIdx.x;
 	const int y = blockIdx.y * blockDim.y + threadIdx.y;
 
 	float3 o   = { 278.0f, 273.0f, -900.0f };
-	float2 d   = { 2.0f * x / (float)res.x - 1.0f, 2.0f * y / (float)res.y - 1.0f };
+	float2 d   = { 2.0f * x / static_cast<float>( res.x ) - 1.0f, 2.0f * y / static_cast<float>( res.y ) - 1.0f };
 	float3 uvw = { -387.817566f, -387.817566f, 1230.0f };
 
 	hiprtRay ray;
@@ -220,8 +228,10 @@ extern "C" __global__ void SharedStackKernel( hiprtGeometry geom, u8* pixels, in
 		ray.direction /
 		sqrtf( ray.direction.x * ray.direction.x + ray.direction.y * ray.direction.y + ray.direction.z * ray.direction.z );
 
-	__shared__ int	 sharedStackBuffer[SHARED_STACK_SIZE * BLOCK_SIZE];
-	hiprtGlobalStack stack( globalStackBuffer, stackSize, sharedStackBuffer, SHARED_STACK_SIZE );
+	__shared__ int		   sharedStackCache[SHARED_STACK_SIZE * BLOCK_SIZE];
+	hiprtSharedStackBuffer sharedStackBuffer{ SHARED_STACK_SIZE, sharedStackCache };
+
+	hiprtGlobalStack									   stack( globalStackBuffer, sharedStackBuffer );
 	hiprtGeomTraversalClosestCustomStack<hiprtGlobalStack> tr( geom, ray, stack );
 
 	hiprtHit hit = tr.getNextHit();
@@ -249,7 +259,7 @@ CustomBvhImportKernel( hiprtGeometry geom, u8* pixels, int2 res, int* matIndices
 	const int y = blockIdx.y * blockDim.y + threadIdx.y;
 
 	float3 o   = { 278.0f, 273.0f, -900.0f };
-	float2 d   = { 2.0f * x / (float)res.x - 1.0f, 2.0f * y / (float)res.y - 1.0f };
+	float2 d   = { 2.0f * x / static_cast<float>( res.x ) - 1.0f, 2.0f * y / static_cast<float>( res.y ) - 1.0f };
 	float3 uvw = { -387.817566f, -387.817566f, 1230.0f };
 
 	hiprtRay ray;
@@ -276,11 +286,25 @@ CustomBvhImportKernel( hiprtGeometry geom, u8* pixels, int2 res, int* matIndices
 		}
 
 		int pixelIndex			   = x + y * res.x;
-		pixels[pixelIndex * 4 + 0] = min( 255, int( pixels[pixelIndex * 4 + 0] ) + color.x );
-		pixels[pixelIndex * 4 + 1] = min( 255, int( pixels[pixelIndex * 4 + 1] ) + color.y );
-		pixels[pixelIndex * 4 + 2] = min( 255, int( pixels[pixelIndex * 4 + 2] ) + color.z );
+		pixels[pixelIndex * 4 + 0] = min( 255, static_cast<int>( pixels[pixelIndex * 4 + 0] ) + color.x );
+		pixels[pixelIndex * 4 + 1] = min( 255, static_cast<int>( pixels[pixelIndex * 4 + 1] ) + color.y );
+		pixels[pixelIndex * 4 + 2] = min( 255, static_cast<int>( pixels[pixelIndex * 4 + 2] ) + color.z );
 		pixels[pixelIndex * 4 + 3] = 255;
 	}
+}
+
+__device__ float3 sampleHemisphereCosine( float3 n, u32& seed )
+{
+	float phi		  = TwoPi * randf( seed );
+	float sinThetaSqr = randf( seed );
+	float sinTheta	  = sqrt( sinThetaSqr );
+
+	float3 axis = fabs( n.x ) > 0.001f ? make_float3( 0.0f, 1.0f, 0.0f ) : make_float3( 1.0f, 0.0f, 0.0f );
+	float3 t	= cross( axis, n );
+	t			= normalize( t );
+	float3 s	= cross( n, t );
+
+	return normalize( s * cos( phi ) * sinTheta + t * sin( phi ) * sinTheta + n * sqrt( 1.0f - sinThetaSqr ) );
 }
 
 extern "C" __global__ void AmbientOcclusionKernel( hiprtGeometry geom, u8* pixels, int2 res, float aoRadius )
@@ -296,10 +320,12 @@ extern "C" __global__ void AmbientOcclusionKernel( hiprtGeometry geom, u8* pixel
 
 	for ( int p = 0; p < spp; p++ )
 	{
-		unsigned int seed = tea<16>( x + y * res.x, p ).x;
+		u32 seed = tea<16>( x + y * res.x, p ).x;
 
-		float3 o   = { 278.0f, 273.0f, -900.0f };
-		float2 d   = { 2.0f * ( x + randf( seed ) ) / (float)res.x - 1.0f, 2.0f * ( y + randf( seed ) ) / (float)res.y - 1.0f };
+		float3 o = { 278.0f, 273.0f, -900.0f };
+		float2 d = {
+			2.0f * ( x + randf( seed ) ) / static_cast<float>( res.x ) - 1.0f,
+			2.0f * ( y + randf( seed ) ) / static_cast<float>( res.y ) - 1.0f };
 		float3 uvw = { -387.817566f, -387.817566f, 1230.0f };
 
 		hiprtRay ray;
@@ -355,10 +381,10 @@ extern "C" __global__ void MotionBlurKernel( hiprtScene scene, u8* pixels, int2 
 	const int x = blockIdx.x * blockDim.x + threadIdx.x;
 	const int y = blockIdx.y * blockDim.y + threadIdx.y;
 
-	const unsigned int samples = 32;
+	const u32 samples = 32;
 
 	hiprtRay ray;
-	float3	 o	  = { x / (float)res.x - 0.5f, y / (float)res.y - 0.5f, -1.f };
+	float3	 o	  = { x / static_cast<float>( res.x ) - 0.5f, y / static_cast<float>( res.y ) - 0.5f, -1.f };
 	float3	 d	  = { 0.f, 0.f, 1.f };
 	ray.origin	  = o;
 	ray.direction = d;
@@ -368,7 +394,7 @@ extern "C" __global__ void MotionBlurKernel( hiprtScene scene, u8* pixels, int2 
 	float3 color = { 0.0f, 0.0f, 0.0f };
 	for ( int i = 0; i < samples; ++i )
 	{
-		float					   time = i / (float)samples;
+		float					   time = i / static_cast<float>( samples );
 		hiprtSceneTraversalClosest tr( scene, ray, hiprtFullRayMask, hiprtTraversalHintDefault, nullptr, nullptr, 0, time );
 		hiprtHit				   hit = tr.getNextHit();
 		if ( hit.hasHit() )
@@ -394,7 +420,7 @@ extern "C" __global__ void MultiCustomIntersectionKernel( hiprtScene scene, u8* 
 	const int y = blockIdx.y * blockDim.y + threadIdx.y;
 
 	hiprtRay ray;
-	ray.origin	  = { x / (float)res.x - 0.5f, y / (float)res.y - 0.5f, -1.0f };
+	ray.origin	  = { x / static_cast<float>( res.x ) - 0.5f, y / static_cast<float>( res.y ) - 0.5f, -1.0f };
 	ray.direction = { 0.0f, 0.0f, 1.0f };
 	ray.maxT	  = 100000.0f;
 
@@ -414,7 +440,7 @@ extern "C" __global__ void CutoutKernel( hiprtGeometry geom, u8* pixels, hiprtFu
 	const int y = blockIdx.y * blockDim.y + threadIdx.y;
 
 	hiprtRay ray;
-	float3	 o	  = { x / (float)res.x, y / (float)res.y, -1.0f };
+	float3	 o	  = { x / static_cast<float>( res.x ), y / static_cast<float>( res.y ), -1.0f };
 	float3	 d	  = { 0.0f, 0.0f, 1.0f };
 	ray.origin	  = o;
 	ray.direction = d;
@@ -429,13 +455,13 @@ extern "C" __global__ void CutoutKernel( hiprtGeometry geom, u8* pixels, hiprtFu
 	pixels[pixelIndex * 4 + 3] = 255;
 }
 
-extern "C" __global__ void ConcurrentSceneBuildKernel( hiprtScene scene, u8* pixels, hiprtFuncTable table, int2 res )
+extern "C" __global__ void SceneBuildKernel( hiprtScene scene, u8* pixels, hiprtFuncTable table, int2 res )
 {
 	const int x = blockIdx.x * blockDim.x + threadIdx.x;
 	const int y = blockIdx.y * blockDim.y + threadIdx.y;
 
 	hiprtRay ray;
-	float3	 o	  = { x / (float)res.x, y / (float)res.y, -1.f };
+	float3	 o	  = { x / static_cast<float>( res.x ), y / static_cast<float>( res.y ), -1.f };
 	float3	 d	  = { 0.f, 0.f, 1.f };
 	ray.origin	  = o;
 	ray.direction = d;
@@ -468,4 +494,175 @@ extern "C" __global__ void ConcurrentSceneBuildKernel( hiprtScene scene, u8* pix
 
 		if ( tr.getCurrentState() == hiprtTraversalStateFinished ) break;
 	}
+}
+
+__device__ float calculateDensity( float r2, float h, float densityCoef )
+{
+	// Implements this equation:
+	// W_poly6(r, h) = 315 / (64 * pi * h^9) * (h^2 - r^2)^3
+	// densityCoef = particleMass * 315.0f / (64.0f * pi * h^9)
+	const float d2 = h * h - r2;
+
+	return densityCoef * d2 * d2 * d2;
+}
+
+__device__ float calculatePressure( float rho, float rho0, float pressureStiffness )
+{
+	// Implements this equation:
+	// Pressure = B * ((rho / rho_0)^3 - 1)
+	const float rhoRatio = rho / rho0;
+
+	return pressureStiffness * max( rhoRatio * rhoRatio * rhoRatio - 1.0f, 0.0f );
+}
+
+__device__ float3
+calculateGradPressure( float r, float d, float pressure, float pressure_j, float rho_j, float3 disp, float pressureGradCoef )
+{
+	float avgPressure = 0.5 * ( pressure + pressure_j );
+	// Implements this equation:
+	// W_spkiey(r, h) = 15 / (pi * h^6) * (h - r)^3
+	// GRAD(W_spikey(r, h)) = -45 / (pi * h^6) * (h - r)^2
+	// pressureGradCoef = particleMass * -45.0f / (pi * h^6)
+
+	return pressureGradCoef * avgPressure * d * d * disp / ( rho_j * r );
+}
+
+__device__ float3
+calculateVelocityLaplace( float d, float3 velocity, float3 velocity_j, float rho_j, float viscosityLaplaceCoef )
+{
+	float3 velDisp = ( velocity_j - velocity );
+	// Implements this equation:
+	// W_viscosity(r, h) = 15 / (2 * pi * h^3) * (-r^3 / (2 * h^3) + r^2 / h^2 + h / (2 * r) - 1)
+	// LAPLACIAN(W_viscosity(r, h)) = 45 / (pi * h^6) * (h - r)
+	// viscosityLaplaceCoef = particleMass * viscosity * 45.0f / (pi * h^6)
+
+	return viscosityLaplaceCoef * d * velDisp / rho_j;
+}
+
+extern "C" __global__ void
+DensityKernel( hiprtGeometry geom, float* densities, const Particle* particles, Simulation* sim, hiprtFuncTable table )
+{
+	const unsigned int idx		= blockIdx.x * blockDim.x + threadIdx.x;
+	Particle		   particle = particles[idx];
+
+	hiprtRay ray;
+	ray.origin	  = particle.Pos;
+	ray.direction = { 0.0f, 0.0f, 1.0f };
+	ray.minT	  = 0.0f;
+	ray.maxT	  = 0.0f;
+
+	hiprtGeomCustomTraversalAnyHit tr( geom, ray, hiprtTraversalHintDefault, sim, table );
+
+	float rho = 0.0f;
+	while ( tr.getCurrentState() != hiprtTraversalStateFinished )
+	{
+		hiprtHit hit = tr.getNextHit();
+		if ( !hit.hasHit() ) continue;
+
+		rho += calculateDensity( hit.t, sim->m_smoothRadius, sim->m_densityCoef );
+	}
+
+	densities[idx] = rho;
+}
+
+extern "C" __global__ void ForceKernel(
+	hiprtGeometry	geom,
+	float3*			accelerations,
+	const Particle* particles,
+	const float*	densities,
+	Simulation*		sim,
+	hiprtFuncTable	table )
+{
+	const unsigned int idx		= blockIdx.x * blockDim.x + threadIdx.x;
+	Particle		   particle = particles[idx];
+	float			   rho		= densities[idx];
+
+	hiprtRay ray;
+	ray.origin	  = particle.Pos;
+	ray.direction = { 0.0f, 0.0f, 1.0f };
+	ray.minT	  = 0.0f;
+	ray.maxT	  = 0.0f;
+
+	float pressure = calculatePressure( rho, sim->m_restDensity, sim->m_pressureStiffness );
+
+	hiprtGeomCustomTraversalAnyHit tr( geom, ray, hiprtTraversalHintDefault, sim, table );
+
+	float3 force = make_float3( 0.0f );
+	while ( tr.getCurrentState() != hiprtTraversalStateFinished )
+	{
+		hiprtHit hit = tr.getNextHit();
+		if ( !hit.hasHit() ) continue;
+		if ( hit.primID == idx ) continue;
+
+		Particle hitParticle = particles[hit.primID];
+		float	 hitRho		 = densities[hit.primID];
+
+		float3 disp		   = hit.normal;
+		float  r		   = sqrtf( hit.t );
+		float  d		   = sim->m_smoothRadius - r;
+		float  hitPressure = calculatePressure( hitRho, sim->m_restDensity, sim->m_pressureStiffness );
+
+		force += calculateGradPressure( r, d, pressure, hitPressure, hitRho, disp, sim->m_pressureGradCoef );
+		force += calculateVelocityLaplace( d, particle.Velocity, hitParticle.Velocity, hitRho, sim->m_viscosityLaplaceCoef );
+	}
+
+	accelerations[idx] = rho > 0.0f ? force / rho : make_float3( 0.0f );
+}
+
+extern "C" __global__ void IntegrationKernel(
+	Particle* particles, Aabb* particleAabbs, const float3* accelerations, const Simulation* sim, const PerFrame* perFrame )
+{
+	const unsigned int idx			= blockIdx.x * blockDim.x + threadIdx.x;
+	Particle		   particle		= particles[idx];
+	float3			   acceleration = accelerations[idx];
+
+	// Apply the forces from the map walls
+	for ( u32 i = 0; i < 6; ++i )
+	{
+		float d = dot( make_float4( particle.Pos, 1.0f ), sim->m_planes[i] );
+		acceleration += min( d, 0.0f ) * -sim->m_wallStiffness * make_float3( sim->m_planes[i] );
+	}
+
+	// Apply gravity
+	acceleration += perFrame->m_gravity;
+
+	// Integrate
+	particle.Velocity += perFrame->m_timeStep * acceleration;
+	particle.Pos += perFrame->m_timeStep * particle.Velocity;
+
+	Aabb aabb;
+	aabb.m_min = particle.Pos - sim->m_smoothRadius;
+	aabb.m_max = particle.Pos + sim->m_smoothRadius;
+
+	// Update
+	particles[idx]	   = particle;
+	particleAabbs[idx] = aabb;
+}
+
+extern "C" __global__ void
+VisualizationKernel( const Particle* particles, const float* densities, u8* pixels, int2 res, const float4x4* viewProj )
+{
+	const unsigned int idx		= blockIdx.x * blockDim.x + threadIdx.x;
+	Particle		   particle = particles[idx];
+	float			   rho		= densities[idx];
+
+	// To clip space
+	float4 pos = ( *viewProj ) * make_float4( particle.Pos, 1.0f );
+
+	// Normalize to NDC
+	pos.x = pos.x / pos.w;
+	pos.y = pos.y / pos.w;
+	pos.z = pos.z / pos.w;
+
+	// To viewport
+	int x = ( pos.x * 0.5f + 0.5f ) * res.x;
+	int y = ( 0.5f - pos.y * 0.5f ) * res.y;
+
+	float visRho = rho / 4000.0f;
+
+	int pixelIndex			   = x + y * res.x;
+	pixels[pixelIndex * 4 + 0] = visRho * 255.0f;
+	pixels[pixelIndex * 4 + 1] = 0;
+	pixels[pixelIndex * 4 + 2] = ( 1.0f - visRho ) * 255.0f;
+	pixels[pixelIndex * 4 + 3] = 255;
 }

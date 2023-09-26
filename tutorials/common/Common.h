@@ -1,12 +1,38 @@
+//
+// Copyright (c) 2021-2023 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+
 #pragma once
 
 #if ( defined( __CUDACC__ ) || defined( __HIPCC__ ) )
 #define __KERNELCC__
 #endif
 
+#include <hiprt/hiprt_vec.h>
 #if !defined( __KERNELCC__ )
 #include <cmath>
 #endif
+
+constexpr float FltMin = 1.175494351e-38f;
+constexpr float FltMax = 3.402823466e+38f;
 
 #if !defined( __KERNELCC__ )
 #define HOST
@@ -41,10 +67,18 @@
 #define INLINE inline
 #endif
 
+struct float4x4
+{
+	union
+	{
+		float4 r[4];
+		float  e[4][4];
+	};
+};
+
 #define RT_MIN( a, b ) ( ( ( b ) < ( a ) ) ? ( b ) : ( a ) )
 #define RT_MAX( a, b ) ( ( ( b ) > ( a ) ) ? ( b ) : ( a ) )
 
-//#if !defined( __KERNELCC__ )
 HOST_DEVICE INLINE int2 make_int2( const float2 a ) { return make_int2( (int)a.x, (int)a.y ); }
 
 HOST_DEVICE INLINE int2 make_int2( const int3& a ) { return make_int2( a.x, a.y ); }
@@ -52,7 +86,6 @@ HOST_DEVICE INLINE int2 make_int2( const int3& a ) { return make_int2( a.x, a.y 
 HOST_DEVICE INLINE int2 make_int2( const int4& a ) { return make_int2( a.x, a.y ); }
 
 HOST_DEVICE INLINE int2 make_int2( const int c ) { return make_int2( c, c ); }
-
 
 HOST_DEVICE INLINE int2 operator+( const int2& a, const int2& b ) { return make_int2( a.x + b.x, a.y + b.y ); }
 
@@ -144,25 +177,13 @@ HOST_DEVICE INLINE int3 make_int3( const int2& a, const int c ) { return make_in
 
 HOST_DEVICE INLINE int3 make_int3( const int c ) { return make_int3( c, c, c ); }
 
-HOST_DEVICE INLINE int3 operator+( const int3& a, const int3& b )
-{
-	return make_int3( a.x + b.x, a.y + b.y, a.z + b.z );
-}
+HOST_DEVICE INLINE int3 operator+( const int3& a, const int3& b ) { return make_int3( a.x + b.x, a.y + b.y, a.z + b.z ); }
 
-HOST_DEVICE INLINE int3 operator-( const int3& a, const int3& b )
-{
-	return make_int3( a.x - b.x, a.y - b.y, a.z - b.z );
-}
+HOST_DEVICE INLINE int3 operator-( const int3& a, const int3& b ) { return make_int3( a.x - b.x, a.y - b.y, a.z - b.z ); }
 
-HOST_DEVICE INLINE int3 operator*( const int3& a, const int3& b )
-{
-	return make_int3( a.x * b.x, a.y * b.y, a.z * b.z );
-}
+HOST_DEVICE INLINE int3 operator*( const int3& a, const int3& b ) { return make_int3( a.x * b.x, a.y * b.y, a.z * b.z ); }
 
-HOST_DEVICE INLINE int3 operator/( const int3& a, const int3& b )
-{
-	return make_int3( a.x / b.x, a.y / b.y, a.z / b.z );
-}
+HOST_DEVICE INLINE int3 operator/( const int3& a, const int3& b ) { return make_int3( a.x / b.x, a.y / b.y, a.z / b.z ); }
 
 HOST_DEVICE INLINE int3& operator+=( int3& a, const int3& b )
 {
@@ -248,10 +269,7 @@ HOST_DEVICE INLINE int3 operator/( const int c, const int3& a ) { return make_in
 
 HOST_DEVICE INLINE int4 make_int4( const float4& a ) { return make_int4( (int)a.x, (int)a.y, (int)a.z, (int)a.w ); }
 
-HOST_DEVICE INLINE int4 make_int4( const int2& a, const int c0, const int c1 )
-{
-	return make_int4( a.x, a.y, c0, c1 );
-}
+HOST_DEVICE INLINE int4 make_int4( const int2& a, const int c0, const int c1 ) { return make_int4( a.x, a.y, c0, c1 ); }
 
 HOST_DEVICE INLINE int4 make_int4( const int3& a, const int c ) { return make_int4( a.x, a.y, a.z, c ); }
 
@@ -351,46 +369,21 @@ HOST_DEVICE INLINE int4& operator/=( int4& a, const int c )
 
 HOST_DEVICE INLINE int4 operator-( const int4& a ) { return make_int4( -a.x, -a.y, -a.z, -a.w ); }
 
-HOST_DEVICE INLINE int4 operator+( const int4& a, const int c )
-{
-	return make_int4( c + a.x, c + a.y, c + a.z, c + a.w );
-}
+HOST_DEVICE INLINE int4 operator+( const int4& a, const int c ) { return make_int4( c + a.x, c + a.y, c + a.z, c + a.w ); }
 
-HOST_DEVICE INLINE int4 operator+( const int c, const int4& a )
-{
-	return make_int4( c + a.x, c + a.y, c + a.z, c + a.w );
-}
+HOST_DEVICE INLINE int4 operator+( const int c, const int4& a ) { return make_int4( c + a.x, c + a.y, c + a.z, c + a.w ); }
 
-HOST_DEVICE INLINE int4 operator-( const int4& a, const int c )
-{
-	return make_int4( a.x - c, a.y - c, a.z - c, a.w - c );
-}
+HOST_DEVICE INLINE int4 operator-( const int4& a, const int c ) { return make_int4( a.x - c, a.y - c, a.z - c, a.w - c ); }
 
-HOST_DEVICE INLINE int4 operator-( const int c, const int4& a )
-{
-	return make_int4( c - a.x, c - a.y, c - a.z, c - a.w );
-}
+HOST_DEVICE INLINE int4 operator-( const int c, const int4& a ) { return make_int4( c - a.x, c - a.y, c - a.z, c - a.w ); }
 
-HOST_DEVICE INLINE int4 operator*( const int4& a, const int c )
-{
-	return make_int4( c * a.x, c * a.y, c * a.z, c * a.w );
-}
+HOST_DEVICE INLINE int4 operator*( const int4& a, const int c ) { return make_int4( c * a.x, c * a.y, c * a.z, c * a.w ); }
 
-HOST_DEVICE INLINE int4 operator*( const int c, const int4& a )
-{
-	return make_int4( c * a.x, c * a.y, c * a.z, c * a.w );
-}
+HOST_DEVICE INLINE int4 operator*( const int c, const int4& a ) { return make_int4( c * a.x, c * a.y, c * a.z, c * a.w ); }
 
-HOST_DEVICE INLINE int4 operator/( const int4& a, const int c )
-{
-	return make_int4( a.x / c, a.y / c, a.z / c, a.w / c );
-}
+HOST_DEVICE INLINE int4 operator/( const int4& a, const int c ) { return make_int4( a.x / c, a.y / c, a.z / c, a.w / c ); }
 
-HOST_DEVICE INLINE int4 operator/( const int c, const int4& a )
-{
-	return make_int4( c / a.x, c / a.y, c / a.z, c / a.w );
-}
-
+HOST_DEVICE INLINE int4 operator/( const int c, const int4& a ) { return make_int4( c / a.x, c / a.y, c / a.z, c / a.w ); }
 
 HOST_DEVICE INLINE int2 max( const int2& a, const int2& b )
 {
@@ -544,25 +537,13 @@ HOST_DEVICE INLINE float2 make_float2( const float4& a ) { return make_float2( a
 
 HOST_DEVICE INLINE float2 make_float2( const float c ) { return make_float2( c, c ); }
 
-HOST_DEVICE INLINE float2 operator+( const float2& a, const float2& b )
-{
-	return make_float2( a.x + b.x, a.y + b.y );
-}
+HOST_DEVICE INLINE float2 operator+( const float2& a, const float2& b ) { return make_float2( a.x + b.x, a.y + b.y ); }
 
-HOST_DEVICE INLINE float2 operator-( const float2& a, const float2& b )
-{
-	return make_float2( a.x - b.x, a.y - b.y );
-}
+HOST_DEVICE INLINE float2 operator-( const float2& a, const float2& b ) { return make_float2( a.x - b.x, a.y - b.y ); }
 
-HOST_DEVICE INLINE float2 operator*( const float2& a, const float2& b )
-{
-	return make_float2( a.x * b.x, a.y * b.y );
-}
+HOST_DEVICE INLINE float2 operator*( const float2& a, const float2& b ) { return make_float2( a.x * b.x, a.y * b.y ); }
 
-HOST_DEVICE INLINE float2 operator/( const float2& a, const float2& b )
-{
-	return make_float2( a.x / b.x, a.y / b.y );
-}
+HOST_DEVICE INLINE float2 operator/( const float2& a, const float2& b ) { return make_float2( a.x / b.x, a.y / b.y ); }
 
 HOST_DEVICE INLINE float2& operator+=( float2& a, const float2& b )
 {
@@ -732,50 +713,23 @@ HOST_DEVICE INLINE float3& operator/=( float3& a, const float c )
 
 HOST_DEVICE INLINE float3 operator-( const float3& a ) { return make_float3( -a.x, -a.y, -a.z ); }
 
-HOST_DEVICE INLINE float3 operator+( const float3& a, const float c )
-{
-	return make_float3( c + a.x, c + a.y, c + a.z );
-}
+HOST_DEVICE INLINE float3 operator+( const float3& a, const float c ) { return make_float3( c + a.x, c + a.y, c + a.z ); }
 
-HOST_DEVICE INLINE float3 operator+( const float c, const float3& a )
-{
-	return make_float3( c + a.x, c + a.y, c + a.z );
-}
+HOST_DEVICE INLINE float3 operator+( const float c, const float3& a ) { return make_float3( c + a.x, c + a.y, c + a.z ); }
 
-HOST_DEVICE INLINE float3 operator-( const float3& a, const float c )
-{
-	return make_float3( a.x - c, a.y - c, a.z - c );
-}
+HOST_DEVICE INLINE float3 operator-( const float3& a, const float c ) { return make_float3( a.x - c, a.y - c, a.z - c ); }
 
-HOST_DEVICE INLINE float3 operator-( const float c, const float3& a )
-{
-	return make_float3( c - a.x, c - a.y, c - a.z );
-}
+HOST_DEVICE INLINE float3 operator-( const float c, const float3& a ) { return make_float3( c - a.x, c - a.y, c - a.z ); }
 
-HOST_DEVICE INLINE float3 operator*( const float3& a, const float c )
-{
-	return make_float3( c * a.x, c * a.y, c * a.z );
-}
+HOST_DEVICE INLINE float3 operator*( const float3& a, const float c ) { return make_float3( c * a.x, c * a.y, c * a.z ); }
 
-HOST_DEVICE INLINE float3 operator*( const float c, const float3& a )
-{
-	return make_float3( c * a.x, c * a.y, c * a.z );
-}
+HOST_DEVICE INLINE float3 operator*( const float c, const float3& a ) { return make_float3( c * a.x, c * a.y, c * a.z ); }
 
-HOST_DEVICE INLINE float3 operator/( const float3& a, const float c )
-{
-	return make_float3( a.x / c, a.y / c, a.z / c );
-}
+HOST_DEVICE INLINE float3 operator/( const float3& a, const float c ) { return make_float3( a.x / c, a.y / c, a.z / c ); }
 
-HOST_DEVICE INLINE float3 operator/( const float c, const float3& a )
-{
-	return make_float3( c / a.x, c / a.y, c / a.z );
-}
+HOST_DEVICE INLINE float3 operator/( const float c, const float3& a ) { return make_float3( c / a.x, c / a.y, c / a.z ); }
 
-HOST_DEVICE INLINE float4 make_float4( const int4& a )
-{
-	return make_float4( (float)a.x, (float)a.y, (float)a.z, (float)a.w );
-}
+HOST_DEVICE INLINE float4 make_float4( const int4& a ) { return make_float4( (float)a.x, (float)a.y, (float)a.z, (float)a.w ); }
 
 HOST_DEVICE INLINE float4 make_float4( const float2& a, const float c0, const float c1 )
 {
@@ -919,7 +873,6 @@ HOST_DEVICE INLINE float4 operator/( const float c, const float4& a )
 {
 	return make_float4( c / a.x, c / a.y, c / a.z, c / a.w );
 }
-//#endif
 
 HOST_DEVICE INLINE float3 cross( const float3& a, const float3& b )
 {
@@ -928,9 +881,55 @@ HOST_DEVICE INLINE float3 cross( const float3& a, const float3& b )
 
 HOST_DEVICE INLINE float dot( const float3& a, const float3& b ) { return a.x * b.x + a.y * b.y + a.z * b.z; }
 
+HOST_DEVICE INLINE float dot( const float4& a, const float4& b ) { return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w; }
+
 HOST_DEVICE INLINE float3 normalize( const float3& a ) { return a / sqrtf( dot( a, a ) ); }
 
-HOST_DEVICE INLINE const float4 cross3( const float3 aa, const float3 bb )
+HOST_DEVICE INLINE float4 operator*( const float4x4& m, const float4& v )
 {
-	return make_float4( aa.y * bb.z - aa.z * bb.y, aa.z * bb.x - aa.x * bb.z, aa.x * bb.y - aa.y * bb.x, 0 );
+	return make_float4( dot( m.r[0], v ), dot( m.r[1], v ), dot( m.r[2], v ), dot( m.r[3], v ) );
+}
+
+HOST_DEVICE INLINE float4x4 operator*( const float4x4& a, const float4x4& b )
+{
+	float4x4 m;
+	for ( int r = 0; r < 4; ++r )
+	{
+		for ( int c = 0; c < 4; ++c )
+		{
+			m.e[r][c] = 0.0f;
+			for ( int k = 0; k < 4; ++k )
+				m.e[r][c] += a.e[r][k] * b.e[k][c];
+		}
+	}
+
+	return m;
+}
+
+HOST_DEVICE INLINE float4x4 Perspective( float y_fov, float aspect, float n, float f )
+{
+	float a = 1.0f / tanf( y_fov / 2.0f );
+
+	float4x4 m;
+	m.r[0] = make_float4( a / aspect, 0.0f, 0.0f, 0.0f );
+	m.r[1] = make_float4( 0.0f, a, 0.0f, 0.0f );
+	m.r[2] = make_float4( 0.0f, 0.0f, f / ( f - n ), n * f / ( n - f ) );
+	m.r[3] = make_float4( 0.0f, 0.0f, 1.0f, 0.0f );
+
+	return m;
+}
+
+HOST_DEVICE INLINE float4x4 LookAt( const float3& eye, const float3& at, const float3& up )
+{
+	float3 f = normalize( at - eye );
+	float3 s = normalize( cross( up, f ) );
+	float3 t = cross( f, s );
+
+	float4x4 m;
+	m.r[0] = make_float4( s, -dot( s, eye ) );
+	m.r[1] = make_float4( t, -dot( t, eye ) );
+	m.r[2] = make_float4( f, -dot( f, eye ) );
+	m.r[3] = make_float4( 0.0f, 0.0f, 0.0f, 1.0f );
+
+	return m;
 }
