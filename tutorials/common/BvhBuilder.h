@@ -21,6 +21,7 @@
 //
 
 #pragma once
+#include <cstdint>
 #include <cassert>
 #include <queue>
 #include <tutorials/common/Aabb.h>
