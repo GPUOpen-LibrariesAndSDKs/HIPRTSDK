@@ -18,3 +18,4 @@
 |[12_concurrent_scene_build](./12_concurrent_scene_build)   | <img src="./imgs/12_concurrent_scene_build.png" alt="drawing" width="100"/>  | Build geometries using multiple streams concurrently. |
 |[13_batch_build](./13_batch_build)   | <img src="./imgs/13_batch_build.png" alt="drawing" width="100"/>  | Build small geometries concurrently in a single batch. |
 |[14_fluid_simulation](./14_fluid_simulation)   | <img src="./imgs/14_fluid_simulation.png" alt="drawing" width="100"/>  | A simple fluid simulation. |
+|[15_hiprt_hip](./15_hiprt_hip)   || Using HIPRT with regular HIP (without Orochi). |
