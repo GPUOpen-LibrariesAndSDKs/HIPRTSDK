@@ -31,9 +31,6 @@
 #include <cmath>
 #endif
 
-constexpr float FltMin = 1.175494351e-38f;
-constexpr float FltMax = 3.402823466e+38f;
-
 #if !defined( __KERNELCC__ )
 #define HOST
 #define DEVICE
