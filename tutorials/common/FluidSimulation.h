@@ -25,15 +25,15 @@
 
 struct Simulation
 {
-	float  m_smoothRadius;
-	float  m_pressureStiffness;
-	float  m_restDensity;
-	float  m_densityCoef;
-	float  m_pressureGradCoef;
-	float  m_viscosityLaplaceCoef;
-	float  m_wallStiffness;
-	u32	   m_particleCount;
-	float4 m_planes[6];
+	float	 m_smoothRadius;
+	float	 m_pressureStiffness;
+	float	 m_restDensity;
+	float	 m_densityCoef;
+	float	 m_pressureGradCoef;
+	float	 m_viscosityLaplaceCoef;
+	float	 m_wallStiffness;
+	uint32_t m_particleCount;
+	float4	 m_planes[6];
 };
 
 struct PerFrame

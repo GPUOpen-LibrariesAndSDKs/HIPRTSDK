@@ -32,10 +32,6 @@
 #endif
 
 #if !defined( __KERNELCC__ )
-#define HOST
-#define DEVICE
-#define HOST_DEVICE
-
 #define int2 hiprtInt2
 #define int3 hiprtInt3
 #define int4 hiprtInt4
@@ -51,17 +47,6 @@
 #define make_float2 make_hiprtFloat2
 #define make_float3 make_hiprtFloat3
 #define make_float4 make_hiprtFloat4
-
-#else
-#define HOST __host__
-#define DEVICE __device__
-#define HOST_DEVICE __host__ __device__
-#endif
-
-#ifdef __CUDACC__
-#define INLINE __forceinline__
-#else
-#define INLINE inline
 #endif
 
 struct float4x4
@@ -76,113 +61,125 @@ struct float4x4
 #define RT_MIN( a, b ) ( ( ( b ) < ( a ) ) ? ( b ) : ( a ) )
 #define RT_MAX( a, b ) ( ( ( b ) > ( a ) ) ? ( b ) : ( a ) )
 
-HOST_DEVICE INLINE int2 make_int2( const float2 a ) { return make_int2( (int)a.x, (int)a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 make_int2( const float2 a ) { return make_int2( (int)a.x, (int)a.y ); }
 
-HOST_DEVICE INLINE int2 make_int2( const int3& a ) { return make_int2( a.x, a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 make_int2( const int3& a ) { return make_int2( a.x, a.y ); }
 
-HOST_DEVICE INLINE int2 make_int2( const int4& a ) { return make_int2( a.x, a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 make_int2( const int4& a ) { return make_int2( a.x, a.y ); }
 
-HOST_DEVICE INLINE int2 make_int2( const int c ) { return make_int2( c, c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 make_int2( const int c ) { return make_int2( c, c ); }
 
-HOST_DEVICE INLINE int2 operator+( const int2& a, const int2& b ) { return make_int2( a.x + b.x, a.y + b.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 operator+( const int2& a, const int2& b ) { return make_int2( a.x + b.x, a.y + b.y ); }
 
-HOST_DEVICE INLINE int2 operator-( const int2& a, const int2& b ) { return make_int2( a.x - b.x, a.y - b.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 operator-( const int2& a, const int2& b ) { return make_int2( a.x - b.x, a.y - b.y ); }
 
-HOST_DEVICE INLINE int2 operator*( const int2& a, const int2& b ) { return make_int2( a.x * b.x, a.y * b.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 operator*( const int2& a, const int2& b ) { return make_int2( a.x * b.x, a.y * b.y ); }
 
-HOST_DEVICE INLINE int2 operator/( const int2& a, const int2& b ) { return make_int2( a.x / b.x, a.y / b.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 operator/( const int2& a, const int2& b ) { return make_int2( a.x / b.x, a.y / b.y ); }
 
-HOST_DEVICE INLINE int2& operator+=( int2& a, const int2& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2& operator+=( int2& a, const int2& b )
 {
 	a.x += b.x;
 	a.y += b.y;
 	return a;
 }
 
-HOST_DEVICE INLINE int2& operator-=( int2& a, const int2& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2& operator-=( int2& a, const int2& b )
 {
 	a.x -= b.x;
 	a.y -= b.y;
 	return a;
 }
 
-HOST_DEVICE INLINE int2& operator*=( int2& a, const int2& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2& operator*=( int2& a, const int2& b )
 {
 	a.x *= b.x;
 	a.y *= b.y;
 	return a;
 }
 
-HOST_DEVICE INLINE int2& operator/=( int2& a, const int2& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2& operator/=( int2& a, const int2& b )
 {
 	a.x /= b.x;
 	a.y /= b.y;
 	return a;
 }
 
-HOST_DEVICE INLINE int2& operator+=( int2& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2& operator+=( int2& a, const int c )
 {
 	a.x += c;
 	a.y += c;
 	return a;
 }
 
-HOST_DEVICE INLINE int2& operator-=( int2& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2& operator-=( int2& a, const int c )
 {
 	a.x -= c;
 	a.y -= c;
 	return a;
 }
 
-HOST_DEVICE INLINE int2& operator*=( int2& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2& operator*=( int2& a, const int c )
 {
 	a.x *= c;
 	a.y *= c;
 	return a;
 }
 
-HOST_DEVICE INLINE int2& operator/=( int2& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2& operator/=( int2& a, const int c )
 {
 	a.x /= c;
 	a.y /= c;
 	return a;
 }
 
-HOST_DEVICE INLINE int2 operator-( const int2& a ) { return make_int2( -a.x, -a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 operator-( const int2& a ) { return make_int2( -a.x, -a.y ); }
 
-HOST_DEVICE INLINE int2 operator+( const int2& a, const int c ) { return make_int2( a.x + c, a.y + c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 operator+( const int2& a, const int c ) { return make_int2( a.x + c, a.y + c ); }
 
-HOST_DEVICE INLINE int2 operator+( const int c, const int2& a ) { return make_int2( c + a.x, c + a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 operator+( const int c, const int2& a ) { return make_int2( c + a.x, c + a.y ); }
 
-HOST_DEVICE INLINE int2 operator-( const int2& a, const int c ) { return make_int2( a.x - c, a.y - c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 operator-( const int2& a, const int c ) { return make_int2( a.x - c, a.y - c ); }
 
-HOST_DEVICE INLINE int2 operator-( const int c, const int2& a ) { return make_int2( c - a.x, c - a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 operator-( const int c, const int2& a ) { return make_int2( c - a.x, c - a.y ); }
 
-HOST_DEVICE INLINE int2 operator*( const int2& a, const int c ) { return make_int2( c * a.x, c * a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 operator*( const int2& a, const int c ) { return make_int2( c * a.x, c * a.y ); }
 
-HOST_DEVICE INLINE int2 operator*( const int c, const int2& a ) { return make_int2( c * a.x, c * a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 operator*( const int c, const int2& a ) { return make_int2( c * a.x, c * a.y ); }
 
-HOST_DEVICE INLINE int2 operator/( const int2& a, const int c ) { return make_int2( a.x / c, a.y / c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 operator/( const int2& a, const int c ) { return make_int2( a.x / c, a.y / c ); }
 
-HOST_DEVICE INLINE int2 operator/( const int c, const int2& a ) { return make_int2( c / a.x, c / a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 operator/( const int c, const int2& a ) { return make_int2( c / a.x, c / a.y ); }
 
-HOST_DEVICE INLINE int3 make_int3( const float3& a ) { return make_int3( (int)a.x, (int)a.y, (int)a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 make_int3( const float3& a ) { return make_int3( (int)a.x, (int)a.y, (int)a.z ); }
 
-HOST_DEVICE INLINE int3 make_int3( const int4& a ) { return make_int3( a.x, a.y, a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 make_int3( const int4& a ) { return make_int3( a.x, a.y, a.z ); }
 
-HOST_DEVICE INLINE int3 make_int3( const int2& a, const int c ) { return make_int3( a.x, a.y, c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 make_int3( const int2& a, const int c ) { return make_int3( a.x, a.y, c ); }
 
-HOST_DEVICE INLINE int3 make_int3( const int c ) { return make_int3( c, c, c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 make_int3( const int c ) { return make_int3( c, c, c ); }
 
-HOST_DEVICE INLINE int3 operator+( const int3& a, const int3& b ) { return make_int3( a.x + b.x, a.y + b.y, a.z + b.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 operator+( const int3& a, const int3& b )
+{
+	return make_int3( a.x + b.x, a.y + b.y, a.z + b.z );
+}
 
-HOST_DEVICE INLINE int3 operator-( const int3& a, const int3& b ) { return make_int3( a.x - b.x, a.y - b.y, a.z - b.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 operator-( const int3& a, const int3& b )
+{
+	return make_int3( a.x - b.x, a.y - b.y, a.z - b.z );
+}
 
-HOST_DEVICE INLINE int3 operator*( const int3& a, const int3& b ) { return make_int3( a.x * b.x, a.y * b.y, a.z * b.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 operator*( const int3& a, const int3& b )
+{
+	return make_int3( a.x * b.x, a.y * b.y, a.z * b.z );
+}
 
-HOST_DEVICE INLINE int3 operator/( const int3& a, const int3& b ) { return make_int3( a.x / b.x, a.y / b.y, a.z / b.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 operator/( const int3& a, const int3& b )
+{
+	return make_int3( a.x / b.x, a.y / b.y, a.z / b.z );
+}
 
-HOST_DEVICE INLINE int3& operator+=( int3& a, const int3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3& operator+=( int3& a, const int3& b )
 {
 	a.x += b.x;
 	a.y += b.y;
@@ -190,7 +187,7 @@ HOST_DEVICE INLINE int3& operator+=( int3& a, const int3& b )
 	return a;
 }
 
-HOST_DEVICE INLINE int3& operator-=( int3& a, const int3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3& operator-=( int3& a, const int3& b )
 {
 	a.x -= b.x;
 	a.y -= b.y;
@@ -198,7 +195,7 @@ HOST_DEVICE INLINE int3& operator-=( int3& a, const int3& b )
 	return a;
 }
 
-HOST_DEVICE INLINE int3& operator*=( int3& a, const int3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3& operator*=( int3& a, const int3& b )
 {
 	a.x *= b.x;
 	a.y *= b.y;
@@ -206,7 +203,7 @@ HOST_DEVICE INLINE int3& operator*=( int3& a, const int3& b )
 	return a;
 }
 
-HOST_DEVICE INLINE int3& operator/=( int3& a, const int3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3& operator/=( int3& a, const int3& b )
 {
 	a.x /= b.x;
 	a.y /= b.y;
@@ -214,7 +211,7 @@ HOST_DEVICE INLINE int3& operator/=( int3& a, const int3& b )
 	return a;
 }
 
-HOST_DEVICE INLINE int3& operator+=( int3& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3& operator+=( int3& a, const int c )
 {
 	a.x += c;
 	a.y += c;
@@ -222,7 +219,7 @@ HOST_DEVICE INLINE int3& operator+=( int3& a, const int c )
 	return a;
 }
 
-HOST_DEVICE INLINE int3& operator-=( int3& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3& operator-=( int3& a, const int c )
 {
 	a.x -= c;
 	a.y -= c;
@@ -230,7 +227,7 @@ HOST_DEVICE INLINE int3& operator-=( int3& a, const int c )
 	return a;
 }
 
-HOST_DEVICE INLINE int3& operator*=( int3& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3& operator*=( int3& a, const int c )
 {
 	a.x *= c;
 	a.y *= c;
@@ -238,7 +235,7 @@ HOST_DEVICE INLINE int3& operator*=( int3& a, const int c )
 	return a;
 }
 
-HOST_DEVICE INLINE int3& operator/=( int3& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3& operator/=( int3& a, const int c )
 {
 	a.x /= c;
 	a.y /= c;
@@ -246,53 +243,56 @@ HOST_DEVICE INLINE int3& operator/=( int3& a, const int c )
 	return a;
 }
 
-HOST_DEVICE INLINE int3 operator-( const int3& a ) { return make_int3( -a.x, -a.y, -a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 operator-( const int3& a ) { return make_int3( -a.x, -a.y, -a.z ); }
 
-HOST_DEVICE INLINE int3 operator+( const int3& a, const int c ) { return make_int3( c + a.x, c + a.y, c + a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 operator+( const int3& a, const int c ) { return make_int3( c + a.x, c + a.y, c + a.z ); }
 
-HOST_DEVICE INLINE int3 operator+( const int c, const int3& a ) { return make_int3( c + a.x, c + a.y, c + a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 operator+( const int c, const int3& a ) { return make_int3( c + a.x, c + a.y, c + a.z ); }
 
-HOST_DEVICE INLINE int3 operator-( const int3& a, const int c ) { return make_int3( a.x - c, a.y - c, a.z - c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 operator-( const int3& a, const int c ) { return make_int3( a.x - c, a.y - c, a.z - c ); }
 
-HOST_DEVICE INLINE int3 operator-( const int c, const int3& a ) { return make_int3( c - a.x, c - a.y, c - a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 operator-( const int c, const int3& a ) { return make_int3( c - a.x, c - a.y, c - a.z ); }
 
-HOST_DEVICE INLINE int3 operator*( const int3& a, const int c ) { return make_int3( c * a.x, c * a.y, c * a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 operator*( const int3& a, const int c ) { return make_int3( c * a.x, c * a.y, c * a.z ); }
 
-HOST_DEVICE INLINE int3 operator*( const int c, const int3& a ) { return make_int3( c * a.x, c * a.y, c * a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 operator*( const int c, const int3& a ) { return make_int3( c * a.x, c * a.y, c * a.z ); }
 
-HOST_DEVICE INLINE int3 operator/( const int3& a, const int c ) { return make_int3( a.x / c, a.y / c, a.z / c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 operator/( const int3& a, const int c ) { return make_int3( a.x / c, a.y / c, a.z / c ); }
 
-HOST_DEVICE INLINE int3 operator/( const int c, const int3& a ) { return make_int3( c / a.x, c / a.y, c / a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 operator/( const int c, const int3& a ) { return make_int3( c / a.x, c / a.y, c / a.z ); }
 
-HOST_DEVICE INLINE int4 make_int4( const float4& a ) { return make_int4( (int)a.x, (int)a.y, (int)a.z, (int)a.w ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 make_int4( const float4& a ) { return make_int4( (int)a.x, (int)a.y, (int)a.z, (int)a.w ); }
 
-HOST_DEVICE INLINE int4 make_int4( const int2& a, const int c0, const int c1 ) { return make_int4( a.x, a.y, c0, c1 ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 make_int4( const int2& a, const int c0, const int c1 )
+{
+	return make_int4( a.x, a.y, c0, c1 );
+}
 
-HOST_DEVICE INLINE int4 make_int4( const int3& a, const int c ) { return make_int4( a.x, a.y, a.z, c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 make_int4( const int3& a, const int c ) { return make_int4( a.x, a.y, a.z, c ); }
 
-HOST_DEVICE INLINE int4 make_int4( const int c ) { return make_int4( c, c, c, c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 make_int4( const int c ) { return make_int4( c, c, c, c ); }
 
-HOST_DEVICE INLINE int4 operator+( const int4& a, const int4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 operator+( const int4& a, const int4& b )
 {
 	return make_int4( a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w );
 }
 
-HOST_DEVICE INLINE int4 operator-( const int4& a, const int4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 operator-( const int4& a, const int4& b )
 {
 	return make_int4( a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w );
 }
 
-HOST_DEVICE INLINE int4 operator*( const int4& a, const int4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 operator*( const int4& a, const int4& b )
 {
 	return make_int4( a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w );
 }
 
-HOST_DEVICE INLINE int4 operator/( const int4& a, const int4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 operator/( const int4& a, const int4& b )
 {
 	return make_int4( a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w );
 }
 
-HOST_DEVICE INLINE int4& operator+=( int4& a, const int4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4& operator+=( int4& a, const int4& b )
 {
 	a.x += b.x;
 	a.y += b.y;
@@ -301,7 +301,7 @@ HOST_DEVICE INLINE int4& operator+=( int4& a, const int4& b )
 	return a;
 }
 
-HOST_DEVICE INLINE int4& operator-=( int4& a, const int4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4& operator-=( int4& a, const int4& b )
 {
 	a.x -= b.x;
 	a.y -= b.y;
@@ -310,7 +310,7 @@ HOST_DEVICE INLINE int4& operator-=( int4& a, const int4& b )
 	return a;
 }
 
-HOST_DEVICE INLINE int4& operator*=( int4& a, const int4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4& operator*=( int4& a, const int4& b )
 {
 	a.x *= b.x;
 	a.y *= b.y;
@@ -319,7 +319,7 @@ HOST_DEVICE INLINE int4& operator*=( int4& a, const int4& b )
 	return a;
 }
 
-HOST_DEVICE INLINE int4& operator/=( int4& a, const int4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4& operator/=( int4& a, const int4& b )
 {
 	a.x /= b.x;
 	a.y /= b.y;
@@ -328,7 +328,7 @@ HOST_DEVICE INLINE int4& operator/=( int4& a, const int4& b )
 	return a;
 }
 
-HOST_DEVICE INLINE int4& operator+=( int4& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4& operator+=( int4& a, const int c )
 {
 	a.x += c;
 	a.y += c;
@@ -337,7 +337,7 @@ HOST_DEVICE INLINE int4& operator+=( int4& a, const int c )
 	return a;
 }
 
-HOST_DEVICE INLINE int4& operator-=( int4& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4& operator-=( int4& a, const int c )
 {
 	a.x -= c;
 	a.y -= c;
@@ -346,7 +346,7 @@ HOST_DEVICE INLINE int4& operator-=( int4& a, const int c )
 	return a;
 }
 
-HOST_DEVICE INLINE int4& operator*=( int4& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4& operator*=( int4& a, const int c )
 {
 	a.x *= c;
 	a.y *= c;
@@ -355,7 +355,7 @@ HOST_DEVICE INLINE int4& operator*=( int4& a, const int c )
 	return a;
 }
 
-HOST_DEVICE INLINE int4& operator/=( int4& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4& operator/=( int4& a, const int c )
 {
 	a.x /= c;
 	a.y /= c;
@@ -364,67 +364,91 @@ HOST_DEVICE INLINE int4& operator/=( int4& a, const int c )
 	return a;
 }
 
-HOST_DEVICE INLINE int4 operator-( const int4& a ) { return make_int4( -a.x, -a.y, -a.z, -a.w ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 operator-( const int4& a ) { return make_int4( -a.x, -a.y, -a.z, -a.w ); }
 
-HOST_DEVICE INLINE int4 operator+( const int4& a, const int c ) { return make_int4( c + a.x, c + a.y, c + a.z, c + a.w ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 operator+( const int4& a, const int c )
+{
+	return make_int4( c + a.x, c + a.y, c + a.z, c + a.w );
+}
 
-HOST_DEVICE INLINE int4 operator+( const int c, const int4& a ) { return make_int4( c + a.x, c + a.y, c + a.z, c + a.w ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 operator+( const int c, const int4& a )
+{
+	return make_int4( c + a.x, c + a.y, c + a.z, c + a.w );
+}
 
-HOST_DEVICE INLINE int4 operator-( const int4& a, const int c ) { return make_int4( a.x - c, a.y - c, a.z - c, a.w - c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 operator-( const int4& a, const int c )
+{
+	return make_int4( a.x - c, a.y - c, a.z - c, a.w - c );
+}
 
-HOST_DEVICE INLINE int4 operator-( const int c, const int4& a ) { return make_int4( c - a.x, c - a.y, c - a.z, c - a.w ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 operator-( const int c, const int4& a )
+{
+	return make_int4( c - a.x, c - a.y, c - a.z, c - a.w );
+}
 
-HOST_DEVICE INLINE int4 operator*( const int4& a, const int c ) { return make_int4( c * a.x, c * a.y, c * a.z, c * a.w ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 operator*( const int4& a, const int c )
+{
+	return make_int4( c * a.x, c * a.y, c * a.z, c * a.w );
+}
 
-HOST_DEVICE INLINE int4 operator*( const int c, const int4& a ) { return make_int4( c * a.x, c * a.y, c * a.z, c * a.w ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 operator*( const int c, const int4& a )
+{
+	return make_int4( c * a.x, c * a.y, c * a.z, c * a.w );
+}
 
-HOST_DEVICE INLINE int4 operator/( const int4& a, const int c ) { return make_int4( a.x / c, a.y / c, a.z / c, a.w / c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 operator/( const int4& a, const int c )
+{
+	return make_int4( a.x / c, a.y / c, a.z / c, a.w / c );
+}
 
-HOST_DEVICE INLINE int4 operator/( const int c, const int4& a ) { return make_int4( c / a.x, c / a.y, c / a.z, c / a.w ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 operator/( const int c, const int4& a )
+{
+	return make_int4( c / a.x, c / a.y, c / a.z, c / a.w );
+}
 
-HOST_DEVICE INLINE int2 max( const int2& a, const int2& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 max( const int2& a, const int2& b )
 {
 	int x = RT_MAX( a.x, b.x );
 	int y = RT_MAX( a.y, b.y );
 	return make_int2( x, y );
 }
 
-HOST_DEVICE INLINE int2 max( const int2& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 max( const int2& a, const int c )
 {
 	int x = RT_MAX( a.x, c );
 	int y = RT_MAX( a.y, c );
 	return make_int2( x, y );
 }
 
-HOST_DEVICE INLINE int2 max( const int c, const int2& a )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 max( const int c, const int2& a )
 {
 	int x = RT_MAX( a.x, c );
 	int y = RT_MAX( a.y, c );
 	return make_int2( x, y );
 }
 
-HOST_DEVICE INLINE int2 min( const int2& a, const int2& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 min( const int2& a, const int2& b )
 {
 	int x = RT_MIN( a.x, b.x );
 	int y = RT_MIN( a.y, b.y );
 	return make_int2( x, y );
 }
 
-HOST_DEVICE INLINE int2 min( const int2& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 min( const int2& a, const int c )
 {
 	int x = RT_MIN( a.x, c );
 	int y = RT_MIN( a.y, c );
 	return make_int2( x, y );
 }
 
-HOST_DEVICE INLINE int2 min( const int c, const int2& a )
+HIPRT_HOST_DEVICE HIPRT_INLINE int2 min( const int c, const int2& a )
 {
 	int x = RT_MIN( a.x, c );
 	int y = RT_MIN( a.y, c );
 	return make_int2( x, y );
 }
 
-HOST_DEVICE INLINE int3 max( const int3& a, const int3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 max( const int3& a, const int3& b )
 {
 	int x = RT_MAX( a.x, b.x );
 	int y = RT_MAX( a.y, b.y );
@@ -432,7 +456,7 @@ HOST_DEVICE INLINE int3 max( const int3& a, const int3& b )
 	return make_int3( x, y, z );
 }
 
-HOST_DEVICE INLINE int3 max( const int3& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 max( const int3& a, const int c )
 {
 	int x = RT_MAX( a.x, c );
 	int y = RT_MAX( a.y, c );
@@ -440,7 +464,7 @@ HOST_DEVICE INLINE int3 max( const int3& a, const int c )
 	return make_int3( x, y, z );
 }
 
-HOST_DEVICE INLINE int3 max( const int c, const int3& a )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 max( const int c, const int3& a )
 {
 	int x = RT_MAX( a.x, c );
 	int y = RT_MAX( a.y, c );
@@ -448,7 +472,7 @@ HOST_DEVICE INLINE int3 max( const int c, const int3& a )
 	return make_int3( x, y, z );
 }
 
-HOST_DEVICE INLINE int3 min( const int3& a, const int3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 min( const int3& a, const int3& b )
 {
 	int x = RT_MIN( a.x, b.x );
 	int y = RT_MIN( a.y, b.y );
@@ -456,7 +480,7 @@ HOST_DEVICE INLINE int3 min( const int3& a, const int3& b )
 	return make_int3( x, y, z );
 }
 
-HOST_DEVICE INLINE int3 min( const int3& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 min( const int3& a, const int c )
 {
 	int x = RT_MIN( a.x, c );
 	int y = RT_MIN( a.y, c );
@@ -464,7 +488,7 @@ HOST_DEVICE INLINE int3 min( const int3& a, const int c )
 	return make_int3( x, y, z );
 }
 
-HOST_DEVICE INLINE int3 min( const int c, const int3& a )
+HIPRT_HOST_DEVICE HIPRT_INLINE int3 min( const int c, const int3& a )
 {
 	int x = RT_MIN( a.x, c );
 	int y = RT_MIN( a.y, c );
@@ -472,7 +496,7 @@ HOST_DEVICE INLINE int3 min( const int c, const int3& a )
 	return make_int3( x, y, z );
 }
 
-HOST_DEVICE INLINE int4 max( const int4& a, const int4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 max( const int4& a, const int4& b )
 {
 	int x = RT_MAX( a.x, b.x );
 	int y = RT_MAX( a.y, b.y );
@@ -481,7 +505,7 @@ HOST_DEVICE INLINE int4 max( const int4& a, const int4& b )
 	return make_int4( x, y, z, w );
 }
 
-HOST_DEVICE INLINE int4 max( const int4& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 max( const int4& a, const int c )
 {
 	int x = RT_MAX( a.x, c );
 	int y = RT_MAX( a.y, c );
@@ -490,7 +514,7 @@ HOST_DEVICE INLINE int4 max( const int4& a, const int c )
 	return make_int4( x, y, z, w );
 }
 
-HOST_DEVICE INLINE int4 max( const int c, const int4& a )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 max( const int c, const int4& a )
 {
 	int x = RT_MAX( a.x, c );
 	int y = RT_MAX( a.y, c );
@@ -499,7 +523,7 @@ HOST_DEVICE INLINE int4 max( const int c, const int4& a )
 	return make_int4( x, y, z, w );
 }
 
-HOST_DEVICE INLINE int4 min( const int4& a, const int4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 min( const int4& a, const int4& b )
 {
 	int x = RT_MIN( a.x, b.x );
 	int y = RT_MIN( a.y, b.y );
@@ -508,7 +532,7 @@ HOST_DEVICE INLINE int4 min( const int4& a, const int4& b )
 	return make_int4( x, y, z, w );
 }
 
-HOST_DEVICE INLINE int4 min( const int4& a, const int c )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 min( const int4& a, const int c )
 {
 	int x = RT_MIN( a.x, c );
 	int y = RT_MIN( a.y, c );
@@ -517,7 +541,7 @@ HOST_DEVICE INLINE int4 min( const int4& a, const int c )
 	return make_int4( x, y, z, w );
 }
 
-HOST_DEVICE INLINE int4 min( const int c, const int4& a )
+HIPRT_HOST_DEVICE HIPRT_INLINE int4 min( const int c, const int4& a )
 {
 	int x = RT_MIN( a.x, c );
 	int y = RT_MIN( a.y, c );
@@ -526,125 +550,137 @@ HOST_DEVICE INLINE int4 min( const int c, const int4& a )
 	return make_int4( x, y, z, w );
 }
 
-HOST_DEVICE INLINE float2 make_float2( const int2& a ) { return make_float2( (float)a.x, (float)a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 make_float2( const int2& a ) { return make_float2( (float)a.x, (float)a.y ); }
 
-HOST_DEVICE INLINE float2 make_float2( const float3& a ) { return make_float2( a.x, a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 make_float2( const float3& a ) { return make_float2( a.x, a.y ); }
 
-HOST_DEVICE INLINE float2 make_float2( const float4& a ) { return make_float2( a.x, a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 make_float2( const float4& a ) { return make_float2( a.x, a.y ); }
 
-HOST_DEVICE INLINE float2 make_float2( const float c ) { return make_float2( c, c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 make_float2( const float c ) { return make_float2( c, c ); }
 
-HOST_DEVICE INLINE float2 operator+( const float2& a, const float2& b ) { return make_float2( a.x + b.x, a.y + b.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 operator+( const float2& a, const float2& b )
+{
+	return make_float2( a.x + b.x, a.y + b.y );
+}
 
-HOST_DEVICE INLINE float2 operator-( const float2& a, const float2& b ) { return make_float2( a.x - b.x, a.y - b.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 operator-( const float2& a, const float2& b )
+{
+	return make_float2( a.x - b.x, a.y - b.y );
+}
 
-HOST_DEVICE INLINE float2 operator*( const float2& a, const float2& b ) { return make_float2( a.x * b.x, a.y * b.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 operator*( const float2& a, const float2& b )
+{
+	return make_float2( a.x * b.x, a.y * b.y );
+}
 
-HOST_DEVICE INLINE float2 operator/( const float2& a, const float2& b ) { return make_float2( a.x / b.x, a.y / b.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 operator/( const float2& a, const float2& b )
+{
+	return make_float2( a.x / b.x, a.y / b.y );
+}
 
-HOST_DEVICE INLINE float2& operator+=( float2& a, const float2& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float2& operator+=( float2& a, const float2& b )
 {
 	a.x += b.x;
 	a.y += b.y;
 	return a;
 }
 
-HOST_DEVICE INLINE float2& operator-=( float2& a, const float2& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float2& operator-=( float2& a, const float2& b )
 {
 	a.x -= b.x;
 	a.y -= b.y;
 	return a;
 }
 
-HOST_DEVICE INLINE float2& operator*=( float2& a, const float2& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float2& operator*=( float2& a, const float2& b )
 {
 	a.x *= b.x;
 	a.y *= b.y;
 	return a;
 }
 
-HOST_DEVICE INLINE float2& operator/=( float2& a, const float2& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float2& operator/=( float2& a, const float2& b )
 {
 	a.x /= b.x;
 	a.y /= b.y;
 	return a;
 }
 
-HOST_DEVICE INLINE float2& operator+=( float2& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float2& operator+=( float2& a, const float c )
 {
 	a.x += c;
 	a.y += c;
 	return a;
 }
 
-HOST_DEVICE INLINE float2& operator-=( float2& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float2& operator-=( float2& a, const float c )
 {
 	a.x -= c;
 	a.y -= c;
 	return a;
 }
 
-HOST_DEVICE INLINE float2& operator*=( float2& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float2& operator*=( float2& a, const float c )
 {
 	a.x *= c;
 	a.y *= c;
 	return a;
 }
 
-HOST_DEVICE INLINE float2& operator/=( float2& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float2& operator/=( float2& a, const float c )
 {
 	a.x /= c;
 	a.y /= c;
 	return a;
 }
 
-HOST_DEVICE INLINE float2 operator-( const float2& a ) { return make_float2( -a.x, -a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 operator-( const float2& a ) { return make_float2( -a.x, -a.y ); }
 
-HOST_DEVICE INLINE float2 operator+( const float2& a, const float c ) { return make_float2( a.x + c, a.y + c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 operator+( const float2& a, const float c ) { return make_float2( a.x + c, a.y + c ); }
 
-HOST_DEVICE INLINE float2 operator+( const float c, const float2& a ) { return make_float2( c + a.x, c + a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 operator+( const float c, const float2& a ) { return make_float2( c + a.x, c + a.y ); }
 
-HOST_DEVICE INLINE float2 operator-( const float2& a, const float c ) { return make_float2( a.x - c, a.y - c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 operator-( const float2& a, const float c ) { return make_float2( a.x - c, a.y - c ); }
 
-HOST_DEVICE INLINE float2 operator-( const float c, const float2& a ) { return make_float2( c - a.x, c - a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 operator-( const float c, const float2& a ) { return make_float2( c - a.x, c - a.y ); }
 
-HOST_DEVICE INLINE float2 operator*( const float2& a, const float c ) { return make_float2( c * a.x, c * a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 operator*( const float2& a, const float c ) { return make_float2( c * a.x, c * a.y ); }
 
-HOST_DEVICE INLINE float2 operator*( const float c, const float2& a ) { return make_float2( c * a.x, c * a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 operator*( const float c, const float2& a ) { return make_float2( c * a.x, c * a.y ); }
 
-HOST_DEVICE INLINE float2 operator/( const float2& a, const float c ) { return make_float2( a.x / c, a.y / c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 operator/( const float2& a, const float c ) { return make_float2( a.x / c, a.y / c ); }
 
-HOST_DEVICE INLINE float2 operator/( const float c, const float2& a ) { return make_float2( c / a.x, c / a.y ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float2 operator/( const float c, const float2& a ) { return make_float2( c / a.x, c / a.y ); }
 
-HOST_DEVICE INLINE float3 make_float3( const int3& a ) { return make_float3( (float)a.x, (float)a.y, (float)a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 make_float3( const int3& a ) { return make_float3( (float)a.x, (float)a.y, (float)a.z ); }
 
-HOST_DEVICE INLINE float3 make_float3( const float4& a ) { return make_float3( a.x, a.y, a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 make_float3( const float4& a ) { return make_float3( a.x, a.y, a.z ); }
 
-HOST_DEVICE INLINE float3 make_float3( const float2& a, const float c ) { return make_float3( a.x, a.y, c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 make_float3( const float2& a, const float c ) { return make_float3( a.x, a.y, c ); }
 
-HOST_DEVICE INLINE float3 make_float3( const float c ) { return make_float3( c, c, c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 make_float3( const float c ) { return make_float3( c, c, c ); }
 
-HOST_DEVICE INLINE float3 operator+( const float3& a, const float3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 operator+( const float3& a, const float3& b )
 {
 	return make_float3( a.x + b.x, a.y + b.y, a.z + b.z );
 }
 
-HOST_DEVICE INLINE float3 operator-( const float3& a, const float3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 operator-( const float3& a, const float3& b )
 {
 	return make_float3( a.x - b.x, a.y - b.y, a.z - b.z );
 }
 
-HOST_DEVICE INLINE float3 operator*( const float3& a, const float3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 operator*( const float3& a, const float3& b )
 {
 	return make_float3( a.x * b.x, a.y * b.y, a.z * b.z );
 }
 
-HOST_DEVICE INLINE float3 operator/( const float3& a, const float3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 operator/( const float3& a, const float3& b )
 {
 	return make_float3( a.x / b.x, a.y / b.y, a.z / b.z );
 }
 
-HOST_DEVICE INLINE float3& operator+=( float3& a, const float3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float3& operator+=( float3& a, const float3& b )
 {
 	a.x += b.x;
 	a.y += b.y;
@@ -652,7 +688,7 @@ HOST_DEVICE INLINE float3& operator+=( float3& a, const float3& b )
 	return a;
 }
 
-HOST_DEVICE INLINE float3& operator-=( float3& a, const float3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float3& operator-=( float3& a, const float3& b )
 {
 	a.x -= b.x;
 	a.y -= b.y;
@@ -660,7 +696,7 @@ HOST_DEVICE INLINE float3& operator-=( float3& a, const float3& b )
 	return a;
 }
 
-HOST_DEVICE INLINE float3& operator*=( float3& a, const float3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float3& operator*=( float3& a, const float3& b )
 {
 	a.x *= b.x;
 	a.y *= b.y;
@@ -668,7 +704,7 @@ HOST_DEVICE INLINE float3& operator*=( float3& a, const float3& b )
 	return a;
 }
 
-HOST_DEVICE INLINE float3& operator/=( float3& a, const float3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float3& operator/=( float3& a, const float3& b )
 {
 	a.x /= b.x;
 	a.y /= b.y;
@@ -676,7 +712,7 @@ HOST_DEVICE INLINE float3& operator/=( float3& a, const float3& b )
 	return a;
 }
 
-HOST_DEVICE INLINE float3& operator+=( float3& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float3& operator+=( float3& a, const float c )
 {
 	a.x += c;
 	a.y += c;
@@ -684,7 +720,7 @@ HOST_DEVICE INLINE float3& operator+=( float3& a, const float c )
 	return a;
 }
 
-HOST_DEVICE INLINE float3& operator-=( float3& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float3& operator-=( float3& a, const float c )
 {
 	a.x -= c;
 	a.y -= c;
@@ -692,7 +728,7 @@ HOST_DEVICE INLINE float3& operator-=( float3& a, const float c )
 	return a;
 }
 
-HOST_DEVICE INLINE float3& operator*=( float3& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float3& operator*=( float3& a, const float c )
 {
 	a.x *= c;
 	a.y *= c;
@@ -700,7 +736,7 @@ HOST_DEVICE INLINE float3& operator*=( float3& a, const float c )
 	return a;
 }
 
-HOST_DEVICE INLINE float3& operator/=( float3& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float3& operator/=( float3& a, const float c )
 {
 	a.x /= c;
 	a.y /= c;
@@ -708,56 +744,83 @@ HOST_DEVICE INLINE float3& operator/=( float3& a, const float c )
 	return a;
 }
 
-HOST_DEVICE INLINE float3 operator-( const float3& a ) { return make_float3( -a.x, -a.y, -a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 operator-( const float3& a ) { return make_float3( -a.x, -a.y, -a.z ); }
 
-HOST_DEVICE INLINE float3 operator+( const float3& a, const float c ) { return make_float3( c + a.x, c + a.y, c + a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 operator+( const float3& a, const float c )
+{
+	return make_float3( c + a.x, c + a.y, c + a.z );
+}
 
-HOST_DEVICE INLINE float3 operator+( const float c, const float3& a ) { return make_float3( c + a.x, c + a.y, c + a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 operator+( const float c, const float3& a )
+{
+	return make_float3( c + a.x, c + a.y, c + a.z );
+}
 
-HOST_DEVICE INLINE float3 operator-( const float3& a, const float c ) { return make_float3( a.x - c, a.y - c, a.z - c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 operator-( const float3& a, const float c )
+{
+	return make_float3( a.x - c, a.y - c, a.z - c );
+}
 
-HOST_DEVICE INLINE float3 operator-( const float c, const float3& a ) { return make_float3( c - a.x, c - a.y, c - a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 operator-( const float c, const float3& a )
+{
+	return make_float3( c - a.x, c - a.y, c - a.z );
+}
 
-HOST_DEVICE INLINE float3 operator*( const float3& a, const float c ) { return make_float3( c * a.x, c * a.y, c * a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 operator*( const float3& a, const float c )
+{
+	return make_float3( c * a.x, c * a.y, c * a.z );
+}
 
-HOST_DEVICE INLINE float3 operator*( const float c, const float3& a ) { return make_float3( c * a.x, c * a.y, c * a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 operator*( const float c, const float3& a )
+{
+	return make_float3( c * a.x, c * a.y, c * a.z );
+}
 
-HOST_DEVICE INLINE float3 operator/( const float3& a, const float c ) { return make_float3( a.x / c, a.y / c, a.z / c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 operator/( const float3& a, const float c )
+{
+	return make_float3( a.x / c, a.y / c, a.z / c );
+}
 
-HOST_DEVICE INLINE float3 operator/( const float c, const float3& a ) { return make_float3( c / a.x, c / a.y, c / a.z ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 operator/( const float c, const float3& a )
+{
+	return make_float3( c / a.x, c / a.y, c / a.z );
+}
 
-HOST_DEVICE INLINE float4 make_float4( const int4& a ) { return make_float4( (float)a.x, (float)a.y, (float)a.z, (float)a.w ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 make_float4( const int4& a )
+{
+	return make_float4( (float)a.x, (float)a.y, (float)a.z, (float)a.w );
+}
 
-HOST_DEVICE INLINE float4 make_float4( const float2& a, const float c0, const float c1 )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 make_float4( const float2& a, const float c0, const float c1 )
 {
 	return make_float4( a.x, a.y, c0, c1 );
 }
 
-HOST_DEVICE INLINE float4 make_float4( const float3& a, const float c ) { return make_float4( a.x, a.y, a.z, c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 make_float4( const float3& a, const float c ) { return make_float4( a.x, a.y, a.z, c ); }
 
-HOST_DEVICE INLINE float4 make_float4( const float c ) { return make_float4( c, c, c, c ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 make_float4( const float c ) { return make_float4( c, c, c, c ); }
 
-HOST_DEVICE INLINE float4 operator+( const float4& a, const float4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator+( const float4& a, const float4& b )
 {
 	return make_float4( a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w );
 }
 
-HOST_DEVICE INLINE float4 operator-( const float4& a, const float4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator-( const float4& a, const float4& b )
 {
 	return make_float4( a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w );
 }
 
-HOST_DEVICE INLINE float4 operator*( const float4& a, const float4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator*( const float4& a, const float4& b )
 {
 	return make_float4( a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w );
 }
 
-HOST_DEVICE INLINE float4 operator/( const float4& a, const float4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator/( const float4& a, const float4& b )
 {
 	return make_float4( a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w );
 }
 
-HOST_DEVICE INLINE float4& operator+=( float4& a, const float4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4& operator+=( float4& a, const float4& b )
 {
 	a.x += b.x;
 	a.y += b.y;
@@ -766,7 +829,7 @@ HOST_DEVICE INLINE float4& operator+=( float4& a, const float4& b )
 	return a;
 }
 
-HOST_DEVICE INLINE float4& operator-=( float4& a, const float4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4& operator-=( float4& a, const float4& b )
 {
 	a.x -= b.x;
 	a.y -= b.y;
@@ -775,7 +838,7 @@ HOST_DEVICE INLINE float4& operator-=( float4& a, const float4& b )
 	return a;
 }
 
-HOST_DEVICE INLINE float4& operator*=( float4& a, const float4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4& operator*=( float4& a, const float4& b )
 {
 	a.x *= b.x;
 	a.y *= b.y;
@@ -784,7 +847,7 @@ HOST_DEVICE INLINE float4& operator*=( float4& a, const float4& b )
 	return a;
 }
 
-HOST_DEVICE INLINE float4& operator/=( float4& a, const float4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4& operator/=( float4& a, const float4& b )
 {
 	a.x /= b.x;
 	a.y /= b.y;
@@ -793,7 +856,7 @@ HOST_DEVICE INLINE float4& operator/=( float4& a, const float4& b )
 	return a;
 }
 
-HOST_DEVICE INLINE float4& operator+=( float4& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4& operator+=( float4& a, const float c )
 {
 	a.x += c;
 	a.y += c;
@@ -802,7 +865,7 @@ HOST_DEVICE INLINE float4& operator+=( float4& a, const float c )
 	return a;
 }
 
-HOST_DEVICE INLINE float4& operator-=( float4& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4& operator-=( float4& a, const float c )
 {
 	a.x -= c;
 	a.y -= c;
@@ -811,7 +874,7 @@ HOST_DEVICE INLINE float4& operator-=( float4& a, const float c )
 	return a;
 }
 
-HOST_DEVICE INLINE float4& operator*=( float4& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4& operator*=( float4& a, const float c )
 {
 	a.x *= c;
 	a.y *= c;
@@ -820,7 +883,7 @@ HOST_DEVICE INLINE float4& operator*=( float4& a, const float c )
 	return a;
 }
 
-HOST_DEVICE INLINE float4& operator/=( float4& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4& operator/=( float4& a, const float c )
 {
 	a.x /= c;
 	a.y /= c;
@@ -829,65 +892,68 @@ HOST_DEVICE INLINE float4& operator/=( float4& a, const float c )
 	return a;
 }
 
-HOST_DEVICE INLINE float4 operator-( const float4& a ) { return make_float4( -a.x, -a.y, -a.z, -a.w ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator-( const float4& a ) { return make_float4( -a.x, -a.y, -a.z, -a.w ); }
 
-HOST_DEVICE INLINE float4 operator+( const float4& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator+( const float4& a, const float c )
 {
 	return make_float4( c + a.x, c + a.y, c + a.z, c + a.w );
 }
 
-HOST_DEVICE INLINE float4 operator+( const float c, const float4& a )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator+( const float c, const float4& a )
 {
 	return make_float4( c + a.x, c + a.y, c + a.z, c + a.w );
 }
 
-HOST_DEVICE INLINE float4 operator-( const float4& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator-( const float4& a, const float c )
 {
 	return make_float4( a.x - c, a.y - c, a.z - c, a.w - c );
 }
 
-HOST_DEVICE INLINE float4 operator-( const float c, const float4& a )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator-( const float c, const float4& a )
 {
 	return make_float4( c - a.x, c - a.y, c - a.z, c - a.w );
 }
 
-HOST_DEVICE INLINE float4 operator*( const float4& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator*( const float4& a, const float c )
 {
 	return make_float4( c * a.x, c * a.y, c * a.z, c * a.w );
 }
 
-HOST_DEVICE INLINE float4 operator*( const float c, const float4& a )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator*( const float c, const float4& a )
 {
 	return make_float4( c * a.x, c * a.y, c * a.z, c * a.w );
 }
 
-HOST_DEVICE INLINE float4 operator/( const float4& a, const float c )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator/( const float4& a, const float c )
 {
 	return make_float4( a.x / c, a.y / c, a.z / c, a.w / c );
 }
 
-HOST_DEVICE INLINE float4 operator/( const float c, const float4& a )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator/( const float c, const float4& a )
 {
 	return make_float4( c / a.x, c / a.y, c / a.z, c / a.w );
 }
 
-HOST_DEVICE INLINE float3 cross( const float3& a, const float3& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 cross( const float3& a, const float3& b )
 {
 	return make_float3( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x );
 }
 
-HOST_DEVICE INLINE float dot( const float3& a, const float3& b ) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+HIPRT_HOST_DEVICE HIPRT_INLINE float dot( const float3& a, const float3& b ) { return a.x * b.x + a.y * b.y + a.z * b.z; }
 
-HOST_DEVICE INLINE float dot( const float4& a, const float4& b ) { return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w; }
+HIPRT_HOST_DEVICE HIPRT_INLINE float dot( const float4& a, const float4& b )
+{
+	return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+}
 
-HOST_DEVICE INLINE float3 normalize( const float3& a ) { return a / sqrtf( dot( a, a ) ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 normalize( const float3& a ) { return a / sqrtf( dot( a, a ) ); }
 
-HOST_DEVICE INLINE float4 operator*( const float4x4& m, const float4& v )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator*( const float4x4& m, const float4& v )
 {
 	return make_float4( dot( m.r[0], v ), dot( m.r[1], v ), dot( m.r[2], v ), dot( m.r[3], v ) );
 }
 
-HOST_DEVICE INLINE float4x4 operator*( const float4x4& a, const float4x4& b )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4x4 operator*( const float4x4& a, const float4x4& b )
 {
 	float4x4 m;
 	for ( int r = 0; r < 4; ++r )
@@ -903,7 +969,7 @@ HOST_DEVICE INLINE float4x4 operator*( const float4x4& a, const float4x4& b )
 	return m;
 }
 
-HOST_DEVICE INLINE float4x4 Perspective( float y_fov, float aspect, float n, float f )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4x4 Perspective( float y_fov, float aspect, float n, float f )
 {
 	float a = 1.0f / tanf( y_fov / 2.0f );
 
@@ -916,7 +982,7 @@ HOST_DEVICE INLINE float4x4 Perspective( float y_fov, float aspect, float n, flo
 	return m;
 }
 
-HOST_DEVICE INLINE float4x4 LookAt( const float3& eye, const float3& at, const float3& up )
+HIPRT_HOST_DEVICE HIPRT_INLINE float4x4 LookAt( const float3& eye, const float3& at, const float3& up )
 {
 	float3 f = normalize( at - eye );
 	float3 s = normalize( cross( up, f ) );

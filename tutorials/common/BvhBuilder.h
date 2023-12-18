@@ -21,8 +21,8 @@
 //
 
 #pragma once
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
 #include <queue>
 #include <tutorials/common/Aabb.h>
 
@@ -141,10 +141,12 @@ class BvhBuilder
 				}
 			}
 
-			nodes[nodeIndex].boundingBoxMin	 = box.m_min;
-			nodes[nodeIndex].boundingBoxMax	 = box.m_max;
-			nodes[nodeIndex].childIndices[2] = hiprtInvalidValue;
-			nodes[nodeIndex].childIndices[3] = hiprtInvalidValue;
+			nodes[nodeIndex].childAabbsMin[0] = minLeftBox.m_min;
+			nodes[nodeIndex].childAabbsMax[0] = minLeftBox.m_max;
+			nodes[nodeIndex].childAabbsMin[1] = minRightBox.m_min;
+			nodes[nodeIndex].childAabbsMax[1] = minRightBox.m_max;
+			nodes[nodeIndex].childIndices[2]  = hiprtInvalidValue;
+			nodes[nodeIndex].childIndices[3]  = hiprtInvalidValue;
 
 			if ( minIndex - begin == 1 )
 			{

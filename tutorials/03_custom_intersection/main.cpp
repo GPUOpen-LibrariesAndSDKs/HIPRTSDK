@@ -27,19 +27,19 @@ class Tutorial : public TutorialBase
   public:
 	void run()
 	{
-		constexpr u32 SphereCount = 8 * 2;
-		hiprtFloat4	  spheres[SphereCount];
-		for ( int i = 0; i < SphereCount / 2; i++ )
+		constexpr uint32_t SphereCount = 8 * 2;
+		hiprtFloat4		   spheres[SphereCount];
+		for ( uint32_t i = 0; i < SphereCount / 2; i++ )
 		{
 			float r	   = 0.1f;
 			float t	   = i / (float)( SphereCount / 2 ) * 2.f * 3.1415f;
-			spheres[i] = { sin( t ) * 0.4f, cos( t ) * 0.4f, 0.f, r };
+			spheres[i] = { sinf( t ) * 0.4f, cosf( t ) * 0.4f, 0.f, r };
 		}
-		for ( int i = 0; i < SphereCount / 2; i++ )
+		for ( uint32_t i = 0; i < SphereCount / 2; i++ )
 		{
 			float r						 = 0.1f;
 			float t						 = i / (float)( SphereCount / 2 ) * 2.f * 3.1415f + 0.2f;
-			spheres[i + SphereCount / 2] = { sin( t ) * 0.35f, cos( t ) * 0.35f, 0.4f, r };
+			spheres[i + SphereCount / 2] = { sinf( t ) * 0.35f, cosf( t ) * 0.35f, 0.4f, r };
 		}
 
 		hiprtContext ctxt;
@@ -49,7 +49,7 @@ class Tutorial : public TutorialBase
 		list.aabbCount	= SphereCount;
 		list.aabbStride = 2 * sizeof( hiprtFloat4 );
 		hiprtFloat4 aabbs[2 * SphereCount];
-		for ( int i = 0; i < SphereCount; i++ )
+		for ( uint32_t i = 0; i < SphereCount; i++ )
 		{
 			const hiprtFloat4& c = spheres[i];
 			aabbs[i * 2 + 0]	 = { c.x - c.w, c.y - c.w, c.z - c.w, 0.0f };
@@ -61,7 +61,7 @@ class Tutorial : public TutorialBase
 
 		hiprtGeometryBuildInput geomInput;
 		geomInput.type				 = hiprtPrimitiveTypeAABBList;
-		geomInput.aabbList.primitive = list;
+		geomInput.primitive.aabbList = list;
 		geomInput.geomType			 = 0;
 
 		size_t			  geomTempSize;
@@ -93,7 +93,7 @@ class Tutorial : public TutorialBase
 		buildTraceKernelFromBitcode(
 			ctxt, "../common/TutorialKernels.h", "CustomIntersectionKernel", func, nullptr, &funcNameSets, 1, 1 );
 
-		u8* pixels;
+		uint8_t* pixels;
 		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &pixels ), m_res.x * m_res.y * 4 ) );
 
 		void* args[] = { &geom, &pixels, &funcTable, &m_res };
