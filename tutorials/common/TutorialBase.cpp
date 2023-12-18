@@ -25,7 +25,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <contrib/stbi/stbi_image_write.h>
 
-void checkOro( oroError res, const char* file, int line )
+void checkOro( oroError res, const char* file, uint32_t line )
 {
 	if ( res != oroSuccess )
 	{
@@ -37,7 +37,7 @@ void checkOro( oroError res, const char* file, int line )
 	}
 }
 
-void checkOrortc( orortcResult res, const char* file, int line )
+void checkOrortc( orortcResult res, const char* file, uint32_t line )
 {
 	if ( res != ORORTC_SUCCESS )
 	{
@@ -47,7 +47,7 @@ void checkOrortc( orortcResult res, const char* file, int line )
 	}
 }
 
-void checkHiprt( hiprtError res, const char* file, int line )
+void checkHiprt( hiprtError res, const char* file, uint32_t line )
 {
 	if ( res != hiprtSuccess )
 	{
@@ -57,11 +57,11 @@ void checkHiprt( hiprtError res, const char* file, int line )
 	}
 }
 
-void TutorialBase::init( int deviceIndex )
+void TutorialBase::init( uint32_t deviceIndex )
 {
 	m_res = make_hiprtInt2( 512, 512 );
 
-	CHECK_ORO( (oroError)oroInitialize( (oroApi)( ORO_API_HIP | ORO_API_CUDA ), 0 ) );
+	CHECK_ORO( static_cast<oroError>( oroInitialize( (oroApi)( ORO_API_HIP | ORO_API_CUDA ), 0 ) ) );
 
 	CHECK_ORO( oroInit( 0 ) );
 	CHECK_ORO( oroDeviceGet( &m_oroDevice, deviceIndex ) );
@@ -128,8 +128,8 @@ void TutorialBase::buildTraceKernelFromBitcode(
 	oroFunction&				   functionOut,
 	std::vector<const char*>*	   opts,
 	std::vector<hiprtFuncNameSet>* funcNameSets,
-	int							   numGeomTypes,
-	int							   numRayTypes )
+	uint32_t					   numGeomTypes,
+	uint32_t					   numRayTypes )
 {
 	std::vector<const char*>		   options;
 	std::vector<std::filesystem::path> includeNamesData;
@@ -234,9 +234,12 @@ void TutorialBase::buildTraceKernelFromBitcode(
 	functionOut = *reinterpret_cast<oroFunction*>( &function );
 }
 
-void TutorialBase::launchKernel( oroFunction func, int nx, int ny, void** args ) { launchKernel( func, nx, ny, 8, 8, args ); }
+void TutorialBase::launchKernel( oroFunction func, uint32_t nx, uint32_t ny, void** args )
+{
+	launchKernel( func, nx, ny, 8, 8, args );
+}
 
-void TutorialBase::launchKernel( oroFunction func, int nx, int ny, int bx, int by, void** args )
+void TutorialBase::launchKernel( oroFunction func, uint32_t nx, uint32_t ny, uint32_t bx, uint32_t by, void** args )
 {
 	hiprtInt3 nb;
 	nb.x = ( nx + bx - 1 ) / bx;
@@ -244,10 +247,10 @@ void TutorialBase::launchKernel( oroFunction func, int nx, int ny, int bx, int b
 	CHECK_ORO( oroModuleLaunchKernel( func, nb.x, nb.y, 1, bx, by, 1, 0, 0, args, 0 ) );
 }
 
-void TutorialBase::writeImage( const std::string& path, int w, int h, u8* pixels )
+void TutorialBase::writeImage( const std::string& path, uint32_t width, uint32_t height, uint8_t* pixels )
 {
-	std::vector<u8> image( w * h * 4 );
-	CHECK_ORO( oroMemcpyDtoH( image.data(), reinterpret_cast<oroDeviceptr>( pixels ), w * h * 4 ) );
-	stbi_write_png( path.c_str(), w, h, 4, image.data(), w * 4 );
+	std::vector<uint8_t> image( width * height * 4 );
+	CHECK_ORO( oroMemcpyDtoH( image.data(), reinterpret_cast<oroDeviceptr>( pixels ), width * height * 4 ) );
+	stbi_write_png( path.c_str(), width, height, 4, image.data(), width * 4 );
 	std::cout << "image written at " << path.c_str() << std::endl;
 }

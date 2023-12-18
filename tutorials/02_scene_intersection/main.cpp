@@ -31,9 +31,9 @@ class Tutorial : public TutorialBase
 		CHECK_HIPRT( hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, ctxt ) );
 
 		hiprtTriangleMeshPrimitive mesh;
-		mesh.triangleCount	  = 2;
-		mesh.triangleStride	  = sizeof( hiprtInt3 );
-		int triangleIndices[] = { 0, 1, 2, 3, 4, 5 };
+		mesh.triangleCount		   = 2;
+		mesh.triangleStride		   = sizeof( hiprtInt3 );
+		uint32_t triangleIndices[] = { 0, 1, 2, 3, 4, 5 };
 		CHECK_ORO(
 			oroMalloc( reinterpret_cast<oroDeviceptr*>( &mesh.triangleIndices ), mesh.triangleCount * sizeof( hiprtInt3 ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
@@ -41,24 +41,24 @@ class Tutorial : public TutorialBase
 			triangleIndices,
 			mesh.triangleCount * sizeof( hiprtInt3 ) ) );
 
-		mesh.vertexCount	   = 6;
-		mesh.vertexStride	   = sizeof( hiprtFloat3 );
-		const float s		   = 0.5f;
-		const float t		   = 0.8f;
-		hiprtFloat3 vertices[] = {
-			{ s, s, 0.0f },
-			{ s + t * s, -s * s, 0.0f },
-			{ s - t * s, -s * s, 0.0f },
-			{ -s, s, 0.0f },
-			{ -s + t * s, -s * s, 0.0f },
-			{ -s - t * s, -s * s, 0.0f } };
+		mesh.vertexCount		   = 6;
+		mesh.vertexStride		   = sizeof( hiprtFloat3 );
+		constexpr float S		   = 0.5f;
+		constexpr float T		   = 0.8f;
+		hiprtFloat3		vertices[] = {
+			{ S, S, 0.0f },
+			{ S + T * S, -S * S, 0.0f },
+			{ S - T * S, -S * S, 0.0f },
+			{ -S, S, 0.0f },
+			{ -S + T * S, -S * S, 0.0f },
+			{ -S - T * S, -S * S, 0.0f } };
 		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &mesh.vertices ), mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
 			reinterpret_cast<oroDeviceptr>( mesh.vertices ), vertices, mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
 
 		hiprtGeometryBuildInput geomInput;
 		geomInput.type					 = hiprtPrimitiveTypeTriangleMesh;
-		geomInput.triangleMesh.primitive = mesh;
+		geomInput.primitive.triangleMesh = mesh;
 
 		size_t			  geomTempSize;
 		hiprtDevicePtr	  geomTemp;
@@ -71,14 +71,17 @@ class Tutorial : public TutorialBase
 		CHECK_HIPRT( hiprtCreateGeometry( ctxt, geomInput, options, geom ) );
 		CHECK_HIPRT( hiprtBuildGeometry( ctxt, hiprtBuildOperationBuild, geomInput, options, geomTemp, 0, geom ) );
 
+		hiprtInstance instance;
+		instance.type	  = hiprtInstanceTypeGeometry;
+		instance.geometry = geom;
+
 		hiprtSceneBuildInput sceneInput;
 		sceneInput.instanceCount			= 1;
 		sceneInput.instanceMasks			= nullptr;
 		sceneInput.instanceTransformHeaders = nullptr;
-		hiprtDevicePtr geoms[]				= { geom };
-		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &sceneInput.instanceGeometries ), sizeof( hiprtDevicePtr ) ) );
+		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &sceneInput.instances ), sizeof( hiprtInstance ) ) );
 		CHECK_ORO(
-			oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( sceneInput.instanceGeometries ), geoms, sizeof( hiprtDevicePtr ) ) );
+			oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( sceneInput.instances ), &instance, sizeof( hiprtInstance ) ) );
 
 		hiprtFrameSRT frame;
 		frame.translation	  = make_hiprtFloat3( 0.0f, 0.0f, 0.0f );
@@ -101,14 +104,14 @@ class Tutorial : public TutorialBase
 		oroFunction func;
 		buildTraceKernelFromBitcode( ctxt, "../common/TutorialKernels.h", "SceneIntersectionKernel", func );
 
-		u8* pixels;
+		uint8_t* pixels;
 		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &pixels ), m_res.x * m_res.y * 4 ) );
 
 		void* args[] = { &scene, &pixels, &m_res };
 		launchKernel( func, m_res.x, m_res.y, args );
 		writeImage( "02_scene_intersection.png", m_res.x, m_res.y, pixels );
 
-		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( sceneInput.instanceGeometries ) ) );
+		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( sceneInput.instances ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( sceneInput.instanceFrames ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( mesh.triangleIndices ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( mesh.vertices ) ) );

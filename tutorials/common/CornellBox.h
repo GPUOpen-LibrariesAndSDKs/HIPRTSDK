@@ -2,8 +2,8 @@
 #include <array>
 #include <hiprt/hiprt_types.h>
 
-constexpr int CornellBoxTriangleCount = 32;
-constexpr int CornellBoxMaterialCount = 4;
+constexpr uint32_t CornellBoxTriangleCount = 32;
+constexpr uint32_t CornellBoxMaterialCount = 4;
 
 const static std::array<hiprtFloat3, CornellBoxTriangleCount* 3> cornellBoxVertices = { { // Floor  -- white lambert
 																						  { 0.0f, 0.0f, 0.0f },
@@ -140,7 +140,7 @@ const static std::array<hiprtFloat3, CornellBoxTriangleCount* 3> cornellBoxVerti
 																						  { 213.0f, 548.6f, 332.0f },
 																						  { 343.0f, 548.6f, 332.0f } } };
 
-static std::array<int, CornellBoxTriangleCount> cornellBoxMatIndices = { {
+static std::array<uint32_t, CornellBoxTriangleCount> cornellBoxMatIndices = { {
 	0, 0,						  // Floor         -- white lambert
 	0, 0,						  // Ceiling       -- white lambert
 	0, 0,						  // Back wall     -- white lambert

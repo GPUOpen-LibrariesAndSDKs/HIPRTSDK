@@ -33,24 +33,19 @@
 #include <vector>
 
 #define CHECK_ORO( error ) ( checkOro( error, __FILE__, __LINE__ ) )
-void checkOro( oroError res, const char* file, int line );
+void checkOro( oroError res, const char* file, uint32_t line );
 
 #define CHECK_HIPRT( error ) ( checkHiprt( error, __FILE__, __LINE__ ) )
-void checkHiprt( hiprtError res, const char* file, int line );
+void checkHiprt( hiprtError res, const char* file, uint32_t line );
 
 #define CHECK_ORORTC( error ) ( checkOrortc( error, __FILE__, __LINE__ ) )
-void checkOrortc( orortcResult res, const char* file, int line );
-
-typedef unsigned char u8;
-
-constexpr float Pi	  = 3.14159265358979323846f;
-constexpr float TwoPi = 2.0f * Pi;
+void checkOrortc( orortcResult res, const char* file, uint32_t line );
 
 class TutorialBase
 {
   public:
 	virtual ~TutorialBase() { printf( "success\n" ); }
-	void init( int deviceIndex = 0 );
+	void init( uint32_t deviceIndex = 0 );
 
 	virtual void run() = 0;
 
@@ -61,13 +56,13 @@ class TutorialBase
 		oroFunction&				   functionOut,
 		std::vector<const char*>*	   opts			= nullptr,
 		std::vector<hiprtFuncNameSet>* funcNameSets = nullptr,
-		int							   numGeomTypes = 0,
-		int							   numRayTypes	= 1 );
+		uint32_t					   numGeomTypes = 0,
+		uint32_t					   numRayTypes	= 1 );
 
-	void launchKernel( oroFunction func, int nx, int ny, void** args );
-	void launchKernel( oroFunction func, int nx, int ny, int bx, int by, void** args );
+	void launchKernel( oroFunction func, uint32_t nx, uint32_t ny, void** args );
+	void launchKernel( oroFunction func, uint32_t nx, uint32_t ny, uint32_t bx, uint32_t by, void** args );
 
-	static void writeImage( const std::string& path, int w, int h, u8* pixels );
+	static void writeImage( const std::string& path, uint32_t width, uint32_t height, uint8_t* pixels );
 
 	static bool readSourceCode(
 		const std::filesystem::path&					  path,

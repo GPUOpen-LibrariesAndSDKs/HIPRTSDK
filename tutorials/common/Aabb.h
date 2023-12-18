@@ -26,13 +26,13 @@
 
 struct Aabb
 {
-	HOST_DEVICE INLINE Aabb() { reset(); }
+	HIPRT_HOST_DEVICE HIPRT_INLINE Aabb() { reset(); }
 
-	HOST_DEVICE INLINE Aabb( const hiprtFloat3& p ) : m_min( p ), m_max( p ) {}
+	HIPRT_HOST_DEVICE HIPRT_INLINE Aabb( const hiprtFloat3& p ) : m_min( p ), m_max( p ) {}
 
-	HOST_DEVICE INLINE Aabb( const hiprtFloat3& mi, const hiprtFloat3& ma ) : m_min( mi ), m_max( ma ) {}
+	HIPRT_HOST_DEVICE HIPRT_INLINE Aabb( const hiprtFloat3& mi, const hiprtFloat3& ma ) : m_min( mi ), m_max( ma ) {}
 
-	HOST_DEVICE INLINE Aabb( const Aabb& rhs, const Aabb& lhs )
+	HIPRT_HOST_DEVICE HIPRT_INLINE Aabb( const Aabb& rhs, const Aabb& lhs )
 	{
 		m_min.x = fminf( lhs.m_min.x, rhs.m_min.x );
 		m_min.y = fminf( lhs.m_min.y, rhs.m_min.y );
@@ -42,13 +42,13 @@ struct Aabb
 		m_max.z = fmaxf( lhs.m_max.z, rhs.m_max.z );
 	}
 
-	HOST_DEVICE INLINE void reset( void )
+	HIPRT_HOST_DEVICE HIPRT_INLINE void reset( void )
 	{
 		m_min = make_hiprtFloat3( hiprt::FltMax, hiprt::FltMax, hiprt::FltMax );
 		m_max = make_hiprtFloat3( -hiprt::FltMax, -hiprt::FltMax, -hiprt::FltMax );
 	}
 
-	HOST_DEVICE INLINE Aabb& grow( const hiprtFloat3& p )
+	HIPRT_HOST_DEVICE HIPRT_INLINE Aabb& grow( const hiprtFloat3& p )
 	{
 		m_min.x = fminf( m_min.x, p.x );
 		m_min.y = fminf( m_min.y, p.y );
@@ -59,7 +59,7 @@ struct Aabb
 		return *this;
 	}
 
-	HOST_DEVICE INLINE Aabb& grow( const Aabb& rhs )
+	HIPRT_HOST_DEVICE HIPRT_INLINE Aabb& grow( const Aabb& rhs )
 	{
 		m_min.x = fminf( m_min.x, rhs.m_min.x );
 		m_min.y = fminf( m_min.y, rhs.m_min.y );
@@ -70,7 +70,7 @@ struct Aabb
 		return *this;
 	}
 
-	HOST_DEVICE INLINE hiprtFloat3 center() const
+	HIPRT_HOST_DEVICE HIPRT_INLINE hiprtFloat3 center() const
 	{
 		hiprtFloat3 c;
 		c.x = ( m_max.x + m_min.x ) * 0.5f;
@@ -79,7 +79,7 @@ struct Aabb
 		return c;
 	}
 
-	HOST_DEVICE INLINE hiprtFloat3 extent() const
+	HIPRT_HOST_DEVICE HIPRT_INLINE hiprtFloat3 extent() const
 	{
 		hiprtFloat3 e;
 		e.x = m_max.x - m_min.x;
@@ -88,7 +88,7 @@ struct Aabb
 		return e;
 	}
 
-	HOST_DEVICE INLINE float area() const
+	HIPRT_HOST_DEVICE HIPRT_INLINE float area() const
 	{
 		hiprtFloat3 ext = extent();
 		return 2 * ( ext.x * ext.y + ext.x * ext.z + ext.y * ext.z );

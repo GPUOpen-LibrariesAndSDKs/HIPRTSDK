@@ -20,6 +20,8 @@
 // THE SOFTWARE.
 //
 
+#include <numeric>
+#include <tutorials/common/CornellBox.h>
 #include <tutorials/common/TutorialBase.h>
 
 class Tutorial : public TutorialBase
@@ -30,23 +32,38 @@ class Tutorial : public TutorialBase
 		hiprtContext ctxt;
 		CHECK_HIPRT( hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, ctxt ) );
 
+		constexpr uint32_t StackSize		  = 64u;
+		constexpr uint32_t SharedStackSize	  = 16u;
+		constexpr uint32_t BlockWidth		  = 8u;
+		constexpr uint32_t BlockHeight		  = 8u;
+		constexpr uint32_t BlockSize		  = BlockWidth * BlockHeight;
+		constexpr uint32_t ThreadCount		  = 100000u;
+		std::string		   BlockSizeDef		  = "-D BLOCK_SIZE=" + std::to_string( BlockSize );
+		std::string		   SharedStackSizeDef = "-D SHARED_STACK_SIZE=" + std::to_string( SharedStackSize );
+
+		std::vector<const char*> opts;
+		opts.push_back( BlockSizeDef.c_str() );
+		opts.push_back( SharedStackSizeDef.c_str() );
+
 		hiprtTriangleMeshPrimitive mesh;
-		mesh.triangleCount		   = 1;
-		mesh.triangleStride		   = sizeof( hiprtInt3 );
-		uint32_t triangleIndices[] = { 0, 1, 2 };
+		mesh.triangleCount	= CornellBoxTriangleCount;
+		mesh.triangleStride = sizeof( hiprtInt3 );
+		std::array<uint32_t, 3 * CornellBoxTriangleCount> triangleIndices;
+		std::iota( triangleIndices.begin(), triangleIndices.end(), 0 );
 		CHECK_ORO(
 			oroMalloc( reinterpret_cast<oroDeviceptr*>( &mesh.triangleIndices ), mesh.triangleCount * sizeof( hiprtInt3 ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
 			reinterpret_cast<oroDeviceptr>( mesh.triangleIndices ),
-			triangleIndices,
+			triangleIndices.data(),
 			mesh.triangleCount * sizeof( hiprtInt3 ) ) );
 
-		mesh.vertexCount	   = 3;
-		mesh.vertexStride	   = sizeof( hiprtFloat3 );
-		hiprtFloat3 vertices[] = { { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.5f, 1.0f, 0.0f } };
+		mesh.vertexCount  = 3 * mesh.triangleCount;
+		mesh.vertexStride = sizeof( hiprtFloat3 );
 		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &mesh.vertices ), mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
-			reinterpret_cast<oroDeviceptr>( mesh.vertices ), vertices, mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
+			reinterpret_cast<oroDeviceptr>( mesh.vertices ),
+			const_cast<hiprtFloat3*>( cornellBoxVertices.data() ),
+			mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
 
 		hiprtGeometryBuildInput geomInput;
 		geomInput.type					 = hiprtPrimitiveTypeTriangleMesh;
@@ -64,20 +81,26 @@ class Tutorial : public TutorialBase
 		CHECK_HIPRT( hiprtBuildGeometry( ctxt, hiprtBuildOperationBuild, geomInput, options, geomTemp, 0, geom ) );
 
 		oroFunction func;
-		buildTraceKernelFromBitcode( ctxt, "../common/TutorialKernels.h", "GeomIntersectionKernel", func );
+		buildTraceKernelFromBitcode( ctxt, "../common/TutorialKernels.h", "SharedStackKernel", func, &opts );
 
 		uint8_t* pixels;
 		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &pixels ), m_res.x * m_res.y * 4 ) );
 
-		void* args[] = { &geom, &pixels, &m_res };
-		launchKernel( func, m_res.x, m_res.y, args );
-		writeImage( "01_geom_intersection.png", m_res.x, m_res.y, pixels );
+		hiprtGlobalStackBufferInput stackBufferInput{
+			hiprtStackTypeDynamic, hiprtStackEntryTypeInteger, StackSize, ThreadCount };
+		hiprtGlobalStackBuffer stackBuffer;
+		CHECK_HIPRT( hiprtCreateGlobalStackBuffer( ctxt, stackBufferInput, stackBuffer ) );
+
+		void* args[] = { &geom, &pixels, &m_res, &stackBuffer };
+		launchKernel( func, m_res.x, m_res.y, BlockWidth, BlockHeight, args );
+		writeImage( "06_dynamic_stack.png", m_res.x, m_res.y, pixels );
 
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( mesh.triangleIndices ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( mesh.vertices ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( geomTemp ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( pixels ) ) );
 
+		CHECK_HIPRT( hiprtDestroyGlobalStackBuffer( ctxt, stackBuffer ) );
 		CHECK_HIPRT( hiprtDestroyGeometry( ctxt, geom ) );
 		CHECK_HIPRT( hiprtDestroyContext( ctxt ) );
 	}
