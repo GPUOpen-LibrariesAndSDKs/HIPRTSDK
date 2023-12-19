@@ -16,7 +16,7 @@ HIP RT is a ray tracing library in HIP. The APIs are designed to be minimal and 
 
 ## Requirement
 
-HIP RT runs on AMD and NVIDIA GPUs. HIP and CUDA &copy; APIs are dynamically loaded so you do not need to have these SDKs if your have these DLLs installed by the GPU driver package. Hardware-accelerated ray tracing only works on AMD RDNA2-based GPUs. 
+HIP RT runs on AMD and NVIDIA® GPUs. HIP and CUDA® APIs are dynamically loaded so you do not need to have these SDKs if your have these DLLs installed with the driver package. Hardware-accelerated ray tracing only works on RDNA™ 2 GPUs (Radeon™ RX 6000 series or newer).
 
 The supported AMD GPU architecture families are:
 
