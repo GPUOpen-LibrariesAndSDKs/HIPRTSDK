@@ -18,15 +18,13 @@ HIP RT is a ray tracing library in HIP. The APIs are designed to be minimal and 
 
 HIP RT runs on AMD and NVIDIA GPUs. HIP and CUDA &copy; APIs are dynamically loaded so you do not need to have these SDKs if your have these DLLs installed by the GPU driver package. Hardware accelerated ray tracing only works on AMD RDNA2-based GPUs. 
 
-It works on any AMD GPU which supports HIP. The supported AMD GPU architecture families are:
+The supported AMD GPU architecture families are:
 
-- Navi3x (Radeon™ RX 7000 series).
-- Navi2x (Radeon™ RX 6000 series).
-- Navi1x (Radeon™ RX 5000 series).
-- Vega2x.
-- Vega1x.
+- Navi3x (Radeon™ RX 7000 series)
+- Navi2x (Radeon™ RX 6000 series)
+- Navi1x (Radeon™ RX 5000 series)
 
-You need an AMDGPU driver newer than 21.40. However, we recommend using 21.50 or newer.
+You will also need AMD Software: Adrenalin Edition 23.30 or later for Windows and ROCm 5.7 for Linux.
 
 ----
 
