@@ -39,7 +39,7 @@ You will also need AMD Software: Adrenalin Edition 23.30 or later for Windows an
   - External dependencies
 
 
-## Building the Tutorial
+## Building the tutorials
 
 1. First you need to clone the repository, then init and update the submodules if you didn't clone with `--recursive`:
 
@@ -47,17 +47,31 @@ You will also need AMD Software: Adrenalin Edition 23.30 or later for Windows an
 git submodule init
 git submodule update
 ````
-2. Download the HIP RT SDK from [HIP RT prject page](https://gpuopen.com/hiprt/), copy hiprt directory to here. 
+2. Download the HIP RT SDK from [HIP RT prject page](https://gpuopen.com/hiprt/), copy hiprt directory here. 
 
-3. Run premake like this on Windows, which will generate a solution for Visual Studio 2019:
-
+Windows:
+3. Run premake to generate a solution for Visual Studio 2022:
 ````
 cd tutorials
-../tools/premake5/win/premake5.exe vs2019
+../tools/premake5/win/premake5.exe vs2022
 ````
 
-4. Open the solution, compile & run. These tutorials are made to run on both AMD and NVIDIA by specifying the device index. 
+4. Open the solution, compile & run.
 
+Linux:
+3. Run premake like this on Windows, which will generate a make file:
+````
+cd tutorials
+../tools/premake5/linux64/premake5 gmake2
+````
+
+4. Compile using the make file & run.
+````
+cd build
+make
+````
+
+These tutorials are made to run on both AMD and NVIDIA by specifying the device index. 
 
 ## Introduction to the HIP RT APIs
 
@@ -69,4 +83,6 @@ An example of a minimum kernel can be found at [here](tutorials/01_geom_intersec
 
 ## References 
 - Introducing HIP RT – a ray tracing library in HIP, [GPUOpen Blog](https://gpuopen.com/learn/introducing-hiprt/)
-
+- HIP Ray Tracing 2.0 introduces improved custom function handling, Bitcode linking, and more, [GPUOpen Blog](https://gpuopen.com/learn/hiprt-v2-release-optimizations-and-updates/)
+- Introducing HIP RT v2.1 - batch construction for small geometries, transformation query functions, and more, [GPUOpen Blog](https://gpuopen.com/learn/hiprt_2_1_batch_construction_transformation_functions/)
+- Introducing HIP RT v2.2, [GPUOpen Blog](https://gpuopen.com/learn/introducing-hip-rt-v2-2/)
