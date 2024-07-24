@@ -3,8 +3,8 @@
 ## List of tutorials
 
 | Demo name  | Image  | Documentation | Description |
-|---|---|--|--|
-|[01_geom_intersection](./01_geom_intersection)   | <img src="./imgs/01_geom_intersection.png" alt="drawing" width="100"/>  | [documentation](../doc/01_geom_intersection.md) | Intersection using hiprtGeometry. |
+|---|:---:|:--:|--|
+|[01_geom_intersection](./01_geom_intersection)   | <img src="./imgs/01_geom_intersection.png" alt="drawing" width="100"/>  | [:page_facing_up:](../doc/01_geom_intersection.md) | Intersection using hiprtGeometry. |
 |[02_scene_intersection](./02_scene_intersection)   | <img src="./imgs/02_scene_intersection.png" alt="drawing" width="100"/>  | | Intersection using hiprtScene. |
 |[03_custom_intersection](./03_custom_intersection)   | <img src="./imgs/03_custom_intersection.png" alt="drawing" width="100"/>  | | Using a custom intersection function. |
 |[04_compaction](./04_compaction)   | <img src="./imgs/04_compaction.png" alt="drawing" width="100"/>  | | Acceleration structure compaction. |
