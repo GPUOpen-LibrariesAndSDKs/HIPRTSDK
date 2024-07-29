@@ -76,6 +76,8 @@ workspace "hiprtSdkTutorial"
     include "15_multi_level_instancing"
     include "16_fluid_simulation"
     include "17_hiprt_hip"
+    include "18_shadow_ray"
+    include "19_primary_ray"
 	
     if os.ishost("windows") then
 		  copydir( "../hiprt/win/", "./dist/bin/Release/" )

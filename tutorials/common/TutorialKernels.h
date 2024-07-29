@@ -41,34 +41,6 @@ __device__ float3 gammaCorrect( float3 a )
 	return { pow( a.x, g ), pow( a.y, g ), pow( a.z, g ) };
 }
 
-__device__ uint32_t lcg( uint32_t& seed )
-{
-	constexpr uint32_t LcgA = 1103515245u;
-	constexpr uint32_t LcgC = 12345u;
-	constexpr uint32_t LcgM = 0x00FFFFFFu;
-	seed					= ( LcgA * seed + LcgC );
-	return seed & LcgM;
-}
-
-__device__ float randf( uint32_t& seed ) { return ( static_cast<float>( lcg( seed ) ) / static_cast<float>( 0x01000000 ) ); }
-
-template <uint32_t N>
-__device__ uint2 tea( uint32_t val0, uint32_t val1 )
-{
-	uint32_t v0 = val0;
-	uint32_t v1 = val1;
-	uint32_t s0 = 0;
-
-	for ( uint32_t n = 0; n < N; n++ )
-	{
-		s0 += 0x9e3779b9;
-		v0 += ( ( v1 << 4 ) + 0xa341316c ) ^ ( v1 + s0 ) ^ ( ( v1 >> 5 ) + 0xc8013ea4 );
-		v1 += ( ( v0 << 4 ) + 0xad90777d ) ^ ( v0 + s0 ) ^ ( ( v0 >> 5 ) + 0x7e95761e );
-	}
-
-	return make_uint2( v0, v1 );
-}
-
 __device__ bool cutoutFilter( const hiprtRay& ray, const void* data, void* payload, const hiprtHit& hit )
 {
 	constexpr float Scale = 16.0f;

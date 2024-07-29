@@ -31,7 +31,19 @@
 #include <cmath>
 #endif
 
+
+#include <hiprt/hiprt_common.h>
+#if defined( __KERNELCC__ )
+#include <hiprt/hiprt_device.h>
+#endif
+
+
+
+
+
 #if !defined( __KERNELCC__ )
+#define uint2 hiprtUint2
+
 #define int2 hiprtInt2
 #define int3 hiprtInt3
 #define int4 hiprtInt4
@@ -49,6 +61,16 @@
 #define make_float4 make_hiprtFloat4
 #endif
 
+
+static constexpr bool UseDynamicStack = false;
+
+
+#if defined( __KERNELCC__ )
+typedef typename hiprt::conditional<UseDynamicStack, hiprtDynamicStack, hiprtGlobalStack>::type Stack;
+typedef hiprtEmptyInstanceStack																	InstanceStack;
+#endif
+
+
 struct float4x4
 {
 	union
@@ -57,6 +79,73 @@ struct float4x4
 		float  e[4][4];
 	};
 };
+
+
+enum
+{
+	VisualizeColor,
+	VisualizeUv,
+	VisualizeId,
+	VisualizeHitDist,
+	VisualizeNormal,
+	VisualizeAo
+};
+
+struct Material
+{
+	float3 m_diffuse;
+	float3 m_emission;
+
+	HIPRT_HOST_DEVICE HIPRT_INLINE bool light() { return m_emission.x + m_emission.y + m_emission.z > 0.0f; }
+};
+
+struct Light
+{
+	float3 m_le;
+	float3 m_lv0;
+	float3 m_lv1;
+	float3 m_lv2;
+	float3 pad;
+};
+
+struct Camera
+{
+	float4 m_rotation;
+	float3 m_translation;
+	float  m_fov;
+};
+
+
+
+HIPRT_HOST_DEVICE HIPRT_INLINE uint32_t lcg( uint32_t& seed )
+{
+	constexpr uint32_t LcgA = 1103515245u;
+	constexpr uint32_t LcgC = 12345u;
+	constexpr uint32_t LcgM = 0x00FFFFFFu;
+	seed					= ( LcgA * seed + LcgC );
+	return seed & LcgM;
+}
+
+HIPRT_HOST_DEVICE HIPRT_INLINE float randf( uint32_t& seed ) { return ( static_cast<float>( lcg( seed ) ) / static_cast<float>( 0x01000000 ) ); }
+
+template <uint32_t N>
+HIPRT_HOST_DEVICE HIPRT_INLINE uint2 tea( uint32_t val0, uint32_t val1 )
+{
+	uint32_t v0 = val0;
+	uint32_t v1 = val1;
+	uint32_t s0 = 0;
+
+	for ( uint32_t n = 0; n < N; n++ )
+	{
+		s0 += 0x9e3779b9;
+		v0 += ( ( v1 << 4 ) + 0xa341316c ) ^ ( v1 + s0 ) ^ ( ( v1 >> 5 ) + 0xc8013ea4 );
+		v1 += ( ( v0 << 4 ) + 0xad90777d ) ^ ( v0 + s0 ) ^ ( ( v0 >> 5 ) + 0x7e95761e );
+	}
+
+	return make_uint2( v0, v1 );
+}
+
+
 
 #define RT_MIN( a, b ) ( ( ( b ) < ( a ) ) ? ( b ) : ( a ) )
 #define RT_MAX( a, b ) ( ( ( b ) > ( a ) ) ? ( b ) : ( a ) )
@@ -948,6 +1037,12 @@ HIPRT_HOST_DEVICE HIPRT_INLINE float dot( const float4& a, const float4& b )
 
 HIPRT_HOST_DEVICE HIPRT_INLINE float3 normalize( const float3& a ) { return a / sqrtf( dot( a, a ) ); }
 
+template <typename T, typename V>
+HIPRT_HOST_DEVICE HIPRT_INLINE V clamp( const V& v, const T& lo, const T& hi )
+{
+	return max( min( v, hi ), lo );
+}
+
 HIPRT_HOST_DEVICE HIPRT_INLINE float4 operator*( const float4x4& m, const float4& v )
 {
 	return make_float4( dot( m.r[0], v ), dot( m.r[1], v ), dot( m.r[2], v ), dot( m.r[3], v ) );
@@ -996,3 +1091,31 @@ HIPRT_HOST_DEVICE HIPRT_INLINE float4x4 LookAt( const float3& eye, const float3&
 
 	return m;
 }
+
+HIPRT_HOST_DEVICE HIPRT_INLINE float3 rotate( const float4& rotation, const float3& p )
+{
+	float3 a = sinf( rotation.w / 2.0f ) * normalize( make_float3( rotation ) );
+	float  c = cosf( rotation.w / 2.0f );
+	return 2.0f * dot( a, p ) * a + ( c * c - dot( a, a ) ) * p + 2.0f * c * cross( a, p );
+}
+
+
+HIPRT_HOST_DEVICE HIPRT_INLINE hiprtRay
+generateRay( float x, float y, int2 res, const Camera& camera, uint32_t& seed, bool isMultiSamples )
+{
+	const float	 offset		= ( isMultiSamples ) ? randf( seed ) : 0.5f;
+	const float2 sensorSize = make_float2( 0.024f * ( res.x / static_cast<float>( res.y ) ), 0.024f );
+	const float2 xy			= make_float2( ( x + offset ) / res.x, ( y + offset ) / res.y ) - make_float2( 0.5f, 0.5f );
+	const float3 dir =
+		make_float3( xy.x * sensorSize.x, xy.y * sensorSize.y, sensorSize.y / ( 2.0f * tan( camera.m_fov / 2.0f ) ) );
+
+	const float3 holDir	 = rotate( camera.m_rotation, make_float3( 1.0f, 0.0f, 0.0f ) );
+	const float3 upDir	 = rotate( camera.m_rotation, make_float3( 0.0f, -1.0f, 0.0f ) );
+	const float3 viewDir = rotate( camera.m_rotation, make_float3( 0.0f, 0.0f, -1.0f ) );
+
+	hiprtRay ray;
+	ray.origin	  = camera.m_translation;
+	ray.direction = normalize( dir.x * holDir + dir.y * upDir + dir.z * viewDir );
+	return ray;
+}
+

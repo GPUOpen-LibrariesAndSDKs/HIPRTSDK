@@ -3,3 +3,6 @@
 *.sln
 *.png
 build/
+hiprt/
+tutorials/dist/
+
