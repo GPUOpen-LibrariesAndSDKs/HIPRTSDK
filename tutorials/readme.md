@@ -20,5 +20,5 @@
 |[14_batch_build](./14_batch_build)   | <img src="./imgs/14_batch_build.png" alt="drawing" width="100"/>  | | Build small geometries concurrently in a single batch. |
 |[15_multi_level_instancing](./15_multi_level_instancing)   | <img src="./imgs/15_multi_level_instancing.png" alt="drawing" width="100"/>  | | Multi-level instancing. |
 |[16_fluid_simulation](./16_fluid_simulation)   | <img src="./imgs/16_fluid_simulation.png" alt="drawing" width="100"/>  | | A simple fluid simulation. |
-|[18_shadow_ray](./18_shadow_ray)   | <img src="./imgs/18_shadow_ray.png" alt="drawing" width="100"/>  | | Shows how to trace a shadow ray in an OBJ scene. |
-|[19_primary_ray](./19_primary_ray)   | <img src="./imgs/19_primary_ray.png" alt="drawing" width="100"/>  | | Shows how to trace different types of primary rays in an OBJ scene. |
+|[18_shadow_ray](./18_shadow_ray)   | <img src="./imgs/18_shadow_ray.png" alt="drawing" width="100"/>  | [:page_facing_up:](../doc/18_shadow_ray.md) | Shows how to trace a shadow ray in an OBJ scene. |
+|[19_primary_ray](./19_primary_ray)   | <img src="./imgs/19_primary_ray.png" alt="drawing" width="100"/>  | [:page_facing_up:](../doc/19_primary_ray.md) | Shows how to trace different types of primary rays in an OBJ scene. |
