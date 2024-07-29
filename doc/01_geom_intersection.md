@@ -1,15 +1,18 @@
 # [01_geom_intersection](../tutorials/01_geom_intersection)
 
-First, we create hiprt context. 
+<br />
+First, we create hiprt context.<br /><br />
 
-```
+```cpp
 hiprtContext ctxt;
 hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, ctxt );
 ```
+ 
+<br />
+<br />
+Then we create vertex and index buffers.<br /><br />
 
-Then we create vertex and index buffers. 
-
-```
+```cpp
 hiprtTriangleMeshPrimitive mesh;
 mesh.triangleCount		   = 1;
 mesh.triangleStride		   = sizeof( hiprtInt3 );
@@ -26,9 +29,11 @@ oroMalloc( reinterpret_cast<oroDeviceptr*>( &mesh.vertices ), mesh.vertexCount *
 oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( mesh.vertices ), vertices, mesh.vertexCount * sizeof( hiprtFloat3 ) );
 ```
 
-The next is preparation of spatial acceleration structure from the vertex, index buffers. A spatial acceleration structure is called `hiprtGeometry`. In the code below, we create a temporary buffer used for the build, create `hiprtGeometry`, then build the geometry with the inputs we provide. 
+<br />
+<br />
+The next is preparation of spatial acceleration structure from the vertex, index buffers. A spatial acceleration structure is called `hiprtGeometry`. In the code below, we create a temporary buffer used for the build, create `hiprtGeometry`, then build the geometry with the inputs we provide. <br /><br />
 
-```
+```cpp
 hiprtGeometryBuildInput geomInput;
 geomInput.type					 = hiprtPrimitiveTypeTriangleMesh;
 geomInput.primitive.triangleMesh = mesh;
@@ -45,9 +50,11 @@ hiprtCreateGeometry( ctxt, geomInput, options, geom );
 hiprtBuildGeometry( ctxt, hiprtBuildOperationBuild, geomInput, options, geomTemp, 0, geom );
 ```
 
-Once it is done, we are ready to trace rays on the GPU in a kernel you write. Here is a kernel used in this tutorial. 
+<br />
+<br />
+Once it is done, we are ready to trace rays on the GPU in a kernel you write. Here is a kernel used in this tutorial. <br /><br />
 
-```
+```cpp
 #include <hiprt/hiprt_device.h>
 #include <hiprt/hiprt_vec.h>
 
@@ -74,23 +81,29 @@ extern "C" __global__ void GeomIntersectionKernel( hiprtGeometry geom, uint8_t* 
 }
 ```
 
-This is nothing but just a regular HIP kernel other than passing `hiprtGeometry`. What you find new in the kernel is the 2 lines. We create traversal object which keeps the state of the ray and execute the traversal. `tr.getNextHit()` does the ray tracing and find the hit we need. 
+<br />
+<br />
+This is nothing but just a regular HIP kernel other than passing `hiprtGeometry`. What you find new in the kernel is the 2 lines. We create traversal object which keeps the state of the ray and execute the traversal. `tr.getNextHit()` does the ray tracing and find the hit we need. <br /><br />
 
-```
+```cpp
 hiprtGeomTraversalClosest tr( geom, ray );
 hiprtHit hit = tr.getNextHit();
 ```
 
-The kernel above has hiprt functions in it. Thus, it needs to be compiled with the hiprt headers (and bitcodes) which is done in this line. 
+<br />
+<br />
+The kernel above has hiprt functions in it. Thus, it needs to be compiled with the hiprt headers (and bitcodes) which is done in this line. <br /><br />
 
-```
+```cpp
 oroFunction func;
 buildTraceKernelFromBitcode( ctxt, "../common/TutorialKernels.h", "GeomIntersectionKernel", func );
 ```
 
-That’s all we need to do for preparation. Now we can launch the kernel and see the first triangle. 
+<br />
+<br />
+That’s all we need to do for preparation. Now we can launch the kernel and see the first triangle. <br /><br />
 
-```
+```cpp
 uint8_t* pixels;
 oroMalloc( reinterpret_cast<oroDeviceptr*>( &pixels ), m_res.x * m_res.y * 4 );
 
