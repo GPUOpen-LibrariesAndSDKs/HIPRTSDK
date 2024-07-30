@@ -5,8 +5,8 @@
 | Demo name  | Image  | Documentation | Description |
 |---|:---:|:--:|--|
 |[01_geom_intersection](./01_geom_intersection)   | <img src="./imgs/01_geom_intersection.png" alt="drawing" width="100"/>  | [:page_facing_up:](../doc/01_geom_intersection.md) | Intersection using hiprtGeometry. |
-|[02_scene_intersection](./02_scene_intersection)   | <img src="./imgs/02_scene_intersection.png" alt="drawing" width="100"/>  | | Intersection using hiprtScene. |
-|[03_custom_intersection](./03_custom_intersection)   | <img src="./imgs/03_custom_intersection.png" alt="drawing" width="100"/>  | | Using a custom intersection function. |
+|[02_scene_intersection](./02_scene_intersection)   | <img src="./imgs/02_scene_intersection.png" alt="drawing" width="100"/>  | [:page_facing_up:](../doc/02_scene_intersection.md) | Intersection using hiprtScene. |
+|[03_custom_intersection](./03_custom_intersection)   | <img src="./imgs/03_custom_intersection.png" alt="drawing" width="100"/>  | [:page_facing_up:](../doc/03_custom_intersection.md) | Using a custom intersection function. |
 |[04_compaction](./04_compaction)   | <img src="./imgs/04_compaction.png" alt="drawing" width="100"/>  | | Acceleration structure compaction. |
 |[05_global_stack](./05_global_stack)   | <img src="./imgs/05_global_stack.png" alt="drawing" width="100"/>  | | Global traversal stack for good performance. | 
 |[06_dynamic_stack](./06_dynamic_stack)   | <img src="./imgs/06_dynamic_stack.png" alt="drawing" width="100"/>  | | Dynamic traversal stack for balancing performance and memory requirements. | 
