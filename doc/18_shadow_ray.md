@@ -2,7 +2,7 @@
 
 <br />
 
-This demo shows how to implement a Shadow Ray in HIPRT. As a reminder, in ray tracing, a shadow ray is a ray that is cast from a point on a surface (the point of intersection where the primary ray hits) towards a light source. The purpose of the shadow ray is to determine whether the point is in shadow or illuminated by the light source.
+This demo shows how to implement a Shadow Ray in HIPRT. A shadow ray is a ray that is cast from a point on a surface (the point of intersection where the primary ray hits) towards a light source. The purpose of the shadow ray is to determine whether the point is in shadow or illuminated by the light source.
 
 <div align="center">
     <img src="../tutorials/imgs/18_shadow_ray.png" alt="img" width="300"/>
@@ -199,7 +199,6 @@ After the kernel execution, the global stack buffer is destroyed, and the render
   writeImage(imgPath.value().u8string().c_str(), m_res.x, m_res.y, dst);
 ```
 <br />
-<br />
 
 The `render` function efficiently manages GPU resources, compiles the necessary kernel, and executes the ray tracing operations to produce the final rendered image.
 
@@ -207,6 +206,127 @@ The `render` function efficiently manages GPU resources, compiles the necessary 
 
 ## Shadow Ray Kernel
 
-... WIP ...
+This kernel performs shadow ray tracing to compute lighting and shading for each pixel in the rendered image. The main steps are as follows:
+
+<br />
+
+### Light Sampling
+
+The sampleLightVertex function samples a light source and calculates the probability density function (PDF) for the light sample. It determines the light vertex and normal, and evaluates the light surface integral:
+
+```cpp
+  __device__ float3 sampleLightVertex(const Light& light, float3 x, float3& lVtxOut, float3& lNormalOut, float& pdf, float2 xi) {
+    // Calculate light vertex and normal
+    // Evaluate light surface integral
+  }
+```
+
+<br />
+
+### Kernel Entry Point
+
+The ShadowRayKernel function is the main entry point for the kernel. It initializes various parameters, including resolution and camera data, and sets up the global and shared stack buffers for ray tracing:
+
+```cpp
+  extern "C" __global__ void __launch_bounds__(64) ShadowRayKernel(
+    hiprtScene scene,
+    uint8_t* image,
+    int2 resolution,
+    hiprtGlobalStackBuffer globalStackBuffer,
+    Camera camera,
+    uint32_t* matIndices,
+    Material* materials,
+    uint32_t* matOffsetPerInstance,
+    uint32_t* indices,
+    uint32_t* indxOffsets,
+    float3* normals,
+    uint32_t* normOffset,
+    uint32_t* numOfLights,
+    Light* lights,
+    float aoRadius
+  ) {
+    const uint32_t x = blockIdx.x * blockDim.x + threadIdx.x;
+    const uint32_t y = blockIdx.y * blockDim.y + threadIdx.y;
+    const uint32_t index = x + y * resolution.x;
+```
+
+<br />
+
+### Ray Generation and Traversal
+
+The kernel generates a ray for each pixel, performs scene traversal to find intersections, and calculates the lighting based on the materials and lights in the scene:
+
+```cpp
+  hiprtRay ray = generateRay(x, y, resolution, camera, seed, false);
+  hiprtSceneTraversalClosestCustomStack<Stack, InstanceStack> tr(scene, ray, stack, instanceStack);
+  hiprtHit hit = tr.getNextHit();
+
+  if (hit.hasHit()) {
+    // Process hit information
+    // Calculate shading and lighting
+  }
+```
+
+<br />
+
+### Shadow Ray Calculation
+
+For each hit, the kernel calculates shadow rays to determine visibility of light sources, taking into account occlusion.<br />
+Notice the double loop: one iterates over each light, and the other iterates over each Sampler Per Pixel, to improve the quality of the Shadow Ray estimation.
+
+```cpp
+  if (matIndex == hiprtInvalidValue || !materials[matIndex].light()) {
+    constexpr uint32_t Spp = 256;
+    float3 est{};
+    for (uint32_t l = 0; l < numOfLights[0]; l++) {
+      for (uint32_t p = 0; p < Spp; p++) {
+        float3 lightVtx;
+        float3 lNormal;
+        Light light = lights[l];
+        float pdf = 0.0f;
+        float3 le = sampleLightVertex(light, surfacePt, lightVtx, lNormal, pdf, make_float2(randf(seed), randf(seed)));
+
+        // Calculate light visibility
+        hiprtRay shadowRay;
+        shadowRay.origin = surfacePt + 1.0e-3f * Ng;
+        shadowRay.direction = normalize(lightDir);
+        shadowRay.maxT = 0.99f * sqrtf(dot(lightVec, lightVec));
+
+        hiprtSceneTraversalAnyHitCustomStack<Stack, InstanceStack> tr(scene, shadowRay, stack, instanceStack);
+        hiprtHit hitShadow = tr.getNextHit();
+        int lightVisibility = hitShadow.hasHit() ? 0 : 1;
+
+        if (pdf != 0.0f)
+          est += lightVisibility * le * max(0.0f, dot(Ng, normalize(lightDir))) / pdf;
+      }
+    }
+
+    finalColor = 1.0f / Spp * est * diffuseColor / hiprt::Pi;
+  }
+```
+
+
+<br />
+
+### Writing the Result
+
+Finally, the kernel writes the computed color for each pixel to the output image buffer:
+
+```cpp
+  color.x = finalColor.x * 255;
+  color.y = finalColor.y * 255;
+  color.z = finalColor.z * 255;
+
+  image[index * 4 + 0] = clamp(color.x, 0, 255);
+  image[index * 4 + 1] = clamp(color.y, 0, 255);
+  image[index * 4 + 2] = clamp(color.z, 0, 255);
+  image[index * 4 + 3] = 255;
+```
+
+This kernel efficiently calculates lighting and shading for each pixel, taking into account shadows and occlusions, to produce a high-quality rendered image.
+
+
+
+
 
 
