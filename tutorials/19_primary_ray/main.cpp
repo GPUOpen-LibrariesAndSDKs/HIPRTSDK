@@ -44,27 +44,29 @@ class Tutorial : public SceneDemo
 			OPTION_DEF(VisualizeHitDist,"depth"), 
 			};
 
+		Camera camera = createCamera();
+		setupScene(
+			camera,
+			"../common/meshes/cornellpot/cornellpot.obj",
+			"../common/meshes/cornellpot/",
+			false,
+			std::nullopt,
+			hiprtBuildFlagBitPreferFastBuild
+			);
+
 		for(const auto& o : optionsList)
 		{
 			const std::string  kernelName = "PrimaryRayKernel_" + std::to_string( o.i );
 
-			Camera camera = createCamera();
-			setupScene(
-				camera,
-				"../common/meshes/cornellpot/cornellpot.obj",
-				"../common/meshes/cornellpot/",
-				false,
-				std::nullopt,
-				hiprtBuildFlagBitPreferFastBuild
-				);
 			render(
 				"19_primaryRay_" + o.name + ".png",
 				"../common/PrimaryRayKernel.h",
 				kernelName 
 				);
-			deleteScene( m_scene );
-
+			
 		}
+
+		deleteScene( m_scene );
 	}
 };
 
