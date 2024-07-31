@@ -2,7 +2,7 @@
 
 <br />
 
-If your scene contains primitives other than triangles, HIP RT can handle them too. All you need to do is provide a custom intersection function for the geometry, register the function in HIP RT, then this function will be called when a ray intersects with the primitive.
+If your scene contains primitives other than triangles, HIPRT can handle them too. All you need to do is provide a custom intersection function for the geometry, register the function in HIPRT, then this function will be called when a ray intersects with the primitive.
 
 <div align="center">
     <img src="../tutorials/imgs/03_custom_intersection.png" alt="img" width="300"/>
@@ -10,7 +10,7 @@ If your scene contains primitives other than triangles, HIP RT can handle them t
 
 <br />
 
-`intersectSphere` is the custom intersection kernel we want to execute on our geometry.
+Here `intersectSphere` is the custom intersection kernel we want to execute on our geometry.
 
 ```cpp
   // check if there is a hit before ray.maxT. if there is, set it to tOut. hiprt will overwrite ray.maxT after this function
@@ -66,9 +66,9 @@ We also need to define our function table, containing the list of all the custom
 <br />
 
 When we build the kernel, we need to use the arguments: `funcNameSets`, `numGeomTypes`, `numRayTypes`.<br />
-`funcNameSets` is the std::vector we created previously.<br />
-`numGeomTypes` is the number of geometry types we use. In our sample we use 1.<br />
-`numRayTypes` is the number of ray types we use. Keep it to 1 ( which is the default value ) as we don't want different ray types in this demo.<br />
+- `funcNameSets`, the `std::vector` we created previously.
+- `numGeomTypes`, the number of geometry types we use. In our sample we use 1.
+- `numRayTypes`, the number of ray types we use. Keep it to 1 ( which is the default value ) as we do not want different ray types in this demo.
 ```cpp
   oroFunction func;
   buildTraceKernelFromBitcode(ctxt, "../common/TutorialKernels.h", "CustomIntersectionKernel", func, nullptr, &funcNameSets, 1, 1 );
@@ -81,8 +81,8 @@ We also need to build a `hiprtFuncTable`,
 
 ```cpp
   hiprtFuncTable funcTable;
-  CHECK_HIPRT( hiprtCreateFuncTable( ctxt, 1, 1, funcTable ) );
-  CHECK_HIPRT( hiprtSetFuncTable( ctxt, funcTable, 0, 0, funcDataSet ) );
+  hiprtCreateFuncTable( ctxt, 1, 1, funcTable );
+  hiprtSetFuncTable( ctxt, funcTable, 0, 0, funcDataSet );
 ```
 
 <br />
@@ -120,7 +120,7 @@ Here is how `hiprtFuncTable table` is used on the kernel side :
   
 <br />
 
-To go further, you can look at the demo [11_multi_custom_intersection](../tutorials/11_multi_custom_intersection) which is similar but uses several custom types.
+In this tutorial, we explained simple usage of custom intersection where there is only single custom geometry type. More complex example can be found at the demo [11_multi_custom_intersection](../tutorials/11_multi_custom_intersection) which is similar but uses several custom types.
 
 
 
