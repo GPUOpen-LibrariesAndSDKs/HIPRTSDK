@@ -18,19 +18,19 @@ The first difference is that instead of creating one triangle, we create the lis
   mesh.triangleStride = sizeof( hiprtInt3 );
   std::array<uint32_t, 3 * CornellBoxTriangleCount> triangleIndices;
   std::iota( triangleIndices.begin(), triangleIndices.end(), 0 );
-  CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &mesh.triangleIndices ), mesh.triangleCount * sizeof( hiprtInt3 ) ) );
-  CHECK_ORO( oroMemcpyHtoD(
+  oroMalloc( reinterpret_cast<oroDeviceptr*>( &mesh.triangleIndices ), mesh.triangleCount * sizeof( hiprtInt3 ) );
+  oroMemcpyHtoD(
   	reinterpret_cast<oroDeviceptr>( mesh.triangleIndices ),
   	triangleIndices.data(),
-  	mesh.triangleCount * sizeof( hiprtInt3 ) ) );
+  	mesh.triangleCount * sizeof( hiprtInt3 ) );
 
   mesh.vertexCount  = 3 * mesh.triangleCount;
   mesh.vertexStride = sizeof( hiprtFloat3 );
-  CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &mesh.vertices ), mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
-  CHECK_ORO( oroMemcpyHtoD(
+  oroMalloc( reinterpret_cast<oroDeviceptr*>( &mesh.vertices ), mesh.vertexCount * sizeof( hiprtFloat3 ) );
+  oroMemcpyHtoD(
   	reinterpret_cast<oroDeviceptr>( mesh.vertices ),
   	const_cast<hiprtFloat3*>( cornellBoxVertices.data() ),
-  	mesh.vertexCount * sizeof( hiprtFloat3 ) ) );
+  	mesh.vertexCount * sizeof( hiprtFloat3 ) ) ;
 ```
 
 <br />
@@ -49,9 +49,9 @@ The second difference is we executing another kernel called "AmbientOcclusionKer
 <br />
 <br />
 
-Concerning the kernel itself, it's a bit more complex than the one used in the [first demo](01_geom_intersection.md).
-This kernel is executing an AO loop inside an SPP loop.
-The SPP loop launches several rays (32 iterations in this example) with slightly different directions within the same pixel:
+Concerning the kernel itself, it is a bit more complex than the one used in the [first demo](01_geom_intersection.md).
+This kernel is executing an AO loop inside the loop.
+The loop launches several rays (32 iterations in this example) with slightly different directions within the same pixel:
 
 ```cpp
   const uint32_t x	 = blockIdx.x * blockDim.x + threadIdx.x;
@@ -89,7 +89,7 @@ The SPP loop launches several rays (32 iterations in this example) with slightly
 <br />
 <br />
 
-The AO loop launches several bouncing rays (32 iterations in this example) in random directions using the 'sampleHemisphereCosine' function. Each bouncing ray's result is accumulated in the 'ao' variable:
+The AO loop launches several rays (32 iterations in this example) in random directions using the 'sampleHemisphereCosine' function. Each bouncing ray's result is accumulated in the 'ao' variable:
 
 ```cpp
   hiprtGeomTraversalClosest tr( geom, ray );
@@ -136,6 +136,3 @@ Finally, we output the accumulated Ambient Occlusion to the result framebuffer b
   pixels[index * 4 + 3] = 255;
 
 ```
-
-
-
