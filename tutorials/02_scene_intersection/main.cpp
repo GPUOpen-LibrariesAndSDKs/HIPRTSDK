@@ -80,8 +80,7 @@ class Tutorial : public TutorialBase
 		sceneInput.instanceMasks			= nullptr;
 		sceneInput.instanceTransformHeaders = nullptr;
 		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &sceneInput.instances ), sizeof( hiprtInstance ) ) );
-		CHECK_ORO(
-			oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( sceneInput.instances ), &instance, sizeof( hiprtInstance ) ) );
+		CHECK_ORO( oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( sceneInput.instances ), &instance, sizeof( hiprtInstance ) ) );
 
 		hiprtFrameSRT frame;
 		frame.translation	  = make_hiprtFloat3( 0.0f, 0.0f, 0.0f );
@@ -89,22 +88,25 @@ class Tutorial : public TutorialBase
 		frame.rotation		  = make_hiprtFloat4( 0.0f, 0.0f, 1.0f, 0.0f );
 		sceneInput.frameCount = 1;
 		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &sceneInput.instanceFrames ), sizeof( hiprtFrameSRT ) ) );
-		CHECK_ORO(
-			oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( sceneInput.instanceFrames ), &frame, sizeof( hiprtFrameSRT ) ) );
+		CHECK_ORO( oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( sceneInput.instanceFrames ), &frame, sizeof( hiprtFrameSRT ) ) );
 
 		size_t		   sceneTempSize;
-		hiprtDevicePtr sceneTemp;
+		hiprtDevicePtr sceneTemp = nullptr;
 		CHECK_HIPRT( hiprtGetSceneBuildTemporaryBufferSize( ctxt, sceneInput, options, sceneTempSize ) );
 		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &sceneTemp ), sceneTempSize ) );
 
-		hiprtScene scene;
+		hiprtScene scene = nullptr;
 		CHECK_HIPRT( hiprtCreateScene( ctxt, sceneInput, options, scene ) );
 		CHECK_HIPRT( hiprtBuildScene( ctxt, hiprtBuildOperationBuild, sceneInput, options, sceneTemp, 0, scene ) );
 
-		oroFunction func;
+		// we can free the Temporary Buffer just after hiprtBuildScene, as this buffer is only used during the build.
+		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( sceneTemp ) ) );
+		sceneTemp = nullptr;
+
+		oroFunction func = nullptr;
 		buildTraceKernelFromBitcode( ctxt, "../common/TutorialKernels.h", "SceneIntersectionKernel", func );
 
-		uint8_t* pixels;
+		uint8_t* pixels = nullptr;
 		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &pixels ), m_res.x * m_res.y * 4 ) );
 
 		void* args[] = { &scene, &pixels, &m_res };
