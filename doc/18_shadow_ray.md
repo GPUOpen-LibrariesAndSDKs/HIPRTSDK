@@ -82,7 +82,7 @@ For each shape in the OBJ file, it constructs the necessary HIPRT geometry input
   hiprtGeometryBuildInput geomInput;
   geomInput.type = hiprtPrimitiveTypeTriangleMesh;
   geomInput.primitive.triangleMesh = mesh;
-  CHECK_HIPRT(hiprtCreateGeometries(scene.m_ctx, 1, &geomInput, options, &m_scene.m_geometries[i]));
+  hiprtCreateGeometries(scene.m_ctx, 1, &geomInput, options, &m_scene.m_geometries[i]);
 ```
 
 <br />
@@ -92,7 +92,7 @@ Finally, it assembles the HIPRT scene by combining all geometries and instances,
 ```cpp
   hiprtSceneBuildInput sceneInput;
   sceneInput.instanceCount = static_cast<uint32_t>(shapes.size());
-  CHECK_HIPRT(hiprtBuildScene(scene.m_ctx, hiprtBuildOperationBuild, sceneInput, options, sceneTemp, 0, sceneLocal));
+  hiprtBuildScene(scene.m_ctx, hiprtBuildOperationBuild, sceneInput, options, sceneTemp, 0, sceneLocal);
 ```
 
 <br />
@@ -139,7 +139,7 @@ The function then creates a global stack buffer used by HIPRT for managing ray t
     static_cast<uint32_t>(m_res.x * m_res.y)
   };
   hiprtGlobalStackBuffer stackBuffer;
-  CHECK_HIPRT(hiprtCreateGlobalStackBuffer(m_scene.m_ctx, stackBufferInput, stackBuffer));
+  hiprtCreateGlobalStackBuffer(m_scene.m_ctx, stackBufferInput, stackBuffer);
 ```
 
 <br />
@@ -195,7 +195,7 @@ The ray tracing kernel is then launched with the specified block dimensions:
 After the kernel execution, the global stack buffer is destroyed, and the rendered image is written to a file:
 
 ```cpp
-  CHECK_HIPRT(hiprtDestroyGlobalStackBuffer(m_scene.m_ctx, stackBuffer));
+  hiprtDestroyGlobalStackBuffer(m_scene.m_ctx, stackBuffer);
   writeImage(imgPath.value().u8string().c_str(), m_res.x, m_res.y, dst);
 ```
 <br />
@@ -324,9 +324,3 @@ Finally, the kernel writes the computed color for each pixel to the output image
 ```
 
 This kernel efficiently calculates lighting and shading for each pixel, taking into account shadows and occlusions, to produce a high-quality rendered image.
-
-
-
-
-
-
