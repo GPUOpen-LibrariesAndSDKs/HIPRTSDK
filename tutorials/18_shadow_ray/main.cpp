@@ -37,7 +37,7 @@ class Tutorial : public SceneDemo
 			"../common/meshes/cornellpot/cornellpot.obj",
 			"../common/meshes/cornellpot/" );
 		render(
-			"18_ShadowRay.png",
+			"18_shadow_ray.png",
 			"../common/ShadowRayKernel.h",
 			"ShadowRayKernel"
 			);

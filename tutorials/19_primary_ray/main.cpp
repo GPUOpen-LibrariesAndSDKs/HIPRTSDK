@@ -59,7 +59,7 @@ class Tutorial : public SceneDemo
 			const std::string  kernelName = "PrimaryRayKernel_" + std::to_string( o.i );
 
 			render(
-				"19_primaryRay_" + o.name + ".png",
+				"19_primary_ray_" + o.name + ".png",
 				"../common/PrimaryRayKernel.h",
 				kernelName 
 				);

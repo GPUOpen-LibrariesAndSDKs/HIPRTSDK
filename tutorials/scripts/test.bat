@@ -15,3 +15,5 @@
 ..\dist\bin\Release\14_batch_build64.exe
 ..\dist\bin\Release\15_multi_level_instancing64.exe
 ..\dist\bin\Release\16_fluid_simulation64.exe
+..\dist\bin\Release\18_shadow_ray64.exe
+..\dist\bin\Release\19_primary_ray64.exe
