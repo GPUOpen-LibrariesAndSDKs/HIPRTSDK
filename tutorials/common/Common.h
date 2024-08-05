@@ -31,15 +31,10 @@
 #include <cmath>
 #endif
 
-
 #include <hiprt/hiprt_common.h>
 #if defined( __KERNELCC__ )
 #include <hiprt/hiprt_device.h>
 #endif
-
-
-
-
 
 #if !defined( __KERNELCC__ )
 #define uint2 hiprtUint2
@@ -61,15 +56,12 @@
 #define make_float4 make_hiprtFloat4
 #endif
 
-
 static constexpr bool UseDynamicStack = false;
-
 
 #if defined( __KERNELCC__ )
 typedef typename hiprt::conditional<UseDynamicStack, hiprtDynamicStack, hiprtGlobalStack>::type Stack;
 typedef hiprtEmptyInstanceStack																	InstanceStack;
 #endif
-
 
 struct float4x4
 {
@@ -79,7 +71,6 @@ struct float4x4
 		float  e[4][4];
 	};
 };
-
 
 enum
 {
@@ -115,8 +106,6 @@ struct Camera
 	float  m_fov;
 };
 
-
-
 HIPRT_HOST_DEVICE HIPRT_INLINE uint32_t lcg( uint32_t& seed )
 {
 	constexpr uint32_t LcgA = 1103515245u;
@@ -126,7 +115,10 @@ HIPRT_HOST_DEVICE HIPRT_INLINE uint32_t lcg( uint32_t& seed )
 	return seed & LcgM;
 }
 
-HIPRT_HOST_DEVICE HIPRT_INLINE float randf( uint32_t& seed ) { return ( static_cast<float>( lcg( seed ) ) / static_cast<float>( 0x01000000 ) ); }
+HIPRT_HOST_DEVICE HIPRT_INLINE float randf( uint32_t& seed )
+{
+	return ( static_cast<float>( lcg( seed ) ) / static_cast<float>( 0x01000000 ) );
+}
 
 template <uint32_t N>
 HIPRT_HOST_DEVICE HIPRT_INLINE uint2 tea( uint32_t val0, uint32_t val1 )
@@ -144,8 +136,6 @@ HIPRT_HOST_DEVICE HIPRT_INLINE uint2 tea( uint32_t val0, uint32_t val1 )
 
 	return make_uint2( v0, v1 );
 }
-
-
 
 #define RT_MIN( a, b ) ( ( ( b ) < ( a ) ) ? ( b ) : ( a ) )
 #define RT_MAX( a, b ) ( ( ( b ) > ( a ) ) ? ( b ) : ( a ) )
@@ -1099,7 +1089,6 @@ HIPRT_HOST_DEVICE HIPRT_INLINE float3 rotate( const float4& rotation, const floa
 	return 2.0f * dot( a, p ) * a + ( c * c - dot( a, a ) ) * p + 2.0f * c * cross( a, p );
 }
 
-
 HIPRT_HOST_DEVICE HIPRT_INLINE hiprtRay
 generateRay( float x, float y, int2 res, const Camera& camera, uint32_t& seed, bool isMultiSamples )
 {
@@ -1118,4 +1107,3 @@ generateRay( float x, float y, int2 res, const Camera& camera, uint32_t& seed, b
 	ray.direction = normalize( dir.x * holDir + dir.y * upDir + dir.z * viewDir );
 	return ray;
 }
-

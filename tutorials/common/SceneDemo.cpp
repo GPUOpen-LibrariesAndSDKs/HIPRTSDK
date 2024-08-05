@@ -33,20 +33,17 @@
 
 #include "Orochi/OrochiUtils.h"
 
-
 void SceneDemo::setupScene(
 	Camera&						 camera,
 	const std::string&			 filePath,
 	const std::string&			 dirPath,
 	bool						 enableRayMask,
 	std::optional<hiprtFrameSRT> frame,
-	hiprtBuildFlags				 bvhBuildFlag
-	)
+	hiprtBuildFlags				 bvhBuildFlag )
 {
 	m_camera = camera;
 	createScene( m_scene, filePath, dirPath, enableRayMask, frame, bvhBuildFlag );
 }
-
 
 void SceneDemo::createScene(
 	SceneData&					 scene,
@@ -54,8 +51,7 @@ void SceneDemo::createScene(
 	const std::string&			 mtlBaseDir,
 	bool						 enableRayMask,
 	std::optional<hiprtFrameSRT> frame,
-	hiprtBuildFlags				 bvhBuildFlag
-	)
+	hiprtBuildFlags				 bvhBuildFlag )
 {
 	hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, scene.m_ctx );
 
@@ -157,10 +153,10 @@ void SceneDemo::createScene(
 		std::vector<float3>										  vertices;
 		std::vector<float3>										  normals;
 		std::vector<uint32_t>									  indices;
-		const int64_t vfloat3Count =  attrib.vertices.size() / 3;
-		const int64_t nfloat3Count =  attrib.normals.size() / 3;
-		const float3* v = reinterpret_cast<float3*>( attrib.vertices.data() );
-		const float3* n = reinterpret_cast<float3*>( attrib.normals.data() );
+		const int64_t											  vfloat3Count = attrib.vertices.size() / 3;
+		const int64_t											  nfloat3Count = attrib.normals.size() / 3;
+		const float3*											  v = reinterpret_cast<float3*>( attrib.vertices.data() );
+		const float3*											  n = reinterpret_cast<float3*>( attrib.normals.data() );
 		std::map<tinyobj::index_t, uint32_t, decltype( compare )> knownIndex( compare );
 		Aabb													  geomBox;
 
@@ -170,17 +166,14 @@ void SceneDemo::createScene(
 			tinyobj::index_t idx1 = shapes[i].mesh.indices[3 * face + 1];
 			tinyobj::index_t idx2 = shapes[i].mesh.indices[3 * face + 2];
 
-
-			#ifdef _DEBUG
+#ifdef _DEBUG
 			// just a sanity check of the OBJ parsing.
-			if (   idx0.vertex_index >= vfloat3Count || idx0.normal_index >= nfloat3Count
-				|| idx1.vertex_index >= vfloat3Count || idx1.normal_index >= nfloat3Count
-				|| idx2.vertex_index >= vfloat3Count || idx2.normal_index >= nfloat3Count
-				)
+			if ( idx0.vertex_index >= vfloat3Count || idx0.normal_index >= nfloat3Count || idx1.vertex_index >= vfloat3Count ||
+				 idx1.normal_index >= nfloat3Count || idx2.vertex_index >= vfloat3Count || idx2.normal_index >= nfloat3Count )
 			{
-				assert(false);
+				assert( false );
 			}
-			#endif
+#endif
 
 			if ( knownIndex.find( idx0 ) != knownIndex.end() )
 			{
@@ -264,8 +257,7 @@ void SceneDemo::createScene(
 
 	uint32_t threadCount = std::min( std::thread::hardware_concurrency(), 16u );
 
-	if ( bvhBuildFlag == hiprtBuildFlagBitCustomBvhImport ) 
-		threadCount = 1;
+	if ( bvhBuildFlag == hiprtBuildFlagBitCustomBvhImport ) threadCount = 1;
 
 	std::vector<std::thread>			  threads( threadCount );
 	std::vector<std::chrono::nanoseconds> bvhBuildTimes( threadCount );
@@ -295,7 +287,8 @@ void SceneDemo::createScene(
 					uint32_t* indices	= &allIndices[indicesOffsets[i]];
 					mesh.triangleCount	= static_cast<uint32_t>( shapes[i].mesh.num_face_vertices.size() );
 					mesh.triangleStride = sizeof( uint32_t ) * 3;
-					OrochiUtils::malloc( reinterpret_cast<uint8_t*&>( mesh.triangleIndices ), 3 * mesh.triangleCount * sizeof( uint32_t ) );
+					OrochiUtils::malloc(
+						reinterpret_cast<uint8_t*&>( mesh.triangleIndices ), 3 * mesh.triangleCount * sizeof( uint32_t ) );
 					OrochiUtils::copyHtoDAsync(
 						reinterpret_cast<uint32_t*>( mesh.triangleIndices ),
 						indices,
@@ -314,7 +307,6 @@ void SceneDemo::createScene(
 					geomInput.type					 = hiprtPrimitiveTypeTriangleMesh;
 					geomInput.primitive.triangleMesh = mesh;
 					geomInput.geomType				 = 0;
-
 
 #ifdef ENABLE_EMBREE
 					if ( bvhBuildFlag == hiprtBuildFlagBitCustomBvhImport )
@@ -335,8 +327,7 @@ void SceneDemo::createScene(
 						scene.m_ctx, static_cast<uint32_t>( geomInputs.size() ), geomInputs.data(), options, geomTempSize ) );
 
 					hiprtDevicePtr tempGeomBuffer = nullptr;
-					if ( geomTempSize > 0 ) 
-						OrochiUtils::malloc( reinterpret_cast<uint8_t*&>( tempGeomBuffer ), geomTempSize );
+					if ( geomTempSize > 0 ) OrochiUtils::malloc( reinterpret_cast<uint8_t*&>( tempGeomBuffer ), geomTempSize );
 
 					CHECK_HIPRT( hiprtCreateGeometries(
 						scene.m_ctx,
@@ -381,8 +372,7 @@ void SceneDemo::createScene(
 						}
 					}
 
-					if ( geomTempSize > 0 ) 
-						OrochiUtils::free( tempGeomBuffer );
+					if ( geomTempSize > 0 ) OrochiUtils::free( tempGeomBuffer );
 
 					OrochiUtils::waitForCompletion( streams[threadIndex] );
 				}
@@ -464,7 +454,8 @@ void SceneDemo::createScene(
 	{
 		sceneInput.instanceCount = static_cast<uint32_t>( shapes.size() );
 		OrochiUtils::malloc( reinterpret_cast<uint32_t*&>( sceneInput.instanceMasks ), sceneInput.instanceCount );
-		OrochiUtils::copyHtoD( reinterpret_cast<uint32_t*>( sceneInput.instanceMasks ), instanceMask.data(), sceneInput.instanceCount );
+		OrochiUtils::copyHtoD(
+			reinterpret_cast<uint32_t*>( sceneInput.instanceMasks ), instanceMask.data(), sceneInput.instanceCount );
 		scene.m_garbageCollector.push_back( sceneInput.instanceMasks );
 
 		OrochiUtils::malloc( reinterpret_cast<hiprtInstance*&>( sceneInput.instances ), sceneInput.instanceCount );
@@ -518,24 +509,21 @@ void SceneDemo::createScene(
 		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 		bvhBuildTime += ( end - begin );
 
-		std::cout << "Bvh build time : " << std::chrono::duration_cast<std::chrono::milliseconds>( bvhBuildTime ).count() << " ms" << std::endl;
+		std::cout << "Bvh build time : " << std::chrono::duration_cast<std::chrono::milliseconds>( bvhBuildTime ).count()
+				  << " ms" << std::endl;
 		scene.m_scene = sceneLocal;
 	}
 
 #ifdef ENABLE_EMBREE
-	if ( bvhBuildFlag == hiprtBuildFlagBitCustomBvhImport ) 
-		rtcReleaseDevice( embreeDevice );
+	if ( bvhBuildFlag == hiprtBuildFlagBitCustomBvhImport ) rtcReleaseDevice( embreeDevice );
 #endif
 }
-
-
 
 void SceneDemo::render(
 	std::optional<std::filesystem::path> imgPath,
 	const std::filesystem::path&		 kernelPath,
 	const std::string&					 funcName,
-	float								 aoRadius
-	)
+	float								 aoRadius )
 {
 	uint8_t* dst;
 	OrochiUtils::malloc( dst, m_res.x * m_res.y * 4 );
@@ -556,18 +544,13 @@ void SceneDemo::render(
 	// opts.push_back( "-G" );
 
 	hiprtGlobalStackBufferInput stackBufferInput{
-		hiprtStackTypeGlobal,
-		hiprtStackEntryTypeInteger,
-		stackSize,
-		static_cast<uint32_t>( m_res.x * m_res.y ) };
-	if constexpr ( UseDynamicStack ) 
-		stackBufferInput.type = hiprtStackTypeDynamic;
+		hiprtStackTypeGlobal, hiprtStackEntryTypeInteger, stackSize, static_cast<uint32_t>( m_res.x * m_res.y ) };
+	if constexpr ( UseDynamicStack ) stackBufferInput.type = hiprtStackTypeDynamic;
 	hiprtGlobalStackBuffer stackBuffer;
 	CHECK_HIPRT( hiprtCreateGlobalStackBuffer( m_scene.m_ctx, stackBufferInput, stackBuffer ) );
 
-	oroFunction	   func = nullptr;
+	oroFunction	   func		 = nullptr;
 	hiprtFuncTable funcTable = nullptr;
-
 
 	buildTraceKernelFromBitcode( m_scene.m_ctx, kernelPath.u8string().c_str(), funcName.c_str(), func );
 
@@ -606,7 +589,8 @@ void SceneDemo::render(
 
 	CHECK_HIPRT( hiprtDestroyGlobalStackBuffer( m_scene.m_ctx, stackBuffer ) );
 
-	std::cout << "Ray cast time: " << std::chrono::duration_cast<std::chrono::milliseconds>( end - begin ).count() << " ms" << std::endl;
+	std::cout << "Ray cast time: " << std::chrono::duration_cast<std::chrono::milliseconds>( end - begin ).count() << " ms"
+			  << std::endl;
 
 	writeImage( imgPath.value().u8string().c_str(), m_res.x, m_res.y, dst );
 
@@ -616,9 +600,7 @@ void SceneDemo::render(
 void SceneDemo::deleteScene( SceneData& scene )
 {
 	CHECK_HIPRT( hiprtDestroyScene( scene.m_ctx, scene.m_scene ) );
-	CHECK_HIPRT( hiprtDestroyGeometries( scene.m_ctx, static_cast<uint32_t>( scene.m_geometries.size() ), scene.m_geometries.data() ) );
+	CHECK_HIPRT(
+		hiprtDestroyGeometries( scene.m_ctx, static_cast<uint32_t>( scene.m_geometries.size() ), scene.m_geometries.data() ) );
 	CHECK_HIPRT( hiprtDestroyContext( scene.m_ctx ) );
 }
-
-
-

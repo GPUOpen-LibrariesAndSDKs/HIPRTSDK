@@ -18,3 +18,5 @@ export LD_LIBRARY_PATH="$PWD_PATH/../../hiprt/linux64:${LD_LIBRARY_PATH}"
 ../dist/bin/Release/14_batch_build64
 ../dist/bin/Release/15_multi_level_instancing64
 ../dist/bin/Release/16_fluid_simulation64
+../dist/bin/Release/18_shadow_ray64
+../dist/bin/Release/19_primary_ray64

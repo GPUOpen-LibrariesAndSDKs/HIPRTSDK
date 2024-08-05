@@ -24,22 +24,19 @@
 
 #include <tutorials/common/TutorialBase.h>
 
-
 class SceneDemo : public TutorialBase
 {
   public:
-
 	SceneDemo()
 	{
-		m_oroCtx= nullptr;
+		m_oroCtx = nullptr;
 
-		m_ctxtInput.ctxt = nullptr;
-		m_ctxtInput.device = 0;
+		m_ctxtInput.ctxt	   = nullptr;
+		m_ctxtInput.device	   = 0;
 		m_ctxtInput.deviceType = (hiprtDeviceType)-1;
 
 		m_scene.Clear();
 	}
-
 
 	void buildBvh( hiprtGeometryBuildInput& buildInput );
 
@@ -57,24 +54,23 @@ class SceneDemo : public TutorialBase
 		hiprtSceneBuildInput&			  buildInput );
 #endif
 
-
 	struct SceneData
 	{
 		void Clear()
 		{
-			m_bufMaterialIndices = nullptr;
+			m_bufMaterialIndices   = nullptr;
 			m_bufMatIdsPerInstance = nullptr;
-			m_bufMaterials = nullptr;
-			m_vertices = nullptr;
-			m_vertexOffsets = nullptr;
-			m_normals = nullptr;
-			m_normalOffsets = nullptr;
-			m_indices = nullptr;
-			m_indexOffsets = nullptr;
-			m_lights = nullptr;
-			m_numOfLights = nullptr;
-			m_scene = nullptr;
-			m_ctx = nullptr;
+			m_bufMaterials		   = nullptr;
+			m_vertices			   = nullptr;
+			m_vertexOffsets		   = nullptr;
+			m_normals			   = nullptr;
+			m_normalOffsets		   = nullptr;
+			m_indices			   = nullptr;
+			m_indexOffsets		   = nullptr;
+			m_lights			   = nullptr;
+			m_numOfLights		   = nullptr;
+			m_scene				   = nullptr;
+			m_ctx				   = nullptr;
 		}
 
 		uint32_t* m_bufMaterialIndices;
@@ -111,8 +107,7 @@ class SceneDemo : public TutorialBase
 		const std::string&			 mtlBaseDir,
 		bool						 enableRayMask = false,
 		std::optional<hiprtFrameSRT> frame		   = std::nullopt,
-		hiprtBuildFlags				 bvhBuildFlag  = hiprtBuildFlagBitPreferFastBuild
-		);
+		hiprtBuildFlags				 bvhBuildFlag  = hiprtBuildFlagBitPreferFastBuild );
 
 	void setupScene(
 		Camera&						 camera,
@@ -120,8 +115,7 @@ class SceneDemo : public TutorialBase
 		const std::string&			 dirPath,
 		bool						 enableRayMask = false,
 		std::optional<hiprtFrameSRT> frame		   = std::nullopt,
-		hiprtBuildFlags				 bvhBuildFlag  = hiprtBuildFlagBitPreferFastBuild
-		);
+		hiprtBuildFlags				 bvhBuildFlag  = hiprtBuildFlagBitPreferFastBuild );
 
 	void deleteScene( SceneData& scene );
 
@@ -136,14 +130,9 @@ class SceneDemo : public TutorialBase
 	void render(
 		std::optional<std::filesystem::path> imgPath,
 		const std::filesystem::path&		 kernelPath,
-		const std::string&					 funcName	 = "PrimaryRayKernel",
-		float								 aoRadius	 = 0.0f
-	);
-
+		const std::string&					 funcName = "PrimaryRayKernel",
+		float								 aoRadius = 0.0f );
 
 	SceneData m_scene;
 	Camera	  m_camera;
-
 };
-
-
