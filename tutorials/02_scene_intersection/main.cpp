@@ -80,7 +80,8 @@ class Tutorial : public TutorialBase
 		sceneInput.instanceMasks			= nullptr;
 		sceneInput.instanceTransformHeaders = nullptr;
 		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &sceneInput.instances ), sizeof( hiprtInstance ) ) );
-		CHECK_ORO( oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( sceneInput.instances ), &instance, sizeof( hiprtInstance ) ) );
+		CHECK_ORO(
+			oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( sceneInput.instances ), &instance, sizeof( hiprtInstance ) ) );
 
 		hiprtFrameSRT frame;
 		frame.translation	  = make_hiprtFloat3( 0.0f, 0.0f, 0.0f );
@@ -88,7 +89,8 @@ class Tutorial : public TutorialBase
 		frame.rotation		  = make_hiprtFloat4( 0.0f, 0.0f, 1.0f, 0.0f );
 		sceneInput.frameCount = 1;
 		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &sceneInput.instanceFrames ), sizeof( hiprtFrameSRT ) ) );
-		CHECK_ORO( oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( sceneInput.instanceFrames ), &frame, sizeof( hiprtFrameSRT ) ) );
+		CHECK_ORO(
+			oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( sceneInput.instanceFrames ), &frame, sizeof( hiprtFrameSRT ) ) );
 
 		size_t		   sceneTempSize;
 		hiprtDevicePtr sceneTemp = nullptr;

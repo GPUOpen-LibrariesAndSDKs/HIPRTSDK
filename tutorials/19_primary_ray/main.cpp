@@ -22,8 +22,8 @@
 
 #include <numeric>
 #include <tutorials/common/CornellBox.h>
-#include <tutorials/common/TutorialBase.h>
 #include <tutorials/common/SceneDemo.h>
+#include <tutorials/common/TutorialBase.h>
 
 class Tutorial : public SceneDemo
 {
@@ -33,16 +33,20 @@ class Tutorial : public SceneDemo
 
 		struct OPTION_DEF
 		{
-			OPTION_DEF(uint32_t i_, const std::string& name_) { i = i_; name = name_;  }
-			uint32_t i;
+			OPTION_DEF( uint32_t i_, const std::string& name_ )
+			{
+				i	 = i_;
+				name = name_;
+			}
+			uint32_t	i;
 			std::string name;
 		};
 		std::vector<OPTION_DEF> optionsList = {
-			OPTION_DEF(VisualizeNormal,"normal"), 
-			OPTION_DEF(VisualizeUv,"uv"), 
-			OPTION_DEF(VisualizeId,"primId"), 
-			OPTION_DEF(VisualizeHitDist,"depth"), 
-			};
+			OPTION_DEF( VisualizeNormal, "normal" ),
+			OPTION_DEF( VisualizeUv, "uv" ),
+			OPTION_DEF( VisualizeId, "primId" ),
+			OPTION_DEF( VisualizeHitDist, "depth" ),
+		};
 
 		Camera camera = createCamera();
 		setupScene(
@@ -51,19 +55,13 @@ class Tutorial : public SceneDemo
 			"../common/meshes/cornellpot/",
 			false,
 			std::nullopt,
-			hiprtBuildFlagBitPreferFastBuild
-			);
+			hiprtBuildFlagBitPreferFastBuild );
 
-		for(const auto& o : optionsList)
+		for ( const auto& o : optionsList )
 		{
-			const std::string  kernelName = "PrimaryRayKernel_" + std::to_string( o.i );
+			const std::string kernelName = "PrimaryRayKernel_" + std::to_string( o.i );
 
-			render(
-				"19_primary_ray_" + o.name + ".png",
-				"../common/PrimaryRayKernel.h",
-				kernelName 
-				);
-			
+			render( "19_primary_ray_" + o.name + ".png", "../common/PrimaryRayKernel.h", kernelName );
 		}
 
 		deleteScene( m_scene );

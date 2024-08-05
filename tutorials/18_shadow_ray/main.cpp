@@ -22,8 +22,8 @@
 
 #include <numeric>
 #include <tutorials/common/CornellBox.h>
-#include <tutorials/common/TutorialBase.h>
 #include <tutorials/common/SceneDemo.h>
+#include <tutorials/common/TutorialBase.h>
 
 class Tutorial : public SceneDemo
 {
@@ -32,15 +32,8 @@ class Tutorial : public SceneDemo
 	{
 		Camera camera = createCamera();
 
-		setupScene(
-			camera,
-			"../common/meshes/cornellpot/cornellpot.obj",
-			"../common/meshes/cornellpot/" );
-		render(
-			"18_shadow_ray.png",
-			"../common/ShadowRayKernel.h",
-			"ShadowRayKernel"
-			);
+		setupScene( camera, "../common/meshes/cornellpot/cornellpot.obj", "../common/meshes/cornellpot/" );
+		render( "18_shadow_ray.png", "../common/ShadowRayKernel.h", "ShadowRayKernel" );
 		deleteScene( m_scene );
 		return;
 	}
