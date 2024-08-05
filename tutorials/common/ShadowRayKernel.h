@@ -29,7 +29,7 @@
 #include <hiprt/hiprt_device.h>
 #include <hiprt/hiprt_vec.h>
 
-//#include <common/shared.h>
+// #include <common/shared.h>
 
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE 1
@@ -38,8 +38,6 @@
 #ifndef SHARED_STACK_SIZE
 #define SHARED_STACK_SIZE 1
 #endif
-
-
 
 __device__ float3 sampleLightVertex( const Light& light, float3 x, float3& lVtxOut, float3& lNormalOut, float& pdf, float2 xi )
 {
@@ -87,8 +85,7 @@ extern "C" __global__ void __launch_bounds__( 64 ) ShadowRayKernel(
 	uint32_t*			   normOffset,
 	uint32_t*			   numOfLights,
 	Light*				   lights,
-	float				   aoRadius 
-	)
+	float				   aoRadius )
 {
 	const uint32_t x	 = blockIdx.x * blockDim.x + threadIdx.x;
 	const uint32_t y	 = blockIdx.y * blockDim.y + threadIdx.y;
@@ -121,7 +118,7 @@ extern "C" __global__ void __launch_bounds__( 64 ) ShadowRayKernel(
 
 		float3 Ns = ( 1.0f - hit.uv.x - hit.uv.y ) * n0 + hit.uv.x * n1 + hit.uv.y * n2;
 
-		//float3 Ng = hiprtVectorObjectToWorld( hit.normal, scene, hit.instanceID );
+		// float3 Ng = hiprtVectorObjectToWorld( hit.normal, scene, hit.instanceID );
 		float3 Ng = hit.normal;
 
 		if ( dot( ray.direction, Ng ) > 0.f ) Ng = -Ng;
@@ -168,8 +165,7 @@ extern "C" __global__ void __launch_bounds__( 64 ) ShadowRayKernel(
 					hiprtHit												   hitShadow	   = tr.getNextHit();
 					int														   lightVisibility = hitShadow.hasHit() ? 0 : 1;
 
-					if ( pdf != 0.0f )
-						est += lightVisibility * le * max( 0.0f, dot( Ng, normalize( lightDir ) ) ) / pdf;
+					if ( pdf != 0.0f ) est += lightVisibility * le * max( 0.0f, dot( Ng, normalize( lightDir ) ) ) / pdf;
 				}
 			}
 
@@ -181,8 +177,8 @@ extern "C" __global__ void __launch_bounds__( 64 ) ShadowRayKernel(
 		color.z = finalColor.z * 255;
 	}
 
-	image[index * 4 + 0] = clamp(color.x,0,255);
-	image[index * 4 + 1] = clamp(color.y,0,255);
-	image[index * 4 + 2] = clamp(color.z,0,255);
+	image[index * 4 + 0] = clamp( color.x, 0, 255 );
+	image[index * 4 + 1] = clamp( color.y, 0, 255 );
+	image[index * 4 + 2] = clamp( color.z, 0, 255 );
 	image[index * 4 + 3] = 255;
 }

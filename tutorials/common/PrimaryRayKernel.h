@@ -29,7 +29,7 @@
 #include <hiprt/hiprt_device.h>
 #include <hiprt/hiprt_vec.h>
 
-//#include <common/shared.h>
+// #include <common/shared.h>
 
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE 1
@@ -98,10 +98,10 @@ template <>
 __device__ int3 getColor<VisualizeNormal>(
 	hiprtScene scene, const hiprtHit& hit, uint32_t* matIndices, Material* materials, uint32_t* matOffsetPerInstance )
 {
-	//float3 n = hiprt::normalize( hiprtVectorObjectToWorld( hit.normal, scene, hit.instanceID ) );
+	// float3 n = hiprt::normalize( hiprtVectorObjectToWorld( hit.normal, scene, hit.instanceID ) );
 	float3 n = normalize( hit.normal );
 
-	int3   color;
+	int3 color;
 	color.x = ( ( n.x + 1.0f ) * 0.5f ) * 255;
 	color.y = ( ( n.y + 1.0f ) * 0.5f ) * 255;
 	color.z = ( ( n.z + 1.0f ) * 0.5f ) * 255;
