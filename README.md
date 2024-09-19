@@ -1,6 +1,6 @@
 # HIP RT SDK
 
-**This repository is only for tutorials. The SDK binaries needs to be downloaded from [HIP RT project page](https://gpuopen.com/hiprt/).**
+**This repository is only for tutorials. The SDK binaries needs to be downloaded from [HIP RT project page](https://gpuopen.com/hiprt/) and the full source code of HIP RT can be found [here](https://github.com/GPUOpen-LibrariesAndSDKs/HIPRT).**
 
 HIP RT is a ray tracing library in HIP. The APIs are designed to be minimal and low level, making it easy to write a ray tracing application in HIP. We designed the library and APIs to be simple to use and integrate into any existing HIP applications. Although there are a few other ray tracing APIs which, we designed HIP RT to be simpler and easier to use, so you do not need to learn many new kernel types. 
 
