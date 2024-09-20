@@ -22,6 +22,8 @@
 
 #include <tutorials/common/TutorialBase.h>
 
+#include <hiprt/hiprt_libpath.h>
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <contrib/stbi/stbi_image_write.h>
 
@@ -61,7 +63,7 @@ void TutorialBase::init( uint32_t deviceIndex )
 {
 	m_res = make_hiprtInt2( 512, 512 );
 
-	CHECK_ORO( static_cast<oroError>( oroInitialize( (oroApi)( ORO_API_HIP | ORO_API_CUDA ), 0 ) ) );
+	CHECK_ORO( static_cast<oroError>( oroInitialize( (oroApi)( ORO_API_HIP | ORO_API_CUDA ), 0, g_hip_paths, g_hiprtc_paths ) ) );
 
 	CHECK_ORO( oroInit( 0 ) );
 	CHECK_ORO( oroDeviceGet( &m_oroDevice, deviceIndex ) );

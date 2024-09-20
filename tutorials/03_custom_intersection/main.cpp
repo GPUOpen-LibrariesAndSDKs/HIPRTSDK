@@ -81,9 +81,9 @@ class Tutorial : public TutorialBase
 
 		hiprtFuncDataSet funcDataSet;
 		CHECK_ORO( oroMalloc(
-			reinterpret_cast<oroDeviceptr*>( &funcDataSet.intersectFuncData ), SphereCount * sizeof( hiprtFloat4 ) ) );
+			const_cast<oroDeviceptr*>( &funcDataSet.intersectFuncData ), SphereCount * sizeof( hiprtFloat4 ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
-			reinterpret_cast<oroDeviceptr>( funcDataSet.intersectFuncData ), spheres, SphereCount * sizeof( hiprtFloat4 ) ) );
+			const_cast<oroDeviceptr>( funcDataSet.intersectFuncData ), spheres, SphereCount * sizeof( hiprtFloat4 ) ) );
 
 		hiprtFuncTable funcTable;
 		CHECK_HIPRT( hiprtCreateFuncTable( ctxt, 1, 1, funcTable ) );
@@ -100,7 +100,7 @@ class Tutorial : public TutorialBase
 		launchKernel( func, m_res.x, m_res.y, args );
 		writeImage( "03_custom_intersection.png", m_res.x, m_res.y, pixels );
 
-		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( funcDataSet.intersectFuncData ) ) );
+		CHECK_ORO( oroFree( const_cast<oroDeviceptr>( funcDataSet.intersectFuncData ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( list.aabbs ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( geomTemp ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( pixels ) ) );

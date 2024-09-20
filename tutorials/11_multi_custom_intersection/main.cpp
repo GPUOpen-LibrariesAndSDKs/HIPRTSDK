@@ -162,15 +162,15 @@ class Tutorial : public TutorialBase
 
 		std::vector<hiprtFuncDataSet> funcDataSets( GeomTypesCount );
 		CHECK_ORO( oroMalloc(
-			reinterpret_cast<oroDeviceptr*>( &funcDataSets[SphereTypeIndex].intersectFuncData ), sizeof( hiprtFloat4 ) ) );
+			const_cast<oroDeviceptr*>( &funcDataSets[SphereTypeIndex].intersectFuncData ), sizeof( hiprtFloat4 ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
-			reinterpret_cast<oroDeviceptr>( funcDataSets[SphereTypeIndex].intersectFuncData ),
+			const_cast<oroDeviceptr>( funcDataSets[SphereTypeIndex].intersectFuncData ),
 			&sphere,
 			sizeof( hiprtFloat4 ) ) );
 		CHECK_ORO( oroMalloc(
-			reinterpret_cast<oroDeviceptr*>( &funcDataSets[CircleTypeIndex].intersectFuncData ), sizeof( hiprtFloat4 ) ) );
+			const_cast<oroDeviceptr*>( &funcDataSets[CircleTypeIndex].intersectFuncData ), sizeof( hiprtFloat4 ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
-			reinterpret_cast<oroDeviceptr>( funcDataSets[CircleTypeIndex].intersectFuncData ),
+			const_cast<oroDeviceptr>( funcDataSets[CircleTypeIndex].intersectFuncData ),
 			&circle,
 			sizeof( hiprtFloat4 ) ) );
 
@@ -190,8 +190,8 @@ class Tutorial : public TutorialBase
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( listCircles.aabbs ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( sceneInput.instanceFrames ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( sceneInput.instances ) ) );
-		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( funcDataSets[SphereTypeIndex].intersectFuncData ) ) );
-		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( funcDataSets[CircleTypeIndex].intersectFuncData ) ) );
+		CHECK_ORO( oroFree( const_cast<oroDeviceptr>( funcDataSets[SphereTypeIndex].intersectFuncData ) ) );
+		CHECK_ORO( oroFree( const_cast<oroDeviceptr>( funcDataSets[CircleTypeIndex].intersectFuncData ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( pixels ) ) );
 
 		CHECK_HIPRT( hiprtDestroyGeometry( ctxt, geomSpheres ) );

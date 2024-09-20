@@ -53,7 +53,7 @@ Windows:
 3. Run premake to generate a solution for Visual Studio 2022:
 ````
 cd tutorials
-../tools/premake5/win/premake5.exe vs2022
+"../tools/premake5/win/premake5.exe" vs2022
 ````
 
 4. Open the solution, compile & run.

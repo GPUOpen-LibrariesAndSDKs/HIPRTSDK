@@ -29,5 +29,5 @@ project "17_hiprt_hip"
     files { "./**.h", "./**.cpp"} 
 	files { "../../hiprt/*.h"}
 
-	links {"hiprt0200264"}
+	links {"hiprt0200464"}
 	targetdir "../dist/bin/%{cfg.buildcfg}"

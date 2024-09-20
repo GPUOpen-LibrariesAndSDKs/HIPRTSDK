@@ -130,9 +130,9 @@ class Tutorial : public TutorialBase
 
 		hiprtFuncDataSet funcDataSet;
 		CHECK_ORO( oroMalloc(
-			reinterpret_cast<oroDeviceptr*>( &funcDataSet.intersectFuncData ), sim.m_particleCount * sizeof( Particle ) ) );
+			const_cast<oroDeviceptr*>( &funcDataSet.intersectFuncData ), sim.m_particleCount * sizeof( Particle ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
-			reinterpret_cast<oroDeviceptr>( funcDataSet.intersectFuncData ),
+			const_cast<oroDeviceptr>( funcDataSet.intersectFuncData ),
 			particles.data(),
 			sim.m_particleCount * sizeof( Particle ) ) );
 
@@ -230,7 +230,7 @@ class Tutorial : public TutorialBase
 			}
 		}
 
-		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( funcDataSet.intersectFuncData ) ) );
+		CHECK_ORO( oroFree( const_cast<oroDeviceptr>( funcDataSet.intersectFuncData ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( list.aabbs ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( geomTemp ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( pSim ) ) );

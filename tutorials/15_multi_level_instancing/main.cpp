@@ -223,9 +223,9 @@ class Tutorial : public TutorialBase
 
 		hiprtFuncDataSet funcDataSet;
 		CHECK_ORO( oroMalloc(
-			reinterpret_cast<oroDeviceptr*>( &funcDataSet.intersectFuncData ), CircleCount * sizeof( hiprtFloat4 ) ) );
+			const_cast<oroDeviceptr*>( &funcDataSet.intersectFuncData ), CircleCount * sizeof( hiprtFloat4 ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
-			reinterpret_cast<oroDeviceptr>( funcDataSet.intersectFuncData ), circles, CircleCount * sizeof( hiprtFloat4 ) ) );
+			const_cast<oroDeviceptr>( funcDataSet.intersectFuncData ), circles, CircleCount * sizeof( hiprtFloat4 ) ) );
 
 		hiprtFuncTable funcTable;
 		CHECK_HIPRT( hiprtCreateFuncTable( ctxt, 1, 1, funcTable ) );
@@ -239,7 +239,7 @@ class Tutorial : public TutorialBase
 		launchKernel( func, m_res.x, m_res.y, args );
 		writeImage( "15_multi_level_instancing.png", m_res.x, m_res.y, pixels );
 
-		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( funcDataSet.intersectFuncData ) ) );
+		CHECK_ORO( oroFree( const_cast<oroDeviceptr>( funcDataSet.intersectFuncData ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( sceneInputTop.instances ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( sceneInputTop.instanceFrames ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( sceneInputMid.instances ) ) );
