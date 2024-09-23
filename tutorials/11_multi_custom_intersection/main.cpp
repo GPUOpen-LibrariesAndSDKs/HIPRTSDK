@@ -161,18 +161,14 @@ class Tutorial : public TutorialBase
 			1 );
 
 		std::vector<hiprtFuncDataSet> funcDataSets( GeomTypesCount );
-		CHECK_ORO( oroMalloc(
-			const_cast<oroDeviceptr*>( &funcDataSets[SphereTypeIndex].intersectFuncData ), sizeof( hiprtFloat4 ) ) );
+		CHECK_ORO(
+			oroMalloc( const_cast<oroDeviceptr*>( &funcDataSets[SphereTypeIndex].intersectFuncData ), sizeof( hiprtFloat4 ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
-			const_cast<oroDeviceptr>( funcDataSets[SphereTypeIndex].intersectFuncData ),
-			&sphere,
-			sizeof( hiprtFloat4 ) ) );
-		CHECK_ORO( oroMalloc(
-			const_cast<oroDeviceptr*>( &funcDataSets[CircleTypeIndex].intersectFuncData ), sizeof( hiprtFloat4 ) ) );
+			const_cast<oroDeviceptr>( funcDataSets[SphereTypeIndex].intersectFuncData ), &sphere, sizeof( hiprtFloat4 ) ) );
+		CHECK_ORO(
+			oroMalloc( const_cast<oroDeviceptr*>( &funcDataSets[CircleTypeIndex].intersectFuncData ), sizeof( hiprtFloat4 ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
-			const_cast<oroDeviceptr>( funcDataSets[CircleTypeIndex].intersectFuncData ),
-			&circle,
-			sizeof( hiprtFloat4 ) ) );
+			const_cast<oroDeviceptr>( funcDataSets[CircleTypeIndex].intersectFuncData ), &circle, sizeof( hiprtFloat4 ) ) );
 
 		hiprtFuncTable funcTable;
 		CHECK_HIPRT( hiprtCreateFuncTable( ctxt, GeomTypesCount, 1, funcTable ) );

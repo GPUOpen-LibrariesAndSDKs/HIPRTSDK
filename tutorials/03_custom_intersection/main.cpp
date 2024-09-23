@@ -80,8 +80,8 @@ class Tutorial : public TutorialBase
 		std::vector<hiprtFuncNameSet> funcNameSets = { funcNameSet };
 
 		hiprtFuncDataSet funcDataSet;
-		CHECK_ORO( oroMalloc(
-			const_cast<oroDeviceptr*>( &funcDataSet.intersectFuncData ), SphereCount * sizeof( hiprtFloat4 ) ) );
+		CHECK_ORO(
+			oroMalloc( const_cast<oroDeviceptr*>( &funcDataSet.intersectFuncData ), SphereCount * sizeof( hiprtFloat4 ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
 			const_cast<oroDeviceptr>( funcDataSet.intersectFuncData ), spheres, SphereCount * sizeof( hiprtFloat4 ) ) );
 

@@ -186,8 +186,8 @@ class Tutorial : public TutorialBase
 			ctxt, "../common/TutorialKernels.h", "SceneBuildKernel", func, nullptr, &funcNameSets, 1, 1 );
 
 		hiprtFuncDataSet funcDataSet;
-		CHECK_ORO( oroMalloc(
-			const_cast<oroDeviceptr*>( &funcDataSet.intersectFuncData ), CircleCount * sizeof( hiprtFloat4 ) ) );
+		CHECK_ORO(
+			oroMalloc( const_cast<oroDeviceptr*>( &funcDataSet.intersectFuncData ), CircleCount * sizeof( hiprtFloat4 ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
 			const_cast<oroDeviceptr>( funcDataSet.intersectFuncData ), circles, CircleCount * sizeof( hiprtFloat4 ) ) );
 
