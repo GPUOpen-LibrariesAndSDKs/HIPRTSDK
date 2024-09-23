@@ -186,10 +186,10 @@ class Tutorial : public TutorialBase
 			ctxt, "../common/TutorialKernels.h", "SceneBuildKernel", func, nullptr, &funcNameSets, 1, 1 );
 
 		hiprtFuncDataSet funcDataSet;
-		CHECK_ORO( oroMalloc(
-			reinterpret_cast<oroDeviceptr*>( &funcDataSet.intersectFuncData ), CircleCount * sizeof( hiprtFloat4 ) ) );
+		CHECK_ORO(
+			oroMalloc( const_cast<oroDeviceptr*>( &funcDataSet.intersectFuncData ), CircleCount * sizeof( hiprtFloat4 ) ) );
 		CHECK_ORO( oroMemcpyHtoD(
-			reinterpret_cast<oroDeviceptr>( funcDataSet.intersectFuncData ), circles, CircleCount * sizeof( hiprtFloat4 ) ) );
+			const_cast<oroDeviceptr>( funcDataSet.intersectFuncData ), circles, CircleCount * sizeof( hiprtFloat4 ) ) );
 
 		hiprtFuncTable funcTable;
 		CHECK_HIPRT( hiprtCreateFuncTable( ctxt, 1, 1, funcTable ) );
@@ -203,7 +203,7 @@ class Tutorial : public TutorialBase
 		launchKernel( func, m_res.x, m_res.y, args );
 		writeImage( "13_concurrent_scene_build.png", m_res.x, m_res.y, pixels );
 
-		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( funcDataSet.intersectFuncData ) ) );
+		CHECK_ORO( oroFree( const_cast<oroDeviceptr>( funcDataSet.intersectFuncData ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( sceneInput.instances ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( sceneInput.instanceFrames ) ) );
 		CHECK_ORO( oroFree( reinterpret_cast<oroDeviceptr>( mesh.triangleIndices ) ) );
