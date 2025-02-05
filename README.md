@@ -32,7 +32,7 @@ You will also need AMD Software: Adrenalin Edition 23.30 or later for Windows an
 ## Directories
 
 - [hiprt](hiprt)
-  - The header and the library which you need to download from [HIP RT prject page](https://gpuopen.com/hiprt/). 
+  - The header and the library which you need to download from [HIP RT project page](https://gpuopen.com/hiprt/). 
 - [tutorials](tutorials)
   - Tutorial source code
 - [contrib](contrib)
