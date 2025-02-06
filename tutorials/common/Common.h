@@ -132,7 +132,6 @@ HIPRT_HOST_DEVICE HIPRT_INLINE uint2 tea( uint32_t val0, uint32_t val1 )
 	return make_uint2( v0, v1 );
 }
 
-
 HIPRT_HOST_DEVICE HIPRT_INLINE float dot4( const float4& a, const float4& b )
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;

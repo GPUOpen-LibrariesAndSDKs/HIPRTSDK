@@ -25,8 +25,8 @@
 #include <common/FluidSimulation.h>
 
 #include <hiprt/hiprt_device.h>
-#include <hiprt/hiprt_vec.h>
 #include <hiprt/hiprt_math.h>
+#include <hiprt/hiprt_vec.h>
 
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE 64

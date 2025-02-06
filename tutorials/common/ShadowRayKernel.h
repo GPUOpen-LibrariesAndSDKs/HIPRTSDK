@@ -165,7 +165,8 @@ extern "C" __global__ void __launch_bounds__( 64 ) ShadowRayKernel(
 					hiprtHit												   hitShadow	   = tr.getNextHit();
 					int														   lightVisibility = hitShadow.hasHit() ? 0 : 1;
 
-					if ( pdf != 0.0f ) est += lightVisibility * le * max( 0.0f, hiprt::dot( Ng, hiprt::normalize( lightDir ) ) ) / pdf;
+					if ( pdf != 0.0f )
+						est += lightVisibility * le * max( 0.0f, hiprt::dot( Ng, hiprt::normalize( lightDir ) ) ) / pdf;
 				}
 			}
 
