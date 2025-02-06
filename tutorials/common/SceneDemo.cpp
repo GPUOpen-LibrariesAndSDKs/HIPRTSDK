@@ -426,8 +426,8 @@ void SceneDemo::createScene(
 	if ( shapeMaterials.empty() )
 	{ // default material to prevent crash
 		Material mat;
-		mat.m_diffuse  = { 1.0f };
-		mat.m_emission = { 0.0f };
+		mat.m_diffuse  = hiprt::make_float3( 1.0f );
+		mat.m_emission = hiprt::make_float3( 0.0f );
 		shapeMaterials.push_back( mat );
 	}
 	OrochiUtils::malloc( scene.m_bufMaterials, shapeMaterials.size() );

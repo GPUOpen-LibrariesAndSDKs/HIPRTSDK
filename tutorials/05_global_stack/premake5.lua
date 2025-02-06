@@ -11,5 +11,3 @@ project "05_global_stack"
     includedirs{ "../../" } 
 
     targetdir "../dist/bin/%{cfg.buildcfg}"
-
-    defines {"HIPRT_EXPORTS"}

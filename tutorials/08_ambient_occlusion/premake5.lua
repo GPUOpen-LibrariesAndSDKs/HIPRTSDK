@@ -11,5 +11,3 @@ project "08_ambient_occlusion"
     includedirs{ "../../", "../" } 
 
     targetdir "../dist/bin/%{cfg.buildcfg}"
-
-    defines {"HIPRT_EXPORTS"}

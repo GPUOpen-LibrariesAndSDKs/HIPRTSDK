@@ -11,5 +11,3 @@ project "14_batch_build"
     includedirs{ "../../" } 
 
     targetdir "../dist/bin/%{cfg.buildcfg}"
-
-    defines {"HIPRT_EXPORTS"}

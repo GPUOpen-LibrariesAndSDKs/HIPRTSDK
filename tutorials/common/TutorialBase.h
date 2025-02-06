@@ -26,8 +26,6 @@
 #include <filesystem>
 #include <fstream>
 #include <hiprt/hiprt.h>
-#include <hiprt/hiprt_vec.h>
-#include <hiprt/hiprt_math.h>
 #include <optional>
 #include <string>
 #include <tutorials/common/Common.h>

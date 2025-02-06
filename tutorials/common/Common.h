@@ -27,6 +27,19 @@
 #endif
 
 #include <hiprt/hiprt_vec.h>
+
+#if !defined( __KERNELCC__ )
+using int2	 = hiprt::Vector<int, 2>;
+using int3	 = hiprt::Vector<int, 3>;
+using int4	 = hiprt::Vector<int, 4>;
+using uint2	 = hiprt::Vector<unsigned int, 2>;
+using uint3	 = hiprt::Vector<unsigned int, 3>;
+using uint4	 = hiprt::Vector<unsigned int, 4>;
+using float2 = hiprt::Vector<float, 2>;
+using float3 = hiprt::Vector<float, 3>;
+using float4 = hiprt::Vector<float, 4>;
+#endif
+
 #include <hiprt/hiprt_math.h>
 
 #if !defined( __KERNELCC__ )

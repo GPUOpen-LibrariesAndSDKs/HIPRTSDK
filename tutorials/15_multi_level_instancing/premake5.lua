@@ -11,5 +11,3 @@ project "15_multi_level_instancing"
     includedirs{ "../../" } 
 
     targetdir "../dist/bin/%{cfg.buildcfg}"
-
-    defines {"HIPRT_EXPORTS"}

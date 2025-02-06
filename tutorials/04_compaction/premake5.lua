@@ -11,5 +11,3 @@ project "04_compaction"
     includedirs{ "../../" } 
 
     targetdir "../dist/bin/%{cfg.buildcfg}"
-
-    defines {"HIPRT_EXPORTS"}
