@@ -14,7 +14,7 @@ project "17_hiprt_hip"
 		defines {"__USE_HIP__"}
 		defines {"__HIP_PLATFORM_AMD__"}
 
-		sysincludedirs {hiproot .. "/include/"}
+		externalincludedirs {hiproot .. "/include/"}
 
 		libdirs {hiproot .. "/lib/"}
 		links { "amdhip64" }
@@ -29,5 +29,5 @@ project "17_hiprt_hip"
     files { "./**.h", "./**.cpp"} 
 	files { "../../hiprt/*.h"}
 
-	links {"hiprt0200464"}
+	links {"hiprt0200564"}
 	targetdir "../dist/bin/%{cfg.buildcfg}"

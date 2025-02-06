@@ -95,8 +95,8 @@ class SceneDemo : public TutorialBase
 	Camera createCamera()
 	{
 		Camera camera;
-		camera.m_translation = make_float3( 0.0f, 2.5f, 5.8f );
-		camera.m_rotation	 = make_float4( 0.0f, 0.0f, 1.0f, 0.0f );
+		camera.m_translation = { 0.0f, 2.5f, 5.8f };
+		camera.m_rotation	 = { 0.0f, 0.0f, 1.0f, 0.0f };
 		camera.m_fov		 = 45.0f * hiprt::Pi / 180.f;
 		return camera;
 	}

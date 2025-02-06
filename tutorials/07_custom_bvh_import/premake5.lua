@@ -11,3 +11,5 @@ project "07_custom_bvh_import"
     includedirs{ "../../" } 
 
     targetdir "../dist/bin/%{cfg.buildcfg}"
+
+    defines {"HIPRT_EXPORTS"}

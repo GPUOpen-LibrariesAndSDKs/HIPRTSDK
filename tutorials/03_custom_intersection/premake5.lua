@@ -11,3 +11,5 @@ project "03_custom_intersection"
     includedirs{ "../../" } 
 
     targetdir "../dist/bin/%{cfg.buildcfg}"
+
+    defines {"HIPRT_EXPORTS"}

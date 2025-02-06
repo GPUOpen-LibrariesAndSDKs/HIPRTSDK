@@ -11,3 +11,5 @@ project "01_geom_intersection"
     includedirs{ "../../" } 
 
     targetdir "../dist/bin/%{cfg.buildcfg}"
+
+    defines {"HIPRT_EXPORTS"}

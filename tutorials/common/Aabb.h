@@ -44,8 +44,8 @@ struct Aabb
 
 	HIPRT_HOST_DEVICE HIPRT_INLINE void reset( void )
 	{
-		m_min = make_hiprtFloat3( hiprt::FltMax, hiprt::FltMax, hiprt::FltMax );
-		m_max = make_hiprtFloat3( -hiprt::FltMax, -hiprt::FltMax, -hiprt::FltMax );
+		m_min = { hiprt::FltMax, hiprt::FltMax, hiprt::FltMax };
+		m_max = { -hiprt::FltMax, -hiprt::FltMax, -hiprt::FltMax };
 	}
 
 	HIPRT_HOST_DEVICE HIPRT_INLINE Aabb& grow( const hiprtFloat3& p )

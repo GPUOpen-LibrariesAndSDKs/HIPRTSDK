@@ -11,3 +11,5 @@ project "16_fluid_simulation"
     includedirs{ "../../" } 
 
     targetdir "../dist/bin/%{cfg.buildcfg}"
+
+    defines {"HIPRT_EXPORTS"}

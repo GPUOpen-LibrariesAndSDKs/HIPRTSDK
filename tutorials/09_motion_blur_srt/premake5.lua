@@ -11,3 +11,5 @@ project "09_motion_blur_srt"
     includedirs{ "../../" } 
 
     targetdir "../dist/bin/%{cfg.buildcfg}"
+
+    defines {"HIPRT_EXPORTS"}

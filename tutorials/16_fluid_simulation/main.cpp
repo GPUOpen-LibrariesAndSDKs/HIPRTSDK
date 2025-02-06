@@ -182,8 +182,8 @@ class Tutorial : public TutorialBase
 
 			// View matrix
 			hiprtFloat3 focusPt = { 0.0f, 0.5f, 0.0f };
-			hiprtFloat3 eyePt	= focusPt - make_hiprtFloat3( -0.5f, -0.5f, 2.0f );
-			float4x4	view	= LookAt( eyePt, focusPt, make_hiprtFloat3( 0.0f, 1.0f, 0.0f ) );
+			hiprtFloat3 eyePt	= focusPt - hiprtFloat3{ -0.5f, -0.5f, 2.0f };
+			float4x4	view	= LookAt( eyePt, focusPt, { 0.0f, 1.0f, 0.0f } );
 
 			float4x4 viewProj = proj * view;
 

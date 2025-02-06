@@ -43,30 +43,30 @@ __device__ float3 sampleLightVertex( const Light& light, float3 x, float3& lVtxO
 {
 
 	float3 le{};
-	lNormalOut	   = cross( light.m_lv1 - light.m_lv0, light.m_lv2 - light.m_lv0 );
-	float area	   = sqrtf( dot( lNormalOut, lNormalOut ) ) / 2.0f;
-	lNormalOut	   = normalize( lNormalOut );
-	const float2 w = make_float2( 1.f - sqrtf( xi.x ), xi.y * sqrtf( xi.x ) );
+	lNormalOut	   = hiprt::cross( light.m_lv1 - light.m_lv0, light.m_lv2 - light.m_lv0 );
+	float area	   = sqrtf( hiprt::dot( lNormalOut, lNormalOut ) ) / 2.0f;
+	lNormalOut	   = hiprt::normalize( lNormalOut );
+	const float2 w = { 1.f - sqrtf( xi.x ), xi.y * sqrtf( xi.x ) };
 	lVtxOut		   = light.m_lv0 + w.x * ( light.m_lv1 - light.m_lv0 ) + w.y * ( light.m_lv2 - light.m_lv0 );
 
 	// evaluate light surface integral part here for convenience
 	float3 r = lVtxOut - x;
 	// light surface cos term
-	float cos = fabs( dot( lNormalOut, -normalize( r ) ) );
-	if ( sqrtf( dot( r, r ) ) < 0.0001f || cos < 0.0001f )
+	float cos = fabs( hiprt::dot( lNormalOut, -hiprt::normalize( r ) ) );
+	if ( sqrtf( hiprt::dot( r, r ) ) < 0.0001f || cos < 0.0001f )
 	{
 		pdf = 0.0f;
 		return le;
 	}
 
-	if ( dot( r, lNormalOut ) > 0.0f )
+	if ( hiprt::dot( r, lNormalOut ) > 0.0f )
 	{
 		pdf = 0.0f;
 		return le;
 	}
 
 	// inverse of cos(theta) / r ^2 / p_i as we will be dividing by pdf
-	pdf = dot( r, r ) * ( 1.0f / area ) / cos;
+	pdf = hiprt::dot( r, r ) * ( 1.0f / area ) / cos;
 	return light.m_le;
 }
 
@@ -121,11 +121,11 @@ extern "C" __global__ void __launch_bounds__( 64 ) ShadowRayKernel(
 		// float3 Ng = hiprtVectorObjectToWorld( hit.normal, scene, hit.instanceID );
 		float3 Ng = hit.normal;
 
-		if ( dot( ray.direction, Ng ) > 0.f ) Ng = -Ng;
-		Ng = normalize( Ng );
+		if ( hiprt::dot( ray.direction, Ng ) > 0.f ) Ng = -Ng;
+		Ng = hiprt::normalize( Ng );
 
-		if ( dot( Ng, Ns ) < 0.0f ) Ns = Ns - 2.0f * dot( Ng, Ns ) * Ng;
-		Ns = normalize( Ns );
+		if ( hiprt::dot( Ng, Ns ) < 0.0f ) Ns = Ns - 2.0f * hiprt::dot( Ng, Ns ) * Ng;
+		Ns = hiprt::normalize( Ns );
 
 		const uint32_t matOffset = matOffsetPerInstance[hit.instanceID] + hit.primID;
 		const uint32_t matIndex	 = matIndices[matOffset];
@@ -158,14 +158,14 @@ extern "C" __global__ void __launch_bounds__( 64 ) ShadowRayKernel(
 
 					hiprtRay shadowRay;
 					shadowRay.origin	= surfacePt + 1.0e-3f * Ng;
-					shadowRay.direction = normalize( lightDir );
-					shadowRay.maxT		= 0.99f * sqrtf( dot( lightVec, lightVec ) );
+					shadowRay.direction = hiprt::normalize( lightDir );
+					shadowRay.maxT		= 0.99f * sqrtf( hiprt::dot( lightVec, lightVec ) );
 
 					hiprtSceneTraversalAnyHitCustomStack<Stack, InstanceStack> tr( scene, shadowRay, stack, instanceStack );
 					hiprtHit												   hitShadow	   = tr.getNextHit();
 					int														   lightVisibility = hitShadow.hasHit() ? 0 : 1;
 
-					if ( pdf != 0.0f ) est += lightVisibility * le * max( 0.0f, dot( Ng, normalize( lightDir ) ) ) / pdf;
+					if ( pdf != 0.0f ) est += lightVisibility * le * max( 0.0f, hiprt::dot( Ng, hiprt::normalize( lightDir ) ) ) / pdf;
 				}
 			}
 
@@ -177,8 +177,8 @@ extern "C" __global__ void __launch_bounds__( 64 ) ShadowRayKernel(
 		color.z = finalColor.z * 255;
 	}
 
-	image[index * 4 + 0] = clamp( color.x, 0, 255 );
-	image[index * 4 + 1] = clamp( color.y, 0, 255 );
-	image[index * 4 + 2] = clamp( color.z, 0, 255 );
+	image[index * 4 + 0] = hiprt::clamp( color.x, 0, 255 );
+	image[index * 4 + 1] = hiprt::clamp( color.y, 0, 255 );
+	image[index * 4 + 2] = hiprt::clamp( color.z, 0, 255 );
 	image[index * 4 + 3] = 255;
 }

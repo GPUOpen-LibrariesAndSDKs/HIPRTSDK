@@ -11,3 +11,5 @@ project "13_concurrent_scene_build"
     includedirs{ "../../" } 
 
     targetdir "../dist/bin/%{cfg.buildcfg}"
+
+    defines {"HIPRT_EXPORTS"}

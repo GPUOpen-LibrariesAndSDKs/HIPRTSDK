@@ -11,3 +11,5 @@ project "19_primary_ray"
     includedirs{ "../../", "../" } 
 
     targetdir "../dist/bin/%{cfg.buildcfg}"
+
+    defines {"HIPRT_EXPORTS"}
