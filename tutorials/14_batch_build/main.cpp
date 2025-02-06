@@ -135,12 +135,12 @@ class Tutorial : public TutorialBase
 
 			const float	  o = 0.05f;
 			hiprtFrameSRT frames[2];
-			frames[0].translation = make_hiprtFloat3( 0.0f, o, 0.0f );
-			frames[0].scale		  = make_hiprtFloat3( 1.0f, 1.0f, 1.0f );
-			frames[0].rotation	  = make_hiprtFloat4( 0.0f, 0.0f, 1.0f, 0.0f );
-			frames[1].translation = make_hiprtFloat3( 0.0f, -o, 0.0f );
-			frames[1].scale		  = make_hiprtFloat3( 1.0f, 1.0f, 1.0f );
-			frames[1].rotation	  = make_hiprtFloat4( 0.0f, 0.0f, 1.0f, 0.0f );
+			frames[0].translation = { 0.0f, o, 0.0f };
+			frames[0].scale		  = { 1.0f, 1.0f, 1.0f };
+			frames[0].rotation	  = { 0.0f, 0.0f, 1.0f, 0.0f };
+			frames[1].translation = { 0.0f, -o, 0.0f };
+			frames[1].scale		  = { 1.0f, 1.0f, 1.0f };
+			frames[1].rotation	  = { 0.0f, 0.0f, 1.0f, 0.0f };
 
 			sceneInput.frameCount = 2;
 			CHECK_ORO( oroMalloc(

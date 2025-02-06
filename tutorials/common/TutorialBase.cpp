@@ -61,7 +61,7 @@ void checkHiprt( hiprtError res, const char* file, uint32_t line )
 
 void TutorialBase::init( uint32_t deviceIndex )
 {
-	m_res = make_hiprtInt2( 512, 512 );
+	m_res = { 512, 512 };
 
 	CHECK_ORO(
 		static_cast<oroError>( oroInitialize( (oroApi)( ORO_API_HIP | ORO_API_CUDA ), 0, g_hip_paths, g_hiprtc_paths ) ) );

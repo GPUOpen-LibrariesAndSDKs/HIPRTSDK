@@ -12,3 +12,5 @@ project "00_context_creation"
 
     targetdir "../dist/bin/%{cfg.buildcfg}"
 
+    defines {"HIPRT_EXPORTS"}
+

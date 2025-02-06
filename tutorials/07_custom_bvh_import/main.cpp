@@ -150,8 +150,8 @@ void Tutorial::buildBvh( hiprtGeometryBuildInput& buildInput )
 		{
 			hiprtFloat4* ptr =
 				reinterpret_cast<hiprtFloat4*>( primBoxesRaw.data() + i * buildInput.primitive.aabbList.aabbStride );
-			primBoxes[i].m_min = make_hiprtFloat3( ptr[0] );
-			primBoxes[i].m_max = make_hiprtFloat3( ptr[1] );
+			primBoxes[i].m_min = make_float3( ptr[0] );
+			primBoxes[i].m_max = make_float3( ptr[1] );
 		}
 		BvhBuilder::build( buildInput.primitive.aabbList.aabbCount, primBoxes, nodes );
 	}

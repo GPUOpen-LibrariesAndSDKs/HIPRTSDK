@@ -84,9 +84,9 @@ class Tutorial : public TutorialBase
 			oroMemcpyHtoD( reinterpret_cast<oroDeviceptr>( sceneInput.instances ), &instance, sizeof( hiprtInstance ) ) );
 
 		hiprtFrameSRT frame;
-		frame.translation	  = make_hiprtFloat3( 0.0f, 0.0f, 0.0f );
-		frame.scale			  = make_hiprtFloat3( 0.5f, 0.5f, 0.5f );
-		frame.rotation		  = make_hiprtFloat4( 0.0f, 0.0f, 1.0f, 0.0f );
+		frame.translation	  = { 0.0f, 0.0f, 0.0f };
+		frame.scale			  = { 0.5f, 0.5f, 0.5f };
+		frame.rotation		  = { 0.0f, 0.0f, 1.0f, 0.0f };
 		sceneInput.frameCount = 1;
 		CHECK_ORO( oroMalloc( reinterpret_cast<oroDeviceptr*>( &sceneInput.instanceFrames ), sizeof( hiprtFrameSRT ) ) );
 		CHECK_ORO(

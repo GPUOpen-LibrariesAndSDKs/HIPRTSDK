@@ -65,8 +65,8 @@ __device__ int3 getColor<VisualizeUv>(
 	hiprtScene scene, const hiprtHit& hit, uint32_t* matIndices, Material* materials, uint32_t* matOffsetPerInstance )
 {
 	int3 color;
-	color.x = clamp( static_cast<uint32_t>( hit.uv.x * 255 ), 0, 255 );
-	color.y = clamp( static_cast<uint32_t>( hit.uv.y * 255 ), 0, 255 );
+	color.x = hiprt::clamp( static_cast<uint32_t>( hit.uv.x * 255 ), 0, 255 );
+	color.y = hiprt::clamp( static_cast<uint32_t>( hit.uv.y * 255 ), 0, 255 );
 	color.z = 0;
 	return color;
 }
@@ -88,9 +88,9 @@ __device__ int3 getColor<VisualizeHitDist>(
 {
 	float t = hit.t / 50.0f;
 	int3  color;
-	color.x = clamp( static_cast<uint32_t>( t * 255 ), 0, 255 );
-	color.y = clamp( static_cast<uint32_t>( t * 255 ), 0, 255 );
-	color.z = clamp( static_cast<uint32_t>( t * 255 ), 0, 255 );
+	color.x = hiprt::clamp( static_cast<uint32_t>( t * 255 ), 0, 255 );
+	color.y = hiprt::clamp( static_cast<uint32_t>( t * 255 ), 0, 255 );
+	color.z = hiprt::clamp( static_cast<uint32_t>( t * 255 ), 0, 255 );
 	return color;
 }
 
@@ -99,7 +99,7 @@ __device__ int3 getColor<VisualizeNormal>(
 	hiprtScene scene, const hiprtHit& hit, uint32_t* matIndices, Material* materials, uint32_t* matOffsetPerInstance )
 {
 	// float3 n = hiprt::normalize( hiprtVectorObjectToWorld( hit.normal, scene, hit.instanceID ) );
-	float3 n = normalize( hit.normal );
+	float3 n = hiprt::normalize( hit.normal );
 
 	int3 color;
 	color.x = ( ( n.x + 1.0f ) * 0.5f ) * 255;

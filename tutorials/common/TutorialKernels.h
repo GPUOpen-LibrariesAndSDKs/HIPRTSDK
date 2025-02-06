@@ -25,6 +25,7 @@
 #include <common/FluidSimulation.h>
 
 #include <hiprt/hiprt_device.h>
+#include <hiprt/hiprt_math.h>
 #include <hiprt/hiprt_vec.h>
 
 #ifndef BLOCK_SIZE
@@ -67,7 +68,7 @@ __device__ bool intersectCircle( const hiprtRay& ray, const void* data, void* pa
 	bool  hasHit = d < r;
 	if ( !hasHit ) return false;
 
-	hit.normal = normalize( make_float3( d, d, d ) );
+	hit.normal = hiprt::normalize( float3{ d, d, d } );
 
 	return true;
 }
@@ -78,14 +79,14 @@ __device__ bool intersectSphere( const hiprtRay& ray, const void* data, void* pa
 	float3 from	  = ray.origin;
 	float3 to	  = from + ray.direction * ray.maxT;
 	float4 sphere = reinterpret_cast<const float4*>( data )[hit.primID];
-	float3 center = make_float3( sphere );
+	float3 center = hiprt::make_float3( sphere );
 	float  r	  = sphere.w;
 
 	float3 m  = from - center;
 	float3 d  = to - from;
-	float  a  = dot( d, d );
-	float  b  = 2.0f * dot( m, d );
-	float  c  = dot( m, m ) - r * r;
+	float  a  = hiprt::dot( d, d );
+	float  b  = 2.0f * hiprt::dot( m, d );
+	float  c  = hiprt::dot( m, m ) - r * r;
 	float  dd = b * b - 4.0f * a * c;
 	if ( dd < 0.0f ) return false;
 
@@ -93,7 +94,7 @@ __device__ bool intersectSphere( const hiprtRay& ray, const void* data, void* pa
 	if ( t > 1.0f ) return false;
 
 	hit.t	   = t * ray.maxT;
-	hit.normal = normalize( from + ray.direction * hit.t - center );
+	hit.normal = hiprt::normalize( from + ray.direction * hit.t - center );
 
 	return true;
 }
@@ -107,7 +108,7 @@ __device__ bool intersectParticleImpactSphere( const hiprtRay& ray, const void* 
 	float		r		 = sim->m_smoothRadius;
 
 	float3 d  = center - from;
-	float  r2 = dot( d, d );
+	float  r2 = hiprt::dot( d, d );
 	if ( r2 >= r * r ) return false;
 
 	hit.t	   = r2;
@@ -203,7 +204,7 @@ extern "C" __global__ void CornellBoxKernel( hiprtGeometry geom, uint8_t* pixels
 	int3 color = { 0, 0, 0 };
 	if ( hit.hasHit() )
 	{
-		float3 n = normalize( hit.normal );
+		float3 n = hiprt::normalize( hit.normal );
 		color.x	 = ( ( n.x + 1.0f ) * 0.5f ) * 255;
 		color.y	 = ( ( n.y + 1.0f ) * 0.5f ) * 255;
 		color.z	 = ( ( n.z + 1.0f ) * 0.5f ) * 255;
@@ -244,7 +245,7 @@ SharedStackKernel( hiprtGeometry geom, uint8_t* pixels, int2 res, hiprtGlobalSta
 	int3 color = { 0, 0, 0 };
 	if ( hit.hasHit() )
 	{
-		float3 n = normalize( hit.normal );
+		float3 n = hiprt::normalize( hit.normal );
 		color.x	 = ( ( n.x + 1.0f ) * 0.5f ) * 255;
 		color.y	 = ( ( n.y + 1.0f ) * 0.5f ) * 255;
 		color.z	 = ( ( n.z + 1.0f ) * 0.5f ) * 255;
@@ -303,12 +304,12 @@ __device__ float3 sampleHemisphereCosine( float3 n, uint32_t& seed )
 	float sinThetaSqr = randf( seed );
 	float sinTheta	  = sqrt( sinThetaSqr );
 
-	float3 axis = fabs( n.x ) > 0.001f ? make_float3( 0.0f, 1.0f, 0.0f ) : make_float3( 1.0f, 0.0f, 0.0f );
-	float3 t	= cross( axis, n );
-	t			= normalize( t );
-	float3 s	= cross( n, t );
+	float3 axis = fabs( n.x ) > 0.001f ? float3{ 0.0f, 1.0f, 0.0f } : float3{ 1.0f, 0.0f, 0.0f };
+	float3 t	= hiprt::cross( axis, n );
+	t			= hiprt::normalize( t );
+	float3 s	= hiprt::cross( n, t );
 
-	return normalize( s * cos( phi ) * sinTheta + t * sin( phi ) * sinTheta + n * sqrt( 1.0f - sinThetaSqr ) );
+	return hiprt::normalize( s * cos( phi ) * sinTheta + t * sin( phi ) * sinTheta + n * sqrt( 1.0f - sinThetaSqr ) );
 }
 
 extern "C" __global__ void AmbientOcclusionKernel( hiprtGeometry geom, uint8_t* pixels, int2 res, float aoRadius )
@@ -349,8 +350,8 @@ extern "C" __global__ void AmbientOcclusionKernel( hiprtGeometry geom, uint8_t* 
 				float3 surfacePt = ray.origin + hit.t * ( 1.0f - 1.0e-2f ) * ray.direction;
 
 				float3 Ng = hit.normal;
-				if ( dot( ray.direction, Ng ) > 0.0f ) Ng = -Ng;
-				Ng = normalize( Ng );
+				if ( hiprt::dot( ray.direction, Ng ) > 0.0f ) Ng = -Ng;
+				Ng = hiprt::normalize( Ng );
 
 				hiprtRay aoRay;
 				aoRay.origin = surfacePt;
@@ -592,7 +593,7 @@ extern "C" __global__ void ForceKernel(
 
 	hiprtGeomCustomTraversalAnyHit tr( geom, ray, hiprtTraversalHintDefault, sim, table );
 
-	float3 force = make_float3( 0.0f );
+	float3 force = hiprt::make_float3( 0.0f );
 	while ( tr.getCurrentState() != hiprtTraversalStateFinished )
 	{
 		hiprtHit hit = tr.getNextHit();
@@ -611,7 +612,7 @@ extern "C" __global__ void ForceKernel(
 		force += calculateVelocityLaplace( d, particle.Velocity, hitParticle.Velocity, hitRho, sim->m_viscosityLaplaceCoef );
 	}
 
-	accelerations[index] = rho > 0.0f ? force / rho : make_float3( 0.0f );
+	accelerations[index] = rho > 0.0f ? force / rho : hiprt::make_float3( 0.0f );
 }
 
 extern "C" __global__ void IntegrationKernel(
@@ -624,8 +625,8 @@ extern "C" __global__ void IntegrationKernel(
 	// Apply the forces from the map walls
 	for ( uint32_t i = 0; i < 6; ++i )
 	{
-		float d = dot( make_float4( particle.Pos, 1.0f ), sim->m_planes[i] );
-		acceleration += min( d, 0.0f ) * -sim->m_wallStiffness * make_float3( sim->m_planes[i] );
+		float d = dot4( hiprt::make_float4( particle.Pos, 1.0f ), sim->m_planes[i] );
+		acceleration += min( d, 0.0f ) * -sim->m_wallStiffness * hiprt::make_float3( sim->m_planes[i] );
 	}
 
 	// Apply gravity
@@ -652,7 +653,7 @@ VisualizationKernel( const Particle* particles, const float* densities, uint8_t*
 	float		   rho		= densities[index];
 
 	// To clip space
-	float4 pos = ( *viewProj ) * make_float4( particle.Pos, 1.0f );
+	float4 pos = ( *viewProj ) * hiprt::make_float4( particle.Pos, 1.0f );
 
 	// Normalize to NDC
 	pos.x = pos.x / pos.w;

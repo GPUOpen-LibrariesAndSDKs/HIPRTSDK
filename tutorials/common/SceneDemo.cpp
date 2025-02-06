@@ -217,10 +217,10 @@ void SceneDemo::createScene(
 			if ( !shapeMaterials.empty() && shapeMaterials[shapes[i].mesh.material_ids[face]].light() )
 			{
 				Light l;
-				l.m_le = make_float3(
+				l.m_le = {
 					shapeMaterials[shapes[i].mesh.material_ids[face]].m_emission.x + 40.f,
 					shapeMaterials[shapes[i].mesh.material_ids[face]].m_emission.y + 40.f,
-					shapeMaterials[shapes[i].mesh.material_ids[face]].m_emission.z + 40.f );
+					shapeMaterials[shapes[i].mesh.material_ids[face]].m_emission.z + 40.f };
 
 				size_t idx = indices.size() - 1;
 				l.m_lv0	   = vertices[indices[idx - 2]];
@@ -426,8 +426,8 @@ void SceneDemo::createScene(
 	if ( shapeMaterials.empty() )
 	{ // default material to prevent crash
 		Material mat;
-		mat.m_diffuse  = make_float3( 1.0f );
-		mat.m_emission = make_float3( 0.0f );
+		mat.m_diffuse  = hiprt::make_float3( 1.0f );
+		mat.m_emission = hiprt::make_float3( 0.0f );
 		shapeMaterials.push_back( mat );
 	}
 	OrochiUtils::malloc( scene.m_bufMaterials, shapeMaterials.size() );
@@ -467,9 +467,9 @@ void SceneDemo::createScene(
 		hiprtFrameSRT			   transform;
 		if ( !frame )
 		{
-			transform.translation = make_float3( 0.0f, 0.0f, 0.0f );
-			transform.scale		  = make_float3( 1.0f, 1.0f, 1.0f );
-			transform.rotation	  = make_float4( 0.0f, 0.0f, 1.0f, 0.0f );
+			transform.translation = { 0.0f, 0.0f, 0.0f };
+			transform.scale		  = { 1.0f, 1.0f, 1.0f };
+			transform.rotation	  = { 0.0f, 0.0f, 1.0f, 0.0f };
 		}
 
 		sceneInput.frameCount				= sceneInput.instanceCount;
@@ -554,7 +554,7 @@ void SceneDemo::render(
 
 	buildTraceKernelFromBitcode( m_scene.m_ctx, kernelPath.u8string().c_str(), funcName.c_str(), func );
 
-	int2  res	 = make_int2( m_res.x, m_res.y );
+	int2  res	 = { m_res.x, m_res.y };
 	void* args[] = {
 		&m_scene.m_scene,
 		&dst,

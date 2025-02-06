@@ -31,8 +31,8 @@ class Tutorial : public TutorialBase
 		constexpr uint32_t CircleTypeIndex = 1;
 		constexpr uint32_t GeomTypesCount  = 2;
 
-		hiprtFloat4 sphere = make_hiprtFloat4( -0.3f, 0.0f, 0.0f, 0.2f );
-		hiprtFloat4 circle = make_hiprtFloat4( 0.3f, 0.0f, 0.0f, 0.2f );
+		hiprtFloat4 sphere = { -0.3f, 0.0f, 0.0f, 0.2f };
+		hiprtFloat4 circle = { 0.3f, 0.0f, 0.0f, 0.2f };
 
 		hiprtContext ctxt;
 		CHECK_HIPRT( hiprtCreateContext( HIPRT_API_VERSION, m_ctxtInput, ctxt ) );
@@ -120,9 +120,9 @@ class Tutorial : public TutorialBase
 
 			std::vector<hiprtFrameSRT> frames;
 			hiprtFrameSRT			   frame;
-			frame.translation = make_hiprtFloat3( 0.0f, 0.0f, 0.0f );
-			frame.scale		  = make_hiprtFloat3( 1.0f, 1.0f, 1.0f );
-			frame.rotation	  = make_hiprtFloat4( 0.0f, 0.0f, 1.0f, 0.0f );
+			frame.translation = { 0.0f, 0.0f, 0.0f };
+			frame.scale		  = { 1.0f, 1.0f, 1.0f };
+			frame.rotation	  = { 0.0f, 0.0f, 1.0f, 0.0f };
 			for ( int i = 0; i < sceneInput.instanceCount; i++ )
 				frames.push_back( frame );
 
