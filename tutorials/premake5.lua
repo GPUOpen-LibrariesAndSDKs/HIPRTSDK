@@ -1,4 +1,53 @@
 
+local generating = _ACTION and _ACTION ~= "clean" and not _OPTIONS["help"] and not _OPTIONS["version"]
+
+if generating then
+    local root = path.getabsolute("..", _SCRIPT_DIR)
+    local function setup(command)
+        local previous = os.getcwd()
+        os.chdir(root)
+        local ok = os.execute(command)
+        os.chdir(previous)
+        if not ok then
+            error("Dependency setup failed. Resolve the error above and run Premake again.", 0)
+        end
+    end
+
+    local orochi = path.join(root, "contrib/Orochi/Orochi/Orochi.h")
+    if not os.isfile(orochi) then
+        print("Initializing tutorial submodules...")
+        setup("git submodule update --init --recursive")
+        if not os.isfile(orochi) then
+            error("Tutorial submodules are incomplete. Restore contrib/Orochi and run Premake again.", 0)
+        end
+    end
+
+    local header = path.join(root, "hiprt/hiprt.h")
+    -- Respect any HIPRT installation supplied by the user.
+    if not os.isfile(header) then
+        print("hiprt/hiprt.h is missing; building HIP RT from source...")
+        if os.ishost("windows") then
+            setup('call "' .. path.translate(path.join(root, "build_hiprt.bat"), "\\") .. '"')
+        elseif os.ishost("linux") then
+            local script = path.join(root, "build_hiprt.sh"):gsub("'", "'\\''")
+            setup("bash '" .. script .. "'")
+        else
+            error("Automatic HIPRT builds support Windows and Linux. Install HIPRT in hiprt/ first.", 0)
+        end
+        if not os.isfile(header) then
+            error("HIPRT setup did not install hiprt/hiprt.h. Run the build script manually to diagnose the failure.", 0)
+        end
+    end
+
+    local file = assert(io.open(header, "r"))
+    local version = file:read("*a"):match('#define%s+HIPRT_VERSION_STR%s+"(%d+)"')
+    file:close()
+    if not version then
+        error("Cannot read HIPRT_VERSION_STR from hiprt/hiprt.h.", 0)
+    end
+    HIPRT_LIBRARY = "hiprt" .. version .. "64"
+end
+
 function copydir(src_dir, dst_dir, filter, single_dst_dir)
     filter = filter or "**"
     src_dir = src_dir .. "/"
@@ -78,8 +127,8 @@ workspace "hiprtSdkTutorial"
     include "17_hiprt_hip"
     include "18_shadow_ray"
     include "19_primary_ray"
-	
-    if os.ishost("windows") then
+
+    if os.ishost("windows") and generating then
 		  copydir( "../hiprt/win/", "./dist/bin/Release/" )
       copydir( "../hiprt/win/", "./dist/bin/Debug/" )
     end

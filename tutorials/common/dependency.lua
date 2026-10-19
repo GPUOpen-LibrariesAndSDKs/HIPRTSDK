@@ -12,5 +12,5 @@ if os.ishost("linux") then
 end
 
 files { "../../hiprt/*.h"}
-links {"hiprt0300064"}
+links {HIPRT_LIBRARY}
 
