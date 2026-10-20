@@ -20,13 +20,15 @@
 // THE SOFTWARE.
 //
 
+#include <hiprt/hiprt_libpath.h>
 #include <tutorials/common/TutorialBase.h>
 
 int main( int argc, char** argv )
 {
 	const int deviceIndex = 0;
 
-	CHECK_ORO( (oroError)oroInitialize( (oroApi)( ORO_API_HIP | ORO_API_CUDA ), 0 ) );
+	CHECK_ORO( static_cast<oroError>(
+		oroInitialize( (oroApi)( ORO_API_HIP | ORO_API_CUDA ), 0, hiprtGetHipPaths(), hiprtGetHiprtcPaths() ) ) );
 
 	CHECK_ORO( oroInit( 0 ) );
 

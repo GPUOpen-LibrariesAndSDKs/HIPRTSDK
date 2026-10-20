@@ -1,6 +1,6 @@
 # HIP RT SDK
 
-**This repository is only for tutorials. The SDK binaries needs to be downloaded from [HIP RT project page](https://gpuopen.com/hiprt/) and the full source code of HIP RT can be found [here](https://github.com/GPUOpen-LibrariesAndSDKs/HIPRT).**
+**HIP RT tutorials. Premake automatically builds HIPRT from its [public source repository](https://github.com/GPUOpen-LibrariesAndSDKs/HIPRT) when `hiprt/hiprt.h` is missing. Existing installations are preserved.**
 
 HIP RT is a ray tracing library in HIP. The APIs are designed to be minimal and low level, making it easy to write a ray tracing application in HIP. We designed the library and APIs to be simple to use and integrate into any existing HIP applications. Although there are a few other ray tracing APIs which, we designed HIP RT to be simpler and easier to use, so you do not need to learn many new kernel types. 
 
@@ -16,10 +16,11 @@ HIP RT is a ray tracing library in HIP. The APIs are designed to be minimal and 
 
 ## Requirement
 
-HIP RT runs on AMD and NVIDIA® GPUs. HIP and CUDA® APIs are dynamically loaded so you do not need to have these SDKs if your have these DLLs installed with the driver package. Hardware-accelerated ray tracing only works on RDNA™ 2 GPUs (Radeon™ RX 6000 series or newer).
+HIP RT runs on AMD and NVIDIA® GPUs. HIP and CUDA® APIs are loaded dynamically at runtime. Building HIP RT from source with the scripts requires the GPU SDK and build tools listed under [Building the tutorials](#building-the-tutorials). Hardware-accelerated ray tracing only works on RDNA™ 2 GPUs (Radeon™ RX 6000 series or newer).
 
 The supported AMD GPU architecture families are:
 
+- Navi4x (Radeon™ RX 9000 series)
 - Navi3x (Radeon™ RX 7000 series)
 - Navi2x (Radeon™ RX 6000 series)
 - Navi1x (Radeon™ RX 5000 series)
@@ -32,7 +33,7 @@ You will also need AMD Software: Adrenalin Edition 23.30 or later for Windows an
 ## Directories
 
 - [hiprt](hiprt)
-  - The header and the library which you need to download from [HIP RT project page](https://gpuopen.com/hiprt/). 
+  - Headers, library and GPU kernels installed by the source build scripts. See [details](hiprt/README.md).
 - [tutorials](tutorials)
   - Tutorial source code
 - [contrib](contrib)
@@ -41,43 +42,35 @@ You will also need AMD Software: Adrenalin Edition 23.30 or later for Windows an
 
 ## Building the tutorials
 
-1. First you need to clone the repository, then init and update the submodules if you didn't clone with `--recursive`:
+Install Git, Python 3.8+, CMake 3.19+ and HIP SDK / ROCm with `hipcc` and HIPRTC. Windows requires Visual Studio 2022 with the C++ tools; Linux requires a C++17 compiler and Make. Set `HIP_PATH` to your HIP installation (default on Linux: `/opt/rocm`).
 
-````
-git submodule init
-git submodule update
-````
-2. Download the HIP RT SDK from [HIP RT prject page](https://gpuopen.com/hiprt/), copy the 'hiprt' directory as explained [here](./hiprt/README.md).
+Clone the repository, then run the commands below from its root. Premake initializes missing submodules and builds HIPRT if needed.
 
-### Windows:
-3. Run premake to generate a solution for Visual Studio 2022:
-````
+### Windows
+
+```bat
 cd tutorials
-"../tools/premake5/win/premake5.exe" vs2022
-````
+..\tools\premake5\win\premake5.exe vs2022
+```
 
-4. Open the solution, compile & run.
+Open `tutorials/hiprtSdkTutorial.sln` in Visual Studio 2022 and build **Release / x64**. Then, from `tutorials`, run a demo:
 
-### Linux:
-3. Run premake like this on Linux, which will generate a make file:
-````
+```bat
+cd dist
+bin\Release\19_primary_ray64.exe
+```
+
+### Linux
+
+```sh
+chmod +x tools/premake5/linux64/premake5
 cd tutorials
 ../tools/premake5/linux64/premake5 gmake2
-````
-
-4. Compile using the make file.
-````
-make config=release_x64
-````
-
-5. Run a demo.
-````
+make config=release_x64 -j
 cd dist
-export LD_LIBRARY_PATH=../../hiprt/linux64/:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH="../../hiprt/linux64:${HIP_PATH:-/opt/rocm}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 bin/Release/19_primary_ray64
-````
-
-These tutorials are made to run on both AMD and NVIDIA by specifying the device index. 
+```
 
 ## Introduction to the HIP RT APIs
 

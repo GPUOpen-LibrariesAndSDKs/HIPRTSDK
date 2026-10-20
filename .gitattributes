@@ -1,0 +1,4 @@
+build_hiprt.bat text eol=crlf
+build_hiprt.sh text eol=lf
+tools/build_hiprt.py text eol=lf
+tools/test_tutorials.py text eol=lf

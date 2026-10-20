@@ -6,3 +6,5 @@ build/
 hiprt/
 tutorials/dist/
 
+/tutorials/Makefile
+__pycache__/
