@@ -20,8 +20,8 @@
 // THE SOFTWARE.
 //
 
-#include <tutorials/common/TutorialBase.h>
 #include <hiprt/hiprt_libpath.h>
+#include <tutorials/common/TutorialBase.h>
 
 int main( int argc, char** argv )
 {
